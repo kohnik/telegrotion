@@ -4,6 +4,8 @@ import com.fizzly.backend.dto.QuizQuestionCreateDTO;
 import com.fizzly.backend.entity.QuizQuestion;
 import com.fizzly.backend.mapper.QuizQuestionMapper;
 import com.fizzly.backend.service.QuizQuestionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +21,14 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/questions")
+@Tag(name = "Вопросы", description = "API управления вопросами квиза")
 public class QuizQuestionController {
 
     private final QuizQuestionService quizQuestionService;
     private final QuizQuestionMapper quizQuestionMapper;
 
     @PostMapping
+    @Operation(summary = "Добавить вопрос к квизу")
     private ResponseEntity<QuizQuestion> addQuestionToQuiz(@RequestBody QuizQuestionCreateDTO createDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 quizQuestionService.addQuestionToQuiz(
@@ -34,6 +38,7 @@ public class QuizQuestionController {
     }
 
     @GetMapping("/quizzes/{quizId}")
+    @Operation(summary = "Получить все вопросы квиза")
     private List<QuizQuestion> getQuestionFromQuiz(@PathVariable Long quizId) {
         return quizQuestionService.findAllByQuizId(quizId);
     }
