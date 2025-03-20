@@ -1,0 +1,33 @@
+@import "../../assets/styles/colors";
+
+.create-quiz {
+  &__header {
+    padding: 10px;
+    color: $primary-color;
+    background-color: $secondary-color;
+  }
+  &__content {
+
+    display: flex;
+    justify-content: space-between;
+
+  }
+
+  &__slides {
+    background-color: red;
+    height: calc(100vh - 44px);
+    width: 300px;
+  }
+
+  &__themes {
+    background-color: blue;
+    height: calc(100vh - 44px);
+    width: 200px;
+  }
+
+  &__workflow {
+    background-color: orange;
+    height: calc(100vh - 44px);
+    width: 100%;
+  }
+}

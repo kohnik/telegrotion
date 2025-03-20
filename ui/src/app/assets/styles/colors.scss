@@ -1,0 +1,13 @@
+// Ваши переменные
+$primary-color: #b5bbc5;;
+$secondary-color: #2a5298;
+$error-color: #ff4d4d;
+$background-gradient: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+$modal-background: rgb(141 95 95 / 13%);
+$modal-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+// Дополнительные переменные для неоновых эффектов
+$neon-accent: #00d4ff; // Неоновый акцентный цвет
+$text-color: #ffffff; // Белый текст
+$input-border: rgba(255, 255, 255, 0.3); // Граница полей ввода
+$input-background: rgba(255, 255, 255, 0.1); // Фон полей ввода

@@ -1,0 +1,47 @@
+.welcome-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("../../assets/images/bg_2.jpeg");
+  background-size: 100%;
+  background-position-y: -300px;
+
+  &__buttons {
+    display: flex;
+    gap: 30px
+  }
+
+  &__join, &__new {
+    text-align: center;
+    padding: 20px;
+    border-radius: 30px;
+    box-sizing: border-box;
+    width: 300px;
+    cursor: pointer;
+  }
+
+  &__join {
+    background-color: #00D4B2;
+
+    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(0, 212, 178, 0.6);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(0, 212, 178, 0.8);
+    }
+  }
+
+  &__new {
+    background-color: #C4F500;
+
+    font-size: 16px; /* Размер текста */
+    box-shadow: 0 4px 15px rgba(196, 245, 0, 0.6);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(196, 245, 0, 0.8);
+    }
+  }
+}
