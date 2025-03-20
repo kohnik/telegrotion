@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: telegrotion
+  datasource:
+    url: ${DB.URL:jdbc:postgresql://localhost:5432/telegrotion}
+    username: ${DB.USERNAME:postgres}
+    password: ${DB.PASSWORD:postgres}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  data:
+    jdbc:
+      dialect: postgresql
