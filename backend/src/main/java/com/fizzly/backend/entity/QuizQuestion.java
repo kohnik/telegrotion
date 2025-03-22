@@ -28,4 +28,6 @@ public class QuizQuestion {
 
     private int points;
 
+    private int ordering;
+
 }

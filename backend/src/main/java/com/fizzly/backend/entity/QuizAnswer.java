@@ -28,4 +28,6 @@ public class QuizAnswer {
 
     private boolean correct;
 
+    private int ordering;
+
 }

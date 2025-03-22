@@ -17,6 +17,9 @@ public class FullQuizQuestionCreateDTO {
     @Schema(description = "Кол-во очков за правильный ответ")
     private int points;
 
+    @Schema(description = "Порядковый номер вопроса")
+    private int order;
+
     @Schema(description = "Список ответов")
     private List<FullQuizAnswerCreateDTO> answers;
 }

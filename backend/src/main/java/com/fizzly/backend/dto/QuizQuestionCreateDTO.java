@@ -17,4 +17,7 @@ public class QuizQuestionCreateDTO {
 
     @Schema(description = "ИД квиза")
     private Long quizId;
+
+    @Schema(description = "Порядковый номер вопроса")
+    private int order;
 }

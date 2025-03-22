@@ -24,8 +24,9 @@ public class FullQuizService {
         Quiz createdQuiz = quizService.createQuiz(quiz, quizDTO.getUserId());
         quizDTO.getQuestions().forEach(questionDTO -> {
             QuizQuestion quizQuestion = new QuizQuestion();
-            quizQuestion.setQuiz(createdQuiz);
+            quizQuestion.setQuestion(questionDTO.getQuestion());
             quizQuestion.setPoints(questionDTO.getPoints());
+            quizQuestion.setOrdering(questionDTO.getOrder());
 
             QuizQuestion createdQuestion = quizQuestionService.addQuestionToQuiz(quizQuestion, createdQuiz.getId());
 
@@ -33,6 +34,7 @@ public class FullQuizService {
                 QuizAnswer quizAnswer = new QuizAnswer();
                 quizAnswer.setAnswer(answerDTO.getAnswer());
                 quizAnswer.setCorrect(answerDTO.isCorrect());
+                quizAnswer.setOrdering(answerDTO.getOrder());
 
                 quizAnswerService.addQuizAnswerToQuiz(quizAnswer, createdQuestion.getId());
             });

@@ -15,6 +15,9 @@ public class QuizAnswerCreateDTO {
     @Schema(description = "Правильный или неправильный ответ")
     private boolean correct;
 
+    @Schema(description = "Порядковый номер ответа")
+    private int order;
+
     @Schema(description = "ИД вопроса")
     private Long questionId;
 }

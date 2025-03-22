@@ -14,4 +14,7 @@ public class FullQuizAnswerCreateDTO {
 
     @Schema(description = "Правильный или неправильный ответ")
     private boolean correct;
+
+    @Schema(description = "Порядковый номер ответа")
+    private int order;
 }
