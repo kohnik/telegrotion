@@ -1,12 +1,19 @@
 package com.fizzly.backend.service;
 
+import com.fizzly.backend.dto.FullQuizAnswerGetDTO;
 import com.fizzly.backend.dto.FullQuizCreateDTO;
+import com.fizzly.backend.dto.FullQuizGetDTO;
+import com.fizzly.backend.dto.FullQuizQuestionGetDTO;
+import com.fizzly.backend.dto.UserGetDTO;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizAnswer;
 import com.fizzly.backend.entity.QuizQuestion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +48,43 @@ public class FullQuizService {
         });
 
         return quiz;
+    }
+
+    public FullQuizGetDTO getFullQuiz(Long quizId) {
+        FullQuizGetDTO fullQuizGetDTO = new FullQuizGetDTO();
+
+        Quiz quiz = quizService.findByQuizId(quizId);
+        fullQuizGetDTO.setName(quiz.getName());
+
+        UserGetDTO userGetDTO = new UserGetDTO();
+        userGetDTO.setUsername(quiz.getOwner() != null ? quiz.getOwner().getUsername() : null);
+        fullQuizGetDTO.setUser(userGetDTO);
+
+        List<QuizQuestion> quizzes = quizQuestionService.findAllByQuizId(quizId);
+        List<FullQuizQuestionGetDTO> questionsDTO = new ArrayList<>();
+        quizzes.forEach(quizQuestion -> {
+            FullQuizQuestionGetDTO quizQuestionGetDTO = new FullQuizQuestionGetDTO();
+            quizQuestionGetDTO.setQuestion(quizQuestion.getQuestion());
+            quizQuestionGetDTO.setPoints(quizQuestion.getPoints());
+            quizQuestionGetDTO.setOrder(quizQuestion.getOrdering());
+
+            List<QuizAnswer> answers = quizAnswerService.getAllAnswersByQuestionId(quizQuestion.getId());
+            List<FullQuizAnswerGetDTO> fullQuizAnswerGetDTOS = new ArrayList<>();
+            answers.forEach(quizAnswer -> {
+                FullQuizAnswerGetDTO quizAnswerGetDTO = new FullQuizAnswerGetDTO();
+                quizAnswerGetDTO.setAnswer(quizAnswer.getAnswer());
+                quizAnswerGetDTO.setCorrect(quizAnswer.isCorrect());
+                quizAnswerGetDTO.setOrder(quizAnswer.getOrdering());
+
+                fullQuizAnswerGetDTOS.add(quizAnswerGetDTO);
+            });
+            quizQuestionGetDTO.setAnswers(fullQuizAnswerGetDTOS);
+
+            questionsDTO.add(quizQuestionGetDTO);
+        });
+        fullQuizGetDTO.setQuestions(questionsDTO);
+
+        return fullQuizGetDTO;
     }
 
 }

@@ -2,6 +2,7 @@ package com.fizzly.backend.service;
 
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.User;
+import com.fizzly.backend.exception.QuizNotFoundException;
 import com.fizzly.backend.exception.UserNotFoundException;
 import com.fizzly.backend.repository.QuizRepository;
 import com.fizzly.backend.repository.UserRepository;
@@ -29,5 +30,9 @@ public class QuizService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         return quizRepository.findAllByOwner(user);
+    }
+
+    public Quiz findByQuizId(Long quizId) {
+        return quizRepository.findById(quizId).orElseThrow(() -> new QuizNotFoundException(quizId));
     }
 }
