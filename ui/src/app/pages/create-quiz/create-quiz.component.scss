@@ -1,6 +1,8 @@
-@import "../../assets/styles/colors";
+@import "../../../assets/styles/colors";
 
 .create-quiz {
+  position: relative;
+
   &__header {
     padding: 10px;
     color: $primary-color;
@@ -14,20 +16,54 @@
   }
 
   &__slides {
-    background-color: red;
+    background-color: #ffffff;
     height: calc(100vh - 44px);
-    width: 300px;
+    width: 320px;
   }
 
   &__themes {
-    background-color: blue;
+    background-color: orange;
     height: calc(100vh - 44px);
     width: 200px;
   }
 
   &__workflow {
-    background-color: orange;
+    background-color: #bababa;
+
     height: calc(100vh - 44px);
     width: 100%;
   }
+
+  &__actions {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    min-width: 500px;
+    max-width: 90%;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 12px 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  &__action {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f0f0f0;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  &__action:hover {
+    background: #e0e0e0;
+  }
 }
+

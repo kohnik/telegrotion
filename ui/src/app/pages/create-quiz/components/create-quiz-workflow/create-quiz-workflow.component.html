@@ -1,0 +1,17 @@
+<div class="workflow">
+  <div class="workflow__title">
+    <span>{{_selectedSlide.question}}</span>
+  </div>
+  <div class="workflow__source-content">
+    <span></span>
+  </div>
+  <div>
+    @for (answer of _selectedSlide.answers; track $index) {
+      <div>
+        <span>{{answer.order}}</span>
+        <span>{{answer.answer}}</span>
+        <span></span>
+      </div>
+    }
+  </div>
+</div>

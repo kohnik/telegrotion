@@ -1,0 +1,27 @@
+.workflow {
+  padding: 30px;
+
+  &__title {
+    width: 100%;
+    height: auto;
+    position: relative;
+    background: rgb(255, 255, 255);
+    padding-bottom: 4px;
+    border-radius: 0.25rem;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px -4px 0px 0px inset;
+    z-index: 1;
+
+    span {
+      display: block;
+      text-align: center;
+      font-size: 40px;
+    }
+  }
+
+  &__source-content {
+    margin: 20px auto;
+    height: 400px;
+    width: 500px;
+    background-color: red;
+  }
+}

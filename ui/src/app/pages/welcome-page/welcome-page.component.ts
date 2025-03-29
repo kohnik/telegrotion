@@ -11,10 +11,18 @@ import {Router, RouterOutlet} from '@angular/router';
 })
 export class WelcomePageComponent {
 
+  public isAuthorized = true;
+
   constructor(private readonly router: Router) {
   }
 
   createFizzly(): void {
-    this.router.navigate(['/authorization'])
+    if(!this.isAuthorized) {
+      this.router.navigate(['/authorization'])
+    }
+    else {
+      this.router.navigate(['/create-quiz'])
+    }
+
   }
 }

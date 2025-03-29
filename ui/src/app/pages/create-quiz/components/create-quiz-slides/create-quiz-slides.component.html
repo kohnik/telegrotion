@@ -1,0 +1,34 @@
+<ul class="slides">
+  @for (slide of slides;let i = $index; track i) {
+    <li class="slides__slide" (click)="selectSlide(slide)" [class.active]="slide.id === selectedSlide?.id">
+      <span class="slides__title">{{slide.order}} {{slide.type}}</span>
+      <div class="slides__content" [class.active]="slide.id === selectedSlide?.id">
+        <span class="slides__question">{{slide.question}}</span>
+        <div class="slides__info">
+          <span class="slides__time-limit">{{slide.timeLimit}}</span>
+          <span class="slides__square"></span>
+        </div>
+        <ul class="slides__answers">
+          @for (answer of slide.answers; track $index) {
+            <li class="slides__answer" [class.correct]="answer.correct"></li>
+          }
+        </ul>
+      </div>
+      <div class="slides__slide-actions">
+        <span (click)="$event.stopPropagation(); duplicateSlide(slide, i)">
+           <svg>
+            <use [attr.xlink:href]="'copy' | symbolSprite" ></use>
+          </svg>
+        </span>
+
+        <span  (click)="$event.stopPropagation(); deleteSlide(i)">
+          <svg>
+            <use [attr.xlink:href]="'trash' | symbolSprite"></use>
+          </svg>
+        </span>
+      </div>
+
+    </li>
+  }
+  <span class="slides__add-slide" (click)="addSlide()"> Добавить слайд</span>
+</ul>

@@ -5,31 +5,20 @@
   </div>
   <div class="create-quiz__content">
     <div class="create-quiz__slides">
-      <div></div>
-
-      <span>Добавить вопрос</span>
-
+      <app-create-quiz-slides [slides]="slides" (toSelectSlide)="selectSlide($event)"></app-create-quiz-slides>
     </div>
 
     <div class="create-quiz__workflow">
-      <span>
-        Начините писать ваш вопрос
-      </span>
-
-      <div>
-        <div>1</div>
-        <div>2</div>
-        <div>3</div>
-        <div>4</div>
-      </div>
-
+      <app-create-quiz-workflow [selectedSlide]="selectedSlide"></app-create-quiz-workflow>
     </div>
 
 
     <div class="create-quiz__themes">
-      Темы
-
+      Настройки
     </div>
   </div>
 
+  <div class="create-quiz__actions">
+    <span class="create-quiz__action" (click)="createQuiz()">СОЗДАТЬ</span>
+  </div>
 </div>
