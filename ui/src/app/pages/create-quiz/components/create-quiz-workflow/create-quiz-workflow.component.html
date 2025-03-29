@@ -1,16 +1,21 @@
 <div class="workflow">
   <div class="workflow__title">
-    <span>{{_selectedSlide.question}}</span>
+    <input
+      [ngModel]="(slide$ | async)?.question"
+    >
   </div>
   <div class="workflow__source-content">
     <span></span>
   </div>
-  <div>
-    @for (answer of _selectedSlide.answers; track $index) {
-      <div>
+  <div class="workflow__answers">
+    @for (answer of (slide$ | async)?.answers; track $index) {
+      <div class="workflow__answer">
         <span>{{answer.order}}</span>
         <span>{{answer.answer}}</span>
-        <span></span>
+
+        <span
+          (click)="setCorrectAnswer(answer)"
+          class="workflow__circle" [class.correct]="answer.correct"></span>
       </div>
     }
   </div>

@@ -8,7 +8,6 @@ import {svgSymbolSpritePath} from '../../svg-symbol-sprite-path';
 })
 export class SymbolSpritePipe implements PipeTransform {
   transform(id: SpriteIdsType): string {
-    console.log(`${svgSymbolSpritePath}${id}`)
     return `${svgSymbolSpritePath}${id}`;
   }
 }

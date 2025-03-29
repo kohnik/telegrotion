@@ -1,8 +1,8 @@
 <ul class="slides">
   @for (slide of slides;let i = $index; track i) {
-    <li class="slides__slide" (click)="selectSlide(slide)" [class.active]="slide.id === selectedSlide?.id">
+    <li class="slides__slide" (click)="selectSlide(slide)" [class.active]="slide.id === (slide$ | async)?.id">
       <span class="slides__title">{{slide.order}} {{slide.type}}</span>
-      <div class="slides__content" [class.active]="slide.id === selectedSlide?.id">
+      <div class="slides__content" [class.active]="slide.id === (slide$ | async)?.id">
         <span class="slides__question">{{slide.question}}</span>
         <div class="slides__info">
           <span class="slides__time-limit">{{slide.timeLimit}}</span>

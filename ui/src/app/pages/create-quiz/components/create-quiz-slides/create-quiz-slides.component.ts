@@ -1,37 +1,59 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input, OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import {ICrateQuizSlide} from '../../interfaces';
 import {SymbolSpritePipe} from '../../../../../helpers/pipes/symbol-sprite.pipe';
-import {NgOptimizedImage} from '@angular/common';
+import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {deleteAtPosition, insertAtPosition} from '../../utils';
+import {QuizService} from '../../services/quiz.service';
+import {Observable, Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-create-quiz-slides',
   imports: [
     SymbolSpritePipe,
-    NgOptimizedImage
+    NgOptimizedImage,
+    AsyncPipe
   ],
   templateUrl: './create-quiz-slides.component.html',
   standalone: true,
-  styleUrl: './create-quiz-slides.component.scss'
+  styleUrl: './create-quiz-slides.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateQuizSlidesComponent implements OnInit{
+export class CreateQuizSlidesComponent implements OnInit, OnDestroy {
+  slides: ICrateQuizSlide[] = [];
+  private subs = new Subscription();
 
-  @Input() slides: ICrateQuizSlide[] = [];
-  @Output() toSelectSlide = new EventEmitter<ICrateQuizSlide>();
+  public slide$: Observable<ICrateQuizSlide | null>;
 
-  public selectedSlide: ICrateQuizSlide;
+  constructor(private quizService: QuizService) {}
 
   ngOnInit(): void {
-    this.selectSlide(this.slides[0])
+    this.subs.add(
+      this.quizService.slides$.subscribe(slides => {
+        this.slides = slides;
+      })
+    );
+
+    this.slide$ = this.quizService.selectedSlide$;
   }
 
-  public selectSlide(slide: ICrateQuizSlide): void{
-    this.selectedSlide = slide;
-    this.toSelectSlide.emit(this.selectedSlide)
+  selectSlide(slide: ICrateQuizSlide): void {
+    this.quizService.setSelectedSlide(slide);
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 
   public addSlide(): void {
-    this.slides.push(  {
+    let newSlide =     {
       id: this.slides.length,
       question: 'Введите ваш вопрос',
       type: "Quiz",
@@ -42,7 +64,7 @@ export class CreateQuizSlidesComponent implements OnInit{
       answers: [
         {
           answer: 'dfdsf',
-          correct: true,
+          correct: false,
           order: 0,
         },
         {
@@ -61,7 +83,9 @@ export class CreateQuizSlidesComponent implements OnInit{
           order: 3,
         },
       ]
-    },)
+    }
+
+    this.quizService.addSlide(newSlide)
   }
 
   duplicateSlide(slide: ICrateQuizSlide, index: number): void {
