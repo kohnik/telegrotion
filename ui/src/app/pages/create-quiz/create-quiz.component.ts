@@ -5,8 +5,8 @@ import {IAddQuizBody, ICrateQuizSlide} from './interfaces';
 import {slides} from './mocks';
 import {CreateQuizWorkflowComponent} from './components/create-quiz-workflow/create-quiz-workflow.component';
 import {DataService} from '../../../services/data.service';
-import {QuizService} from './services/quiz.service';
-import {Subscription} from 'rxjs';
+import {QuizManagementService} from './services/quiz-management.service';
+import {Observable, Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-create-quiz',
@@ -21,24 +21,20 @@ import {Subscription} from 'rxjs';
 })
 export class CreateQuizComponent implements OnInit, OnDestroy {
 
-  public slides: ICrateQuizSlide[] = [];
+  public slides$: Observable<ICrateQuizSlide[]>
   private subs = new Subscription();
 
   constructor(
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
     private readonly dataService: DataService,
-    private readonly quizService: QuizService) {
+    private readonly quizService: QuizManagementService) {
   }
 
   ngOnInit() {
-    this.quizService.setSlides(slides); // Предположим, slides загружены заранее
+    this.quizService.setSlides(slides);
 
-    this.subs.add(
-      this.quizService.slides$.subscribe(slides => {
-        this.slides = slides;
-      })
-    );
+    this.slides$ = this.quizService.slides$;
   }
 
   selectSlide(slide: ICrateQuizSlide): void {
@@ -54,12 +50,7 @@ export class CreateQuizComponent implements OnInit, OnDestroy {
   }
 
   createQuiz(): void {
-    let body: IAddQuizBody = {
-      name: 'test',
-      userId: 1,
-      questions: this.slides
-    }
-    this.dataService.addQuiz(body).subscribe(el=> console.log(el))
+    this.quizService.createNewQuiz()
   }
 
 }

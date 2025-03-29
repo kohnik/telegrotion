@@ -85,6 +85,15 @@
     font-weight: bold;
   }
 
+  &__question {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 140px;
+    height: 20px;
+    overflow: hidden;
+  }
+
   &__add-slide {
     display: inline-flex;
     align-items: center;

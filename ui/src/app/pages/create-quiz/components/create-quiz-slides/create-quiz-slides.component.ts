@@ -11,7 +11,7 @@ import {ICrateQuizSlide} from '../../interfaces';
 import {SymbolSpritePipe} from '../../../../../helpers/pipes/symbol-sprite.pipe';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {deleteAtPosition, insertAtPosition} from '../../utils';
-import {QuizService} from '../../services/quiz.service';
+import {QuizManagementService} from '../../services/quiz-management.service';
 import {Observable, Subscription} from 'rxjs';
 
 @Component({
@@ -27,21 +27,16 @@ import {Observable, Subscription} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateQuizSlidesComponent implements OnInit, OnDestroy {
-  slides: ICrateQuizSlide[] = [];
   private subs = new Subscription();
 
   public slide$: Observable<ICrateQuizSlide | null>;
+  public slides$: Observable<ICrateQuizSlide[]>;
 
-  constructor(private quizService: QuizService) {}
+  constructor(private quizService: QuizManagementService) {}
 
   ngOnInit(): void {
-    this.subs.add(
-      this.quizService.slides$.subscribe(slides => {
-        this.slides = slides;
-      })
-    );
-
     this.slide$ = this.quizService.selectedSlide$;
+    this.slides$ = this.quizService.slides$;
   }
 
   selectSlide(slide: ICrateQuizSlide): void {
@@ -53,56 +48,14 @@ export class CreateQuizSlidesComponent implements OnInit, OnDestroy {
   }
 
   public addSlide(): void {
-    let newSlide =     {
-      id: this.slides.length,
-      question: 'Введите ваш вопрос',
-      type: "Quiz",
-      order: this.slides.length,
-      timeLimit: 20,
-      img: '',
-      points: 20,
-      answers: [
-        {
-          answer: 'dfdsf',
-          correct: false,
-          order: 0,
-        },
-        {
-          answer: '12312',
-          correct: false,
-          order: 1,
-        },
-        {
-          answer: 'opa',
-          correct: false,
-          order: 2,
-        },
-        {
-          answer: 'dfsdsd',
-          correct: false,
-          order: 3,
-        },
-      ]
-    }
-
-    this.quizService.addSlide(newSlide)
+    this.quizService.addSlide()
   }
 
-  duplicateSlide(slide: ICrateQuizSlide, index: number): void {
-    let duplicateSlide :ICrateQuizSlide = {
-      ...slide,
-    }
-
-    let newOrder = slide.order + 1;
-
-    this.slides = insertAtPosition(this.slides, duplicateSlide, newOrder )
-      .map((el, index) => ({
-      ...el,
-      order: index
-    }) )
+  duplicateSlide(slide: ICrateQuizSlide): void {
+    this.quizService.duplicateSlide(slide)
   }
 
   deleteSlide(index: number): void {
-    this.slides = deleteAtPosition(this.slides, index)
+    this.quizService.deleteSlide(index)
   }
 }

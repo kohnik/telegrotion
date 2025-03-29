@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {WelcomePageComponent} from './pages/welcome-page/welcome-page.component';
 
@@ -7,7 +7,8 @@ import {WelcomePageComponent} from './pages/welcome-page/welcome-page.component'
   imports: [RouterOutlet, WelcomePageComponent],
   templateUrl: './app.component.html',
   standalone: true,
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   title = 'ui';

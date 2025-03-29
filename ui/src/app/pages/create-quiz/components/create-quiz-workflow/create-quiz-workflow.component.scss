@@ -6,7 +6,6 @@
     height: auto;
     position: relative;
     background: rgb(255, 255, 255);
-    padding-bottom: 4px;
     border-radius: 0.25rem;
     box-shadow: rgba(0, 0, 0, 0.15) 0px -4px 0px 0px inset;
     z-index: 1;
@@ -67,6 +66,30 @@
 
     &.correct {
       background-color: white;
+    }
+  }
+
+  &__question {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__answer-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.28);
+
+    &:focus {
+      outline: none;
     }
   }
 }
