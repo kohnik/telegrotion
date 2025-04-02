@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Client with Dynamic Topics</title>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { margin-bottom: 20px; }
+        button { padding: 8px 15px; margin-right: 10px; }
+        input { padding: 8px; width: 300px; }
+        #messages { border: 1px solid #ddd; padding: 15px; min-height: 200px; margin-top: 20px; }
+        .message { margin-bottom: 10px; padding: 8px; background: #f5f5f5; border-radius: 4px; }
+        .subscriptions { margin-top: 20px; }
+        .subscription-item { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+<h1>WebSocket Client</h1>
+
+<div class="container">
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()" disabled id="disconnectBtn">Disconnect</button>
+</div>
+
+<div class="container">
+    <h3>Subscribe to Topic:</h3>
+    <input type="text" id="topicInput" placeholder="/topic/your-topic" value="/topic/topic/session">
+    <button onclick="subscribeToTopic()">Subscribe</button>
+</div>
+
+<div class="subscriptions">
+    <h3>Active Subscriptions:</h3>
+    <div id="subscriptionsList"></div>
+</div>
+
+<div id="messages"></div>
+
+<script>
+    let stompClient = null;
+    const subscriptions = new Map(); // Хранит подписки: key = topic, value = subscription object
+
+    function connect() {
+        if (stompClient && stompClient.connected) {
+            console.log('Already connected');
+            return;
+        }
+
+        const wsUrl = `ws://localhost:8080/quiz-websocket`;
+        console.log(`Connecting to ${wsUrl}`);
+
+        stompClient = new StompJs.Client({
+            brokerURL: wsUrl,
+            reconnectDelay: 5000,
+            debug: function(str) {
+                console.debug('[STOMP] ' + str);
+            }
+        });
+
+        stompClient.onConnect = function(frame) {
+            console.log('Connected:', frame);
+            document.getElementById('disconnectBtn').disabled = false;
+            addMessage('System: Connected to server', 'system');
+
+            // Автоподписка на дефолтные топики при подключении
+            const defaultTopic = '/topic/topic/session';
+            if (!subscriptions.has(defaultTopic)) {
+                subscribe(defaultTopic);
+            }
+        };
+
+        stompClient.onStompError = function(frame) {
+            console.error('STOMP error:', frame);
+            addMessage(`Error: ${frame.headers.message || 'Unknown STOMP error'}`, 'error');
+        };
+
+        stompClient.onWebSocketError = function(error) {
+            console.error('WebSocket error:', error);
+            addMessage(`WebSocket Error: ${error.message}`, 'error');
+        };
+
+        stompClient.onDisconnect = function() {
+            console.log('Disconnected');
+            addMessage('System: Disconnected from server', 'system');
+            document.getElementById('disconnectBtn').disabled = true;
+        };
+
+        stompClient.activate();
+    }
+
+    function disconnect() {
+        if (stompClient) {
+            subscriptions.forEach((sub, topic) => {
+                sub.unsubscribe();
+                console.log(`Unsubscribed from ${topic}`);
+            });
+            subscriptions.clear();
+            updateSubscriptionsList();
+
+            stompClient.deactivate();
+        }
+    }
+
+    function subscribeToTopic() {
+        const topicInput = document.getElementById('topicInput');
+        const topic = topicInput.value.trim();
+
+        if (!topic) {
+            alert('Please enter a topic');
+            return;
+        }
+
+        if (!stompClient || !stompClient.connected) {
+            alert('Not connected to server');
+            return;
+        }
+
+        if (subscriptions.has(topic)) {
+            alert(`Already subscribed to ${topic}`);
+            return;
+        }
+
+        subscribe(topic);
+        topicInput.value = '';
+    }
+
+    function subscribe(topic) {
+        const subscription = stompClient.subscribe(topic, function(message) {
+            console.log(`Received message from ${topic}:`, message.body);
+            addMessage(`[${topic}] ${message.body}`, 'message');
+        });
+
+        subscriptions.set(topic, subscription);
+        console.log(`Subscribed to ${topic}`);
+        addMessage(`System: Subscribed to ${topic}`, 'system');
+        updateSubscriptionsList();
+    }
+
+    function unsubscribeFromTopic(topic) {
+        if (subscriptions.has(topic)) {
+            const sub = subscriptions.get(topic);
+            sub.unsubscribe();
+            subscriptions.delete(topic);
+            console.log(`Unsubscribed from ${topic}`);
+            addMessage(`System: Unsubscribed from ${topic}`, 'system');
+            updateSubscriptionsList();
+        }
+    }
+
+    function updateSubscriptionsList() {
+        const list = document.getElementById('subscriptionsList');
+        list.innerHTML = '';
+
+        if (subscriptions.size === 0) {
+            list.innerHTML = '<p>No active subscriptions</p>';
+            return;
+        }
+
+        subscriptions.forEach((sub, topic) => {
+            const item = document.createElement('div');
+            item.className = 'subscription-item';
+
+            const topicSpan = document.createElement('span');
+            topicSpan.textContent = topic;
+
+            const unsubBtn = document.createElement('button');
+            unsubBtn.textContent = 'Unsubscribe';
+            unsubBtn.onclick = () => unsubscribeFromTopic(topic);
+
+            item.appendChild(topicSpan);
+            item.appendChild(unsubBtn);
+            list.appendChild(item);
+        });
+    }
+
+    function addMessage(text, type) {
+        const messagesDiv = document.getElementById('messages');
+        const msg = document.createElement('div');
+        msg.className = `message ${type}`;
+        msg.textContent = text;
+        messagesDiv.appendChild(msg);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+</script>
+</body>
+</html>

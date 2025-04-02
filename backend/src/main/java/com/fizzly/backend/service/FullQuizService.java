@@ -4,6 +4,7 @@ import com.fizzly.backend.dto.FullQuizAnswerGetDTO;
 import com.fizzly.backend.dto.FullQuizCreateDTO;
 import com.fizzly.backend.dto.FullQuizGetDTO;
 import com.fizzly.backend.dto.FullQuizQuestionGetDTO;
+import com.fizzly.backend.dto.GetListQuizDTO;
 import com.fizzly.backend.dto.UserGetDTO;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizAnswer;
@@ -85,6 +86,22 @@ public class FullQuizService {
         fullQuizGetDTO.setQuestions(questionsDTO);
 
         return fullQuizGetDTO;
+    }
+
+    @Transactional
+    public List<GetListQuizDTO> getAllQuizzesByUserId(Long userId) {
+        List<Quiz> quizzes = quizService.findAllQuizzesByUser(userId);
+        return quizzes.stream()
+                .map(quiz -> {
+                    GetListQuizDTO dto = new GetListQuizDTO();
+                    dto.setName(quiz.getName());
+                    dto.setQuizId(quiz.getId());
+                    dto.setUsername(quiz.getOwner().getUsername());
+                    dto.setQuestionCount(quizQuestionService.findAllByQuizId(quiz.getId()).size());
+
+                    return dto;
+                })
+                .toList();
     }
 
 }

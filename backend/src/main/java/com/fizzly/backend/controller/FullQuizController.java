@@ -2,6 +2,7 @@ package com.fizzly.backend.controller;
 
 import com.fizzly.backend.dto.FullQuizCreateDTO;
 import com.fizzly.backend.dto.FullQuizGetDTO;
+import com.fizzly.backend.dto.GetListQuizDTO;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.service.FullQuizService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/full-quiz")
@@ -33,9 +36,15 @@ public class FullQuizController {
 
     @GetMapping("/{quizId}")
     @Operation(summary = "Получить полный квиз")
-    public ResponseEntity<FullQuizGetDTO> createFullQuiz(@PathVariable("quizId") Long quizId) {
+    public ResponseEntity<FullQuizGetDTO> getQuizById(@PathVariable("quizId") Long quizId) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(fullQuizService.getFullQuiz(quizId));
+    }
+
+    @GetMapping("/users/{userId}")
+    @Operation(summary = "Получить полный список квизов по пользователю")
+    public List<GetListQuizDTO> getQuizzesList(@PathVariable("userId") Long userId) {
+        return fullQuizService.getAllQuizzesByUserId(userId);
     }
 
 }
