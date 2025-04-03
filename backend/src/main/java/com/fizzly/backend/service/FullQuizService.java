@@ -66,9 +66,11 @@ public class FullQuizService {
         List<FullQuizQuestionGetDTO> questionsDTO = new ArrayList<>();
         quizzes.forEach(quizQuestion -> {
             FullQuizQuestionGetDTO quizQuestionGetDTO = new FullQuizQuestionGetDTO();
+            quizQuestionGetDTO.setQuestionId(quizQuestion.getId());
             quizQuestionGetDTO.setQuestion(quizQuestion.getQuestion());
             quizQuestionGetDTO.setPoints(quizQuestion.getPoints());
             quizQuestionGetDTO.setOrder(quizQuestion.getOrdering());
+            quizQuestionGetDTO.setSeconds(quizQuestion.getSeconds());
 
             List<QuizAnswer> answers = quizAnswerService.getAllAnswersByQuestionId(quizQuestion.getId());
             List<FullQuizAnswerGetDTO> fullQuizAnswerGetDTOS = new ArrayList<>();

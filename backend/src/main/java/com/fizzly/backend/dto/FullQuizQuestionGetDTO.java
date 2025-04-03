@@ -11,6 +11,9 @@ import java.util.List;
 @Schema(description = "DTO для получения полного квиза (DTO вопрос)")
 public class FullQuizQuestionGetDTO {
 
+    @Schema(description = "ИД вопроса")
+    private Long questionId;
+
     @Schema(description = "Название вопроса")
     private String question;
 
@@ -19,6 +22,9 @@ public class FullQuizQuestionGetDTO {
 
     @Schema(description = "Порядковый номер вопроса")
     private int order;
+
+    @Schema(description = "Время ответа на вопрос")
+    private int seconds;
 
     @Schema(description = "Список ответов")
     private List<FullQuizAnswerGetDTO> answers;

@@ -23,6 +23,8 @@ public class SessionParticipant {
 
     private String username;
 
+    private int points = 0;
+
     @ManyToOne
     private QuizSession session;
 }
