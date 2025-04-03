@@ -20,6 +20,9 @@ public class FullQuizQuestionCreateDTO {
     @Schema(description = "Порядковый номер вопроса")
     private int order;
 
+    @Schema(description = "Кол-во секунд на ответ")
+    private int seconds;
+
     @Schema(description = "Список ответов")
     private List<FullQuizAnswerCreateDTO> answers;
 }

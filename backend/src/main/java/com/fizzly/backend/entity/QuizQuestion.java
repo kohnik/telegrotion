@@ -30,4 +30,6 @@ public class QuizQuestion {
 
     private int ordering;
 
+    private int seconds;
+
 }

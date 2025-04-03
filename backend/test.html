@@ -1,175 +1,254 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebSocket Client with Dynamic Topics</title>
+    <title>Advanced WebSocket STOMP Client</title>
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .container { margin-bottom: 20px; }
-        button { padding: 8px 15px; margin-right: 10px; }
-        input { padding: 8px; width: 300px; }
-        #messages { border: 1px solid #ddd; padding: 15px; min-height: 200px; margin-top: 20px; }
-        .message { margin-bottom: 10px; padding: 8px; background: #f5f5f5; border-radius: 4px; }
-        .subscriptions { margin-top: 20px; }
-        .subscription-item { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .panel { display: flex; gap: 20px; margin-bottom: 20px; }
+        .panel-section { flex: 1; border: 1px solid #eee; padding: 15px; border-radius: 4px; }
+        button { padding: 8px 15px; margin: 5px 0; cursor: pointer; background: #1890ff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #40a9ff; }
+        button:disabled { background: #d9d9d9; }
+        button.danger { background: #ff4d4f; }
+        button.danger:hover { background: #ff7875; }
+        input, select, textarea { padding: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #d9d9d9; border-radius: 4px; }
+        #messages { border: 1px solid #ddd; padding: 15px; min-height: 200px; max-height: 400px; overflow-y: auto; }
+        .message { margin-bottom: 10px; padding: 10px; border-radius: 4px; }
+        .system { background: #e6f7ff; border-left: 4px solid #1890ff; }
+        .error { background: #fff1f0; border-left: 4px solid #ff4d4f; }
+        .incoming { background: #f6ffed; border-left: 4px solid #52c41a; }
+        .outgoing { background: #fff2e8; border-left: 4px solid #fa8c16; }
+        .subscription-item { display: flex; justify-content: space-between; margin-bottom: 5px; padding: 8px; background: #fafafa; border-radius: 4px; }
+        h2 { margin-top: 0; color: #262626; }
+        .status { padding: 8px; margin-bottom: 10px; border-radius: 4px; }
+        .connected { background: #f6ffed; border: 1px solid #b7eb8f; }
+        .disconnected { background: #fff1f0; border: 1px solid #ffa39e; }
     </style>
 </head>
 <body>
-<h1>WebSocket Client</h1>
+<h1>Advanced STOMP WebSocket Client</h1>
 
-<div class="container">
-    <button onclick="connect()">Connect</button>
-    <button onclick="disconnect()" disabled id="disconnectBtn">Disconnect</button>
+<div id="connectionStatus" class="status disconnected">Disconnected</div>
+
+<div class="panel">
+    <div class="panel-section">
+        <h2>Connection</h2>
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()" disabled id="disconnectBtn">Disconnect</button>
+
+        <h3>Subscribe to Topic:</h3>
+        <input type="text" id="topicInput" placeholder="/topic/your-topic" value="/topic/topic/session">
+        <button onclick="subscribeToTopic()">Subscribe</button>
+
+        <h3>Active Subscriptions:</h3>
+        <div id="subscriptionsList">No active subscriptions</div>
+    </div>
+
+    <div class="panel-section">
+        <h2>Send Message</h2>
+        <div>
+            <label for="sendTopicSelect">Destination:</label>
+            <select id="sendTopicSelect">
+                <option value="/app/send-message">/app/send-message (Application)</option>
+                <option value="/topic/topic/session">/topic/topic/session (Broadcast)</option>
+            </select>
+            <input type="text" id="customTopicInput" placeholder="Or enter custom destination">
+            <textarea id="messageInput" placeholder="Your message content" rows="4"></textarea>
+            <button onclick="sendMessage()">Send Message</button>
+        </div>
+    </div>
 </div>
 
-<div class="container">
-    <h3>Subscribe to Topic:</h3>
-    <input type="text" id="topicInput" placeholder="/topic/your-topic" value="/topic/topic/session">
-    <button onclick="subscribeToTopic()">Subscribe</button>
-</div>
-
-<div class="subscriptions">
-    <h3>Active Subscriptions:</h3>
-    <div id="subscriptionsList"></div>
-</div>
-
+<h2>Message Log</h2>
 <div id="messages"></div>
 
 <script>
     let stompClient = null;
-    const subscriptions = new Map(); // Хранит подписки: key = topic, value = subscription object
+    const subscriptions = new Map();
 
     function connect() {
         if (stompClient && stompClient.connected) {
-            console.log('Already connected');
+            addMessage('Already connected to server', 'system');
             return;
         }
 
         const wsUrl = `ws://localhost:8080/quiz-websocket`;
-        console.log(`Connecting to ${wsUrl}`);
+        addMessage(`Connecting to ${wsUrl}...`, 'system');
 
         stompClient = new StompJs.Client({
             brokerURL: wsUrl,
             reconnectDelay: 5000,
             debug: function(str) {
                 console.debug('[STOMP] ' + str);
-            }
+            },
+            onConnect: onConnectSuccess,
+            onStompError: onStompError,
+            onWebSocketError: onWebSocketError,
+            onDisconnect: onDisconnect
         });
-
-        stompClient.onConnect = function(frame) {
-            console.log('Connected:', frame);
-            document.getElementById('disconnectBtn').disabled = false;
-            addMessage('System: Connected to server', 'system');
-
-            // Автоподписка на дефолтные топики при подключении
-            const defaultTopic = '/topic/topic/session';
-            if (!subscriptions.has(defaultTopic)) {
-                subscribe(defaultTopic);
-            }
-        };
-
-        stompClient.onStompError = function(frame) {
-            console.error('STOMP error:', frame);
-            addMessage(`Error: ${frame.headers.message || 'Unknown STOMP error'}`, 'error');
-        };
-
-        stompClient.onWebSocketError = function(error) {
-            console.error('WebSocket error:', error);
-            addMessage(`WebSocket Error: ${error.message}`, 'error');
-        };
-
-        stompClient.onDisconnect = function() {
-            console.log('Disconnected');
-            addMessage('System: Disconnected from server', 'system');
-            document.getElementById('disconnectBtn').disabled = true;
-        };
 
         stompClient.activate();
     }
 
+    function onConnectSuccess(frame) {
+        addMessage('Successfully connected to server', 'system');
+        document.getElementById('disconnectBtn').disabled = false;
+        document.getElementById('connectionStatus').className = 'status connected';
+        document.getElementById('connectionStatus').textContent = 'Connected to ' + stompClient.brokerURL;
+
+        // Auto-subscribe to default topic
+        const defaultTopic = '/topic/topic/session';
+        if (!subscriptions.has(defaultTopic)) {
+            subscribe(defaultTopic);
+        }
+    }
+
+    function onStompError(frame) {
+        addMessage(`STOMP error: ${frame.headers.message || 'Unknown error'}`, 'error');
+    }
+
+    function onWebSocketError(error) {
+        addMessage(`WebSocket error: ${error.message}`, 'error');
+    }
+
+    function onDisconnect() {
+        addMessage('Disconnected from server', 'system');
+        document.getElementById('disconnectBtn').disabled = true;
+        document.getElementById('connectionStatus').className = 'status disconnected';
+        document.getElementById('connectionStatus').textContent = 'Disconnected';
+        subscriptions.clear();
+        updateSubscriptionsList();
+    }
+
     function disconnect() {
         if (stompClient) {
-            subscriptions.forEach((sub, topic) => {
-                sub.unsubscribe();
-                console.log(`Unsubscribed from ${topic}`);
-            });
-            subscriptions.clear();
-            updateSubscriptionsList();
-
             stompClient.deactivate();
         }
     }
 
     function subscribeToTopic() {
-        const topicInput = document.getElementById('topicInput');
-        const topic = topicInput.value.trim();
+        const topic = document.getElementById('topicInput').value.trim();
 
         if (!topic) {
-            alert('Please enter a topic');
+            addMessage('Please enter a topic', 'error');
             return;
         }
 
         if (!stompClient || !stompClient.connected) {
-            alert('Not connected to server');
+            addMessage('Not connected to server', 'error');
             return;
         }
 
         if (subscriptions.has(topic)) {
-            alert(`Already subscribed to ${topic}`);
+            addMessage(`Already subscribed to ${topic}`, 'system');
             return;
         }
 
         subscribe(topic);
-        topicInput.value = '';
     }
 
     function subscribe(topic) {
-        const subscription = stompClient.subscribe(topic, function(message) {
-            console.log(`Received message from ${topic}:`, message.body);
-            addMessage(`[${topic}] ${message.body}`, 'message');
+        const subscription = stompClient.subscribe(topic, (message) => {
+            addMessage(`[${topic}] ${message.body}`, 'incoming');
+            console.log(`Received from ${topic}:`, message.body);
         });
 
         subscriptions.set(topic, subscription);
-        console.log(`Subscribed to ${topic}`);
-        addMessage(`System: Subscribed to ${topic}`, 'system');
+        addMessage(`Subscribed to ${topic}`, 'system');
         updateSubscriptionsList();
+        updateSendTopicSelect();
     }
 
     function unsubscribeFromTopic(topic) {
         if (subscriptions.has(topic)) {
-            const sub = subscriptions.get(topic);
-            sub.unsubscribe();
+            subscriptions.get(topic).unsubscribe();
             subscriptions.delete(topic);
-            console.log(`Unsubscribed from ${topic}`);
-            addMessage(`System: Unsubscribed from ${topic}`, 'system');
+            addMessage(`Unsubscribed from ${topic}`, 'system');
             updateSubscriptionsList();
+            updateSendTopicSelect();
         }
+    }
+
+    function sendMessage() {
+        if (!stompClient || !stompClient.connected) {
+            addMessage('Not connected to server', 'error');
+            return;
+        }
+
+        const select = document.getElementById('sendTopicSelect');
+        const customTopic = document.getElementById('customTopicInput').value.trim();
+        const destination = customTopic || select.value;
+        const message = document.getElementById('messageInput').value.trim();
+
+        if (!destination || !message) {
+            addMessage('Please enter destination and message', 'error');
+            return;
+        }
+
+        stompClient.publish({
+            destination: destination,
+            body: message
+        });
+
+        addMessage(`[${destination}] ${message}`, 'outgoing');
+        document.getElementById('messageInput').value = '';
     }
 
     function updateSubscriptionsList() {
         const list = document.getElementById('subscriptionsList');
-        list.innerHTML = '';
 
         if (subscriptions.size === 0) {
-            list.innerHTML = '<p>No active subscriptions</p>';
+            list.innerHTML = '<div>No active subscriptions</div>';
             return;
         }
 
+        list.innerHTML = '';
         subscriptions.forEach((sub, topic) => {
             const item = document.createElement('div');
             item.className = 'subscription-item';
 
-            const topicSpan = document.createElement('span');
-            topicSpan.textContent = topic;
+            item.innerHTML = `
+                    <span>${topic}</span>
+                    <button class="danger" onclick="unsubscribeFromTopic('${topic}')">Unsubscribe</button>
+                `;
 
-            const unsubBtn = document.createElement('button');
-            unsubBtn.textContent = 'Unsubscribe';
-            unsubBtn.onclick = () => unsubscribeFromTopic(topic);
-
-            item.appendChild(topicSpan);
-            item.appendChild(unsubBtn);
             list.appendChild(item);
         });
+    }
+
+    function updateSendTopicSelect() {
+        const select = document.getElementById('sendTopicSelect');
+        const customInput = document.getElementById('customTopicInput');
+
+        // Сохраняем текущее значение
+        const currentValue = customInput.value || select.value;
+
+        // Очищаем и добавляем стандартные опции
+        select.innerHTML = `
+                <option value="/app/send-message">/app/send-message (Application)</option>
+                <option value="/topic/topic/session">/topic/topic/session (Broadcast)</option>
+            `;
+
+        // Добавляем активные подписки в select
+        subscriptions.forEach((sub, topic) => {
+            if (!select.querySelector(`option[value="${topic}"]`)) {
+                const option = document.createElement('option');
+                option.value = topic;
+                option.textContent = `${topic} (Subscribed)`;
+                select.appendChild(option);
+            }
+        });
+
+        // Восстанавливаем выбранное значение
+        if (currentValue) {
+            if (select.querySelector(`option[value="${currentValue}"]`)) {
+                select.value = currentValue;
+                customInput.value = '';
+            } else {
+                customInput.value = currentValue;
+            }
+        }
     }
 
     function addMessage(text, type) {
@@ -180,6 +259,11 @@
         messagesDiv.appendChild(msg);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSendTopicSelect();
+    });
 </script>
 </body>
 </html>

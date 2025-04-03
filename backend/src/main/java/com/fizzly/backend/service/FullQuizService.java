@@ -35,6 +35,7 @@ public class FullQuizService {
             quizQuestion.setQuestion(questionDTO.getQuestion());
             quizQuestion.setPoints(questionDTO.getPoints());
             quizQuestion.setOrdering(questionDTO.getOrder());
+            quizQuestion.setSeconds(questionDTO.getSeconds());
 
             QuizQuestion createdQuestion = quizQuestionService.addQuestionToQuiz(quizQuestion, createdQuiz.getId());
 
