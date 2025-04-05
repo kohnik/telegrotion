@@ -7,6 +7,8 @@ export interface IWsResponse {
   userCount: number
 }
 
+export const localApi = '192.168.100.37'
+
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private stompClient: Client;
@@ -18,11 +20,11 @@ export class WebSocketService {
 
   constructor() {
     this.stompClient = new Client({
-      brokerURL: 'ws://localhost:8080/quiz-websocket',
+      brokerURL: `ws://${localApi}:8080/quiz-websocket`,
       reconnectDelay: 5000,
       debug: (str) => console.debug('[STOMP]', str),
     });
-    
+
     this.configureCallbacks();
   }
 
@@ -107,5 +109,30 @@ export class WebSocketService {
 
   private updateSubscriptionsList() {
     this.subscriptionsList.next([...this.subscriptions.keys()]);
+  }
+
+  public send(destination: string, body: string, headers: any = {}): void {
+    if (!this.stompClient.active) {
+      console.error('STOMP connection is not active');
+      this.messages.next({
+        content: 'Error: Connection is not active',
+        topic: 'error'
+      });
+      return;
+    }
+
+    try {
+      this.stompClient.publish({
+        destination,
+        body,
+        headers
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // this.messages.next({
+      //   content: `Error sending message: ${error.message}`,
+      //   topic: 'error'
+      // });
+    }
   }
 }

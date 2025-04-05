@@ -25,13 +25,13 @@ import {Observable, Subscription} from 'rxjs';
 export class QuizSlidesComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
 
-  public slide$: Observable<ICrateQuizSlide | null>;
+  public selectedSlide$: Observable<ICrateQuizSlide | null>;
   public slides$: Observable<ICrateQuizSlide[]>;
 
   constructor(private quizService: QuizManagementService) {}
 
   ngOnInit(): void {
-    this.slide$ = this.quizService.selectedSlide$;
+    this.selectedSlide$ = this.quizService.selectedSlide$;
     this.slides$ = this.quizService.slides$;
   }
 

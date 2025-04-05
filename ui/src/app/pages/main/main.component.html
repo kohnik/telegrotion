@@ -18,39 +18,4 @@
       </div>
     }
   </div>
-
-</div>
-
-
-
-<h1>WebSocket Client</h1>
-
-<div class="container">
-  <button (click)="connect()">Connect</button>
-  <button (click)="disconnect()" [disabled]="!(isConnected$ | async)">Disconnect</button>
-</div>
-
-<div class="container">
-  <h3>Subscribe to Topic:</h3>
-  <input [(ngModel)]="newTopic" placeholder="/topic/your-topic" value="/topic/topic/session">
-  <button (click)="subscribe()">Subscribe</button>
-</div>
-
-<div class="subscriptions">
-  <h3>Active Subscriptions:</h3>
-  <div *ngIf="(subscriptions$ | async)?.length; else noSubscriptions">
-    <div *ngFor="let topic of subscriptions$ | async" class="subscription-item">
-      <span>{{ topic }}</span>
-      <button (click)="unsubscribe(topic)">Unsubscribe</button>
-    </div>
-  </div>
-  <ng-template #noSubscriptions>
-    <p>No active subscriptions</p>
-  </ng-template>
-</div>
-
-<div id="messages">
-  <div *ngFor="let msg of messages" [class]="'message ' + msg.type">
-    {{ msg.content }}
-  </div>
 </div>

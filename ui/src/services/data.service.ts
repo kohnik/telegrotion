@@ -35,7 +35,16 @@ export class DataService {
   }
 
   public getParticipantsByCurrentSession(joinCode: string): Observable<IStartedQuizParticipants> {
-    return this.http.get<IStartedQuizParticipants>(`/api//quiz-session/${joinCode}/participants`)
+    return this.http.get<IStartedQuizParticipants>(`/api/quiz-session/${joinCode}/participants`)
+  }
+
+  public gotToLobby(joinCode: string, username: string): Observable<IStartedQuizParticipants> {
+    let body = {
+      username: username,
+      joinCode: joinCode,
+    }
+    console.log(body)
+    return this.http.post<IStartedQuizParticipants>(`/api/quiz-session/join`, body)
   }
 
 }

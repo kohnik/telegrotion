@@ -22,4 +22,12 @@ export class WelcomePageComponent {
       this.router.navigate(['/quiz'])
     }
   }
+
+  connectToFizzly(): void {
+    if (!this.isAuthorized) {
+      this.router.navigate(['/authorization'])
+    } else {
+      this.router.navigate(['/join'])
+    }
+  }
 }

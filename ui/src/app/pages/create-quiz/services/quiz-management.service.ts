@@ -29,7 +29,7 @@ export class QuizManagementService {
 
     this._slides.next(
       currentSlides.map(slide =>
-        slide.id === currentSelectedSlide.id ? updatedSlide : slide
+        slide.questionId === currentSelectedSlide.questionId ? updatedSlide : slide
       )
     );
     this._selectedSlide.next(updatedSlide);
@@ -49,6 +49,12 @@ export class QuizManagementService {
     this.updateSlide(slide => ({
       ...slide,
       question: newQuestion,
+    }));
+  }
+
+  updateSlideProperty(updatedSlide: ICrateQuizSlide): void {
+    this.updateSlide(slide => ({
+      ...updatedSlide
     }));
   }
 
@@ -80,12 +86,12 @@ export class QuizManagementService {
   }
 
   addSlide(): void {
-    let newSlide =     {
-      id: new Date().getTime(),
+    let newSlide: ICrateQuizSlide =     {
+      questionId: new Date().getTime(),
       question: 'Введите ваш вопрос',
       type: "Quiz",
       order: this._slides.getValue().length,
-      timeLimit: 20,
+      seconds: 20,
       img: '',
       points: 20,
       answers: [
@@ -137,11 +143,11 @@ export class QuizManagementService {
     )
   }
 
-  createNewQuiz(): Observable<IQuizConfig> {
+  createNewQuiz(quizName: string): Observable<IQuizConfig> {
     let body: IAddQuizBody = {
-      name: 'test',
+      name: quizName,
       userId: 1,
-      questions: this._slides.getValue(),
+      questions: this._slides.value,
     }
     return this.dataService.addQuiz(body)
   }

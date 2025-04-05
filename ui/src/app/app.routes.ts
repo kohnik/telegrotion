@@ -41,4 +41,12 @@ export const routes: Routes = [
     path: 'quiz/:id',
     loadComponent: () => import('./pages/create-quiz/quiz.component').then(m => m.QuizComponent),
   },
+  {
+    path: 'game-window',
+    loadComponent: () => import('./pages/quiz-lobby/components/game-window/game-window.component').then(m => m.GameWindowComponent),
+  },
+  {
+    path: 'join',
+    loadComponent: () => import('./pages/quiz-lobby/components/game-controller/game-controller.component').then(m => m.GameControllerComponent),
+  },
 ];

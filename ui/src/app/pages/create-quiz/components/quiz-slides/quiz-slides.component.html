@@ -3,12 +3,15 @@
     @for (slide of slides; let i = $index; track i) {
       <li class="slides__slide"
           (click)="selectSlide(slide)"
-          [class.active]="slide.id === (slide$ | async)?.id">
+          [class.active]="slide.questionId === (selectedSlide$ | async)?.questionId">
         <span class="slides__title">{{slide.order}} {{slide.type}}</span>
-        <div class="slides__content" [class.active]="slide.id === (slide$ | async)?.id">
+        <div
+          class="slides__content"
+          [class.active]="slide.questionId === (selectedSlide$ | async)?.questionId"
+        >
           <span class="slides__question">{{slide.question}}</span>
           <div class="slides__info">
-            <span class="slides__time-limit">{{slide.timeLimit}}</span>
+            <span class="slides__time-limit">{{slide.seconds}}</span>
             <span class="slides__square"></span>
           </div>
           <ul class="slides__answers">

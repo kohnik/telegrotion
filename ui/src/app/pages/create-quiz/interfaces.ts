@@ -1,9 +1,9 @@
 export interface ICrateQuizSlide {
-  id: number;
+  questionId: number;
   question?: string;
   type?: string;
   order: number;
-  timeLimit?: number;
+  seconds?: number;
   img?: string;
   points: number;
   answers: ICrateQuizAnswer[]

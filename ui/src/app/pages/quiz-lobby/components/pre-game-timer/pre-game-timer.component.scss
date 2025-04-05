@@ -1,0 +1,45 @@
+.timer-container {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+.timer {
+  $self: &;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+
+  &__circle {
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 2rem rgba(0, 0, 0, 0.3);
+    transition: background 0.3s ease;
+  }
+
+  &__number {
+    font-size: 4.8rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
+  }
+
+  // Модификаторы для разных цифр (если нужно разное оформление)
+  &__circle--3 {
+    // Специфичные стили для цифры 3
+  }
+
+  &__circle--2 {
+    // Специфичные стили для цифры 2
+  }
+
+  &__circle--1 {
+    // Специфичные стили для цифры 1
+  }
+}

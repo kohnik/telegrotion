@@ -7,12 +7,14 @@ import {QuizWorkflowComponent} from './components/quiz-workflow/quiz-workflow.co
 import {DataService} from '../../../services/data.service';
 import {QuizManagementService} from './services/quiz-management.service';
 import {catchError, EMPTY, Observable, of, Subject, Subscription, switchMap, takeUntil, throwError} from 'rxjs';
+import {QuizSlidePropertyComponent} from './components/quiz-slide-property/quiz-slide-property.component';
 
 @Component({
   selector: 'app-quiz',
   imports: [
     QuizSlidesComponent,
-    QuizWorkflowComponent
+    QuizWorkflowComponent,
+    QuizSlidePropertyComponent
   ],
   templateUrl: './quiz.component.html',
   standalone: true,
@@ -24,6 +26,7 @@ export class QuizComponent implements OnInit, OnDestroy {
   public slides$: Observable<ICrateQuizSlide[]>
   private subs = new Subscription();
   public isEditing = false;
+  public quizName = ''
 
 
   constructor(
@@ -54,6 +57,7 @@ export class QuizComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: quiz => {
+        console.log(quiz.questions)
         this.quizService.setSlides(quiz.questions);
         this.isEditing = true;
       },
@@ -77,7 +81,7 @@ export class QuizComponent implements OnInit, OnDestroy {
   }
 
   createQuiz(): void {
-    this.quizService.createNewQuiz().subscribe(() => {
+    this.quizService.createNewQuiz(this.quizName).subscribe(() => {
       this.router.navigate(['/main']);
     })
   }

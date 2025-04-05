@@ -9,17 +9,20 @@
     </div>
   </div>
 
+  <div class="lobby__start-btn" (click)="startQuiz()">
+    <span>Начать</span>
+  </div>
+
   <div class="lobby__participants">
     @if (joinedUsers.length) {
       @for (user of joinedUsers; track $index) {
         <span class="lobby__participant">
-          user number {{user.userName}}
+         {{user.username}}
         </span>
       }
     } @else {
       <span class="lobby__empty">Ждём людей...</span>
     }
-
   </div>
 
   <div class="lobby__settings">

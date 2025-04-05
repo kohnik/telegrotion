@@ -1,0 +1,20 @@
+<div class="leader-board">
+  <div class="leader-board__container">
+    <span class="leader-board__title">
+      МОНУМЕНТ СЛАВЫ
+    </span>
+
+    <span class="leader-board__next" (click)="nextQuestion.emit()">
+      Далее
+    </span>
+
+    <div class="leader-board__table">
+      @for (player of players; track $index) {
+        <div class="leader-board__row">
+          <span>{{player.username}}</span>
+          <span>{{player.points}}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>
