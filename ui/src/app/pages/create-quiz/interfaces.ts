@@ -23,6 +23,26 @@ export interface IAddQuizBody  {
   questions: ICrateQuizSlide[]
 }
 
+export interface IStartQuizBody  {
+  quizId: number,
+  userId: number
+}
+
+export interface IStartedQuizConfig {
+  id: string,
+  quizId: number,
+  joinCode: string,
+  ownerId: number,
+  participants: IStartedQuizParticipants
+  active: boolean
+}
+
+export interface IStartedQuizParticipants {
+  userCount: number,
+  joinCode: string,
+  users: string[]
+}
+
 export interface IQuizConfig {
   id: number,
   name: string,

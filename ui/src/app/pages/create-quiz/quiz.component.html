@@ -1,15 +1,15 @@
 <div class="create-quiz">
   <div class="create-quiz__header">
     <span (click)="goToHome()">Fizzly</span>
-    <span>Save</span>
+    <span (click)="goToQuizList()">К списку квизов</span>
   </div>
   <div class="create-quiz__content">
     <div class="create-quiz__slides">
-      <app-create-quiz-slides></app-create-quiz-slides>
+      <app-quiz-slides></app-quiz-slides>
     </div>
 
     <div class="create-quiz__workflow">
-      <app-create-quiz-workflow></app-create-quiz-workflow>
+      <app-quiz-workflow></app-quiz-workflow>
     </div>
 
 
@@ -19,6 +19,6 @@
   </div>
 
   <div class="create-quiz__actions">
-    <span class="create-quiz__action" (click)="createQuiz()">СОЗДАТЬ</span>
+    <span class="create-quiz__action" (click)="createQuiz()">{{isEditing ? 'Редактировать' : 'Создать'}}</span>
   </div>
 </div>

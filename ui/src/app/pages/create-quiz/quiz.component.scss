@@ -4,10 +4,17 @@
   position: relative;
 
   &__header {
+    display: flex;
+    justify-content: space-between;
     padding: 10px;
     color: $primary-color;
     background-color: $secondary-color;
+
+    span {
+      cursor: pointer;
+    }
   }
+
   &__content {
 
     display: flex;

@@ -6,17 +6,17 @@ import {Observable, Subscription} from 'rxjs';
 import {AsyncPipe} from '@angular/common';
 
 @Component({
-  selector: 'app-create-quiz-workflow',
+  selector: 'app-quiz-workflow',
   imports: [
     FormsModule,
     AsyncPipe
   ],
-  templateUrl: './create-quiz-workflow.component.html',
+  templateUrl: './quiz-workflow.component.html',
   standalone: true,
-  styleUrl: './create-quiz-workflow.component.scss',
+  styleUrl: './quiz-workflow.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateQuizWorkflowComponent implements OnInit, OnDestroy {
+export class QuizWorkflowComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
   public slide$: Observable<ICrateQuizSlide | null>;
 

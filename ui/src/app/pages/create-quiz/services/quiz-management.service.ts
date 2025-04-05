@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {IAddQuizBody, ICrateQuizAnswer, ICrateQuizSlide} from '../interfaces';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {IAddQuizBody, ICrateQuizAnswer, ICrateQuizSlide, IQuizConfig} from '../interfaces';
 import {deleteAtPosition, insertAtPosition} from '../utils';
 import {DataService} from '../../../../services/data.service';
 
@@ -137,15 +137,12 @@ export class QuizManagementService {
     )
   }
 
-  createNewQuiz(): void {
+  createNewQuiz(): Observable<IQuizConfig> {
     let body: IAddQuizBody = {
       name: 'test',
       userId: 1,
       questions: this._slides.getValue(),
     }
-
-    console.log(this._slides.getValue())
-
-    this.dataService.addQuiz(body).subscribe(el=> console.log(el))
+    return this.dataService.addQuiz(body)
   }
 }

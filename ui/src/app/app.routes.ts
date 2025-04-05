@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import {CreateQuizComponent} from './pages/create-quiz/create-quiz.component';
+import {QuizComponent} from './pages/create-quiz/quiz.component';
+import {QuizLobbyComponent} from './pages/quiz-lobby/quiz-lobby.component';
 
 export const routes: Routes = [
   {
@@ -29,7 +30,15 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'create-quiz',
-    loadComponent: () => import('./pages/create-quiz/create-quiz.component').then(m => m.CreateQuizComponent),
+    path: 'quiz-lobby/:id',
+    loadComponent: () => import('./pages/quiz-lobby/quiz-lobby.component').then(m => m.QuizLobbyComponent),
+  },
+  {
+    path: 'quiz',
+    loadComponent: () => import('./pages/create-quiz/quiz.component').then(m => m.QuizComponent),
+  },
+  {
+    path: 'quiz/:id',
+    loadComponent: () => import('./pages/create-quiz/quiz.component').then(m => m.QuizComponent),
   },
 ];

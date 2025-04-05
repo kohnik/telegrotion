@@ -1,32 +1,28 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
-  EventEmitter,
-  Input, OnDestroy,
+  OnDestroy,
   OnInit,
-  Output
 } from '@angular/core';
 import {ICrateQuizSlide} from '../../interfaces';
 import {SymbolSpritePipe} from '../../../../../helpers/pipes/symbol-sprite.pipe';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
-import {deleteAtPosition, insertAtPosition} from '../../utils';
 import {QuizManagementService} from '../../services/quiz-management.service';
 import {Observable, Subscription} from 'rxjs';
 
 @Component({
-  selector: 'app-create-quiz-slides',
+  selector: 'app-quiz-slides',
   imports: [
     SymbolSpritePipe,
     NgOptimizedImage,
     AsyncPipe
   ],
-  templateUrl: './create-quiz-slides.component.html',
+  templateUrl: './quiz-slides.component.html',
   standalone: true,
-  styleUrl: './create-quiz-slides.component.scss',
+  styleUrl: './quiz-slides.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateQuizSlidesComponent implements OnInit, OnDestroy {
+export class QuizSlidesComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
 
   public slide$: Observable<ICrateQuizSlide | null>;

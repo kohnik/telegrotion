@@ -13,16 +13,13 @@ export class WelcomePageComponent {
 
   public isAuthorized = true;
 
-  constructor(private readonly router: Router) {
-  }
+  constructor(private readonly router: Router) {}
 
   createFizzly(): void {
-    if(!this.isAuthorized) {
+    if (!this.isAuthorized) {
       this.router.navigate(['/authorization'])
+    } else {
+      this.router.navigate(['/quiz'])
     }
-    else {
-      this.router.navigate(['/create-quiz'])
-    }
-
   }
 }

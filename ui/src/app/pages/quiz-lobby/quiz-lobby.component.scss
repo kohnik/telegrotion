@@ -1,0 +1,134 @@
+.lobby {
+  position: relative;
+  box-sizing: border-box;
+  background-image: url("/assets/images/lobby-background.webp");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+
+  padding: 50px;
+
+  &__connect-data {
+    margin: 0 auto;
+    display: flex;
+    gap: 5px;
+    height: 100px;
+    width: fit-content;
+  }
+
+  &__connect-link {
+    background-color: white;
+    box-sizing: border-box;
+    padding: 10px;
+    width: 250px;
+
+    span {
+      font-size: 20px;
+    }
+  }
+
+  &__connect-code {
+    box-sizing: border-box;
+    padding: 10px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: white;
+
+    span:first-child {
+      font-size: 14px;
+    }
+
+    span:last-child {
+      font-size: 34px;
+      font-weight: bold;
+    }
+  }
+
+  &__settings {
+    display: flex;
+    gap: 5px;
+    box-sizing: border-box;
+    position: absolute;
+    bottom: 20px;
+    right: 15px;
+    height: 50px;
+    width: 200px;
+  }
+
+  &__count-participants {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 40%;
+    background-color: rgba(black, 0.6);
+    border-radius: 5px;
+    padding: 10px;
+    color: white;
+    cursor: pointer;
+
+    span {
+      font-size: 20px;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__settings-config {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 60%;
+    background-color: rgba(black, 0.6);
+    border-radius: 5px;
+    padding: 10px;
+    color: white;
+    cursor: pointer;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__participants {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: fit-content;
+    flex-wrap: wrap;
+    max-height: 50%;
+    margin: 100px;
+    overflow-x: auto;
+  }
+
+  &__empty {
+    display: inline-flex;
+    background-color: rgb(70, 23, 143);
+    color: white;
+    padding: 10px;
+    font-size: 40px;
+    border-radius: 5px;
+  }
+
+  &__participant {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 50%;
+    background-color: #00d4ff;
+    width: 100px;
+    height: 100px;
+  }
+}
