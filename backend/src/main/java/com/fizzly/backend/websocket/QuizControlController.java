@@ -100,7 +100,12 @@ public class QuizControlController {
 
     @MessageMapping("/submit-answer")
     public void submitAnswer(@Payload SubmitAnswerRequest request) {
-        List<String> usersLeft = quizSessionService.submitAnswer(request.getJoinCode(), request.getUsername(), request.getAnswer());
+        List<String> usersLeft = quizSessionService.submitAnswer(
+                request.getJoinCode(),
+                request.getUsername(),
+                request.getAnswer(),
+                request.getTimeSpent()
+        );
 
         final String topic = String.format(WebSocketTopics.JOIN_TOPIC, request.getJoinCode());
         messagingTemplate.convertAndSend(topic, new SubmitAnswerResponse(

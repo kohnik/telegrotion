@@ -123,7 +123,7 @@ public class QuizSessionService {
                 questions.get(i).setActive(true);
                 questions.get(i).setNext(false);
                 questions.get(i).setLast(true);
-                if(i + 1 < questions.size()) {
+                if (i + 1 < questions.size()) {
                     questions.get(i).setLast(false);
                     questions.get(i + 1).setNext(true);
                 }
@@ -146,7 +146,7 @@ public class QuizSessionService {
         }
     }
 
-    public List<String> submitAnswer(String joinCode, String username, int answerOrder) {
+    public List<String> submitAnswer(String joinCode, String username, int answerOrder, double answerTime) {
         List<QuizSessionDTO> questions = activeQuizQuestions.get(joinCode);
         if (questions == null) {
             throw new TelegrotionException("Invalid join code");
@@ -169,7 +169,10 @@ public class QuizSessionService {
                     .filter(participant -> participant.getUsername().equals(username))
                     .findFirst()
                     .orElseThrow(() -> new UserNotFoundException(username));
-            sessionParticipant.setPoints(sessionParticipant.getPoints() + activeQuestion.getPoints());
+            sessionParticipant.setPoints(
+                    sessionParticipant.getPoints() +
+                            calcUserPoints(answerTime, activeQuestion.getTimeLeft(), activeQuestion.getPoints())
+            );
         }
 
         List<String> allQuizParticipants = quizSession.getParticipants().stream()
@@ -178,6 +181,10 @@ public class QuizSessionService {
         allQuizParticipants.removeAll(usersByQuestion);
 
         return allQuizParticipants;
+    }
+
+    private int calcUserPoints(double answerTime, int questionTime, int questionPoints) {
+        return (int) Math.round((1 - answerTime / questionTime) * questionPoints);
     }
 
     public void endQuiz(String joinCode) {
