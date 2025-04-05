@@ -1,17 +1,28 @@
 package com.fizzly.backend.websocket;
 
+import com.fizzly.backend.dto.QuizSessionAnswerDTO;
+import com.fizzly.backend.dto.QuizSessionDTO;
+import com.fizzly.backend.dto.websocket.QuestionEndedPlayerDTO;
+import com.fizzly.backend.dto.websocket.request.NextQuestionRequest;
+import com.fizzly.backend.dto.websocket.request.StartSessionRequest;
+import com.fizzly.backend.dto.websocket.request.SubmitAnswerRequest;
+import com.fizzly.backend.dto.websocket.response.QuestionEndedResponse;
+import com.fizzly.backend.dto.websocket.response.QuizEndedResponse;
+import com.fizzly.backend.dto.websocket.response.StartSessionResponse;
+import com.fizzly.backend.dto.websocket.response.SubmitAnswerResponse;
+import com.fizzly.backend.entity.QuizSession;
+import com.fizzly.backend.exception.TelegrotionException;
 import com.fizzly.backend.service.QuizSessionService;
+import com.fizzly.backend.entity.QuizEvent;
 import com.fizzly.backend.utils.WebSocketTopics;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Controller
@@ -21,32 +32,32 @@ public class QuizControlController {
     private final QuizSessionService quizSessionService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/send-message")
-    public void test(@Payload String message, SimpMessageHeaderAccessor headerAccessor) {
-        System.out.println("message = " + message);
-    }
-
     @MessageMapping("/start")
-    public void startQuizSession(@Payload StartSessionRequest request, SimpMessageHeaderAccessor headerAccessor) {
-        final String joinCode = request.joinCode;
+    public void startQuizSession(@Payload StartSessionRequest request) {
+        final String joinCode = request.getJoinCode();
         int questionsCount = quizSessionService.activateSession(joinCode);
 
         final String topic = String.format(WebSocketTopics.JOIN_TOPIC, joinCode);
         messagingTemplate.convertAndSend(topic, new StartSessionResponse(
-                "quizStarted",
+                QuizEvent.QUIZ_STARTED.getId(),
                 joinCode,
                 questionsCount)
         );
     }
 
     @MessageMapping("/nextQuestion")
-    public void nextQuestion(@Payload NextQuestionRequest request, SimpMessageHeaderAccessor headerAccessor) {
-        final String joinCode = request.joinCode;
+    public void nextQuestion(@Payload NextQuestionRequest request) {
+        final String joinCode = request.getJoinCode();
         final String topic = String.format(WebSocketTopics.JOIN_TOPIC, joinCode);
 
-        QuizSessionService.QuizSessionDTO question = quizSessionService.nextQuestion(joinCode);
+        QuizSessionDTO question = quizSessionService.nextQuestion(joinCode);
         if (question == null) {
-            messagingTemplate.convertAndSend(topic, "quizFinished");
+            final QuizSession session = quizSessionService.getSession(joinCode);
+            List<QuestionEndedPlayerDTO> players = session.getParticipants().stream()
+                    .map(participant -> new QuestionEndedPlayerDTO(participant.getUsername(), participant.getPoints()))
+                    .sorted(Comparator.comparingInt(QuestionEndedPlayerDTO::getPoints))
+                    .toList();
+            messagingTemplate.convertAndSend(topic, new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), players));
             return;
         }
 
@@ -56,68 +67,33 @@ public class QuizControlController {
         try {
             TimeUnit.SECONDS.sleep(seconds);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         }
         quizSessionService.endQuestion(joinCode);
+
+        final QuizSession session = quizSessionService.getSession(joinCode);
+        List<QuestionEndedPlayerDTO> players = session.getParticipants().stream()
+                .map(participant -> new QuestionEndedPlayerDTO(participant.getUsername(), participant.getPoints()))
+                .toList();
+        int order = question.getAnswers().stream()
+                .filter(QuizSessionAnswerDTO::isCorrect)
+                .findFirst().orElseThrow(() -> new TelegrotionException(
+                        String.format("Не найден правильный ответ на вопрос: %s", question.getQuestionId()))
+                )
+                .getOrder();
+
         messagingTemplate.convertAndSend(topic,
-                new QuestionEndedResponse("questionEnded", question.getAnswers().stream()
-                        .filter(answer -> answer.isCorrect())
-                        .findFirst().get()
-                        .getOrder())
+                new QuestionEndedResponse(QuizEvent.QUESTION_ENDED.getId(), order, players)
         );
     }
 
     @MessageMapping("/submit-answer")
-    public void submitAnswer(@Payload SubmitAnswerRequest request, SimpMessageHeaderAccessor headerAccessor) {
-        quizSessionService.submitAnswer(request.joinCode, request.username, request.getAnswer());
+    public void submitAnswer(@Payload SubmitAnswerRequest request) {
+        quizSessionService.submitAnswer(request.getJoinCode(), request.getUsername(), request.getAnswer());
 
         final String topic = String.format(WebSocketTopics.JOIN_TOPIC, request.getJoinCode());
-        messagingTemplate.convertAndSend(topic, new SubmitAnswerResponse("answerSubmitted", request.getUsername()));
-    }
-
-    @Getter
-    @Setter
-    private static class StartSessionRequest {
-        private String joinCode;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    private static class StartSessionResponse {
-        private String event;
-        private String joinCode;
-        private int questionCount;
-    }
-
-    @Getter
-    @Setter
-    private static class NextQuestionRequest {
-        private String joinCode;
-    }
-
-    @Getter
-    @Setter
-    private static class SubmitAnswerRequest {
-        private String joinCode;
-        private String username;
-        private int answer;
-        private double timeSpent;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    private static class SubmitAnswerResponse {
-        private String event;
-        private String username;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    private static class QuestionEndedResponse {
-        private String event;
-        private int correctAnswer;
+        messagingTemplate.convertAndSend(topic, new SubmitAnswerResponse(
+                QuizEvent.ANSWER_SUBMITTED.getId(), request.getUsername())
+        );
     }
 }

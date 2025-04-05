@@ -1,21 +1,23 @@
 package com.fizzly.backend.service;
 
 import com.fizzly.backend.dto.FullQuizGetDTO;
+import com.fizzly.backend.dto.QuizSessionAnswerDTO;
+import com.fizzly.backend.dto.QuizSessionDTO;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizSession;
 import com.fizzly.backend.entity.SessionParticipant;
+import com.fizzly.backend.exception.InvalidJoinCodeException;
 import com.fizzly.backend.exception.TelegrotionException;
+import com.fizzly.backend.exception.UserNotFoundException;
 import com.fizzly.backend.repository.QuizSessionRepository;
 import com.fizzly.backend.repository.SessionParticipantRepository;
-import lombok.Getter;
+import com.fizzly.backend.utils.JoinCodeUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -34,7 +36,7 @@ public class QuizSessionService {
     public QuizSession startQuiz(Long quizId, Long userId) {
         Quiz quiz = quizService.findByQuizId(quizId);
 
-        String joinCode = generateJoinCode();
+        String joinCode = JoinCodeUtils.generateJoinCode();
         QuizSession quizSession = new QuizSession();
         quizSession.setActive(false);
         quizSession.setJoinCode(joinCode);
@@ -61,11 +63,6 @@ public class QuizSessionService {
         session.getParticipants().add(participant);
     }
 
-    private String generateJoinCode() {
-        Random random = new Random();
-        return String.format("%06d", random.nextInt(999999));
-    }
-
     public QuizSession getSession(String joinCode) {
         return activeSessions.get(joinCode);
     }
@@ -74,7 +71,7 @@ public class QuizSessionService {
     public int activateSession(String joinCode) {
         QuizSession session = activeSessions.get(joinCode);
         if (session == null) {
-            throw new TelegrotionException("Invalid join code");
+            throw new InvalidJoinCodeException();
         }
         session.setActive(true);
         quizSessionRepository.save(session);
@@ -99,7 +96,7 @@ public class QuizSessionService {
 
                     return quizSessionDTO;
                 }).toList();
-        questions.get(0).setNext(true);
+        questions.getFirst().setNext(true);
         activeQuizQuestions.put(joinCode, questions);
 
         return fullQuiz.getQuestions().size();
@@ -108,14 +105,14 @@ public class QuizSessionService {
     public QuizSessionDTO nextQuestion(String joinCode) {
         List<QuizSessionDTO> questions = activeQuizQuestions.get(joinCode);
         if (questions == null) {
-            throw new TelegrotionException("Invalid join code");
+            throw new InvalidJoinCodeException();
         }
 
         //typical order
-        for (int i = 0; i < questions.size(); i++) {
-            if (questions.get(i).isNext) {
-                questions.get(i).setActive(true);
-                return questions.get(i);
+        for (QuizSessionDTO question : questions) {
+            if (question.isNext()) {
+                question.setActive(true);
+                return question;
             }
         }
         return null;
@@ -124,11 +121,11 @@ public class QuizSessionService {
     public void endQuestion(String joinCode) {
         List<QuizSessionDTO> questions = activeQuizQuestions.get(joinCode);
         if (questions == null) {
-            throw new TelegrotionException("Invalid join code");
+            throw new InvalidJoinCodeException();
         }
 
         for (int i = 0; i < questions.size(); i++) {
-            if (questions.get(i).isNext) {
+            if (questions.get(i).isNext()) {
                 questions.get(i).setActive(false);
                 questions.get(i).setNext(false);
                 if (i + 1 < questions.size()) {
@@ -143,36 +140,22 @@ public class QuizSessionService {
         if (questions == null) {
             throw new TelegrotionException("Invalid join code");
         }
-        final QuizSessionDTO activeQuestion = questions.stream().filter(QuizSessionDTO::isActive).findFirst().get();
-        QuizSessionAnswerDTO correctAnswer = activeQuestion.getAnswers().stream().filter(QuizSessionAnswerDTO::isCorrect).findFirst().get();
-        if (correctAnswer.order == answerOrder) {
+
+        final QuizSessionDTO activeQuestion = questions.stream().filter(QuizSessionDTO::isActive).findFirst()
+                .orElseThrow(() -> new TelegrotionException("Не найдена активная сессия"));
+        QuizSessionAnswerDTO correctAnswer = activeQuestion.getAnswers().stream().filter(QuizSessionAnswerDTO::isCorrect)
+                .findFirst()
+                .orElseThrow(() -> new TelegrotionException(
+                        (String.format("Не найден правильный ответ на вопрос: %d", activeQuestion.getQuestionId()))
+                ));
+
+        if (correctAnswer.getOrder() == answerOrder) {
             QuizSession quizSession = activeSessions.get(joinCode);
             SessionParticipant sessionParticipant = quizSession.getParticipants().stream()
                     .filter(participant -> participant.getUsername().equals(username))
-                    .findFirst().get();
+                    .findFirst()
+                    .orElseThrow(() -> new UserNotFoundException(username));
             sessionParticipant.setPoints(sessionParticipant.getPoints() + activeQuestion.getPoints());
         }
     }
-
-    @Getter
-    @Setter
-    public static class QuizSessionDTO {
-        private String event = "newQuestion";
-        private Long questionId;
-        private String questionName;
-        private List<QuizSessionAnswerDTO> answers;
-        private int timeLeft;
-        private int points;
-        private boolean isActive;
-        private boolean isNext;
-    }
-
-    @Getter
-    @Setter
-    public static class QuizSessionAnswerDTO {
-        private String answer;
-        private int order;
-        private boolean isCorrect;
-    }
-
 }
