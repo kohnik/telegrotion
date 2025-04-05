@@ -50,6 +50,13 @@ public class QuizSessionController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/validate")
+    @Operation(summary = "Валидация кода входа в комнату")
+    public ResponseEntity<Void> validateJoinCode(@RequestBody ValidateJoinCodeRequest joinCodeRequest) {
+        quizSessionService.validateJoinCode(joinCodeRequest.getJoinCode());
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("{joinCode}/participants")
     @Operation(summary = "Получить участников по текущей сессии")
     public ResponseEntity<CurrentUserSessionStateResponse> getQuizParticipants(@PathVariable String joinCode) {
@@ -93,5 +100,11 @@ public class QuizSessionController {
         private int userCount;
         private String joinCode;
         private List<String> users;
+    }
+
+    @Getter
+    @Setter
+    private static class ValidateJoinCodeRequest {
+        private String joinCode;
     }
 }

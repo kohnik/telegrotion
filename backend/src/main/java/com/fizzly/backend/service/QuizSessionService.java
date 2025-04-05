@@ -182,4 +182,10 @@ public class QuizSessionService {
         activeQuizQuestions.remove(joinCode);
         activeSessions.remove(joinCode);
     }
+
+    public void validateJoinCode(String joinCode) {
+        if (activeSessions.get(joinCode) == null) {
+            throw new InvalidJoinCodeException();
+        }
+    }
 }
