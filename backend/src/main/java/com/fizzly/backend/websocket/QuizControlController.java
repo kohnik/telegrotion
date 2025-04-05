@@ -10,10 +10,10 @@ import com.fizzly.backend.dto.websocket.response.QuestionEndedResponse;
 import com.fizzly.backend.dto.websocket.response.QuizEndedResponse;
 import com.fizzly.backend.dto.websocket.response.StartSessionResponse;
 import com.fizzly.backend.dto.websocket.response.SubmitAnswerResponse;
+import com.fizzly.backend.entity.QuizEvent;
 import com.fizzly.backend.entity.QuizSession;
 import com.fizzly.backend.exception.TelegrotionException;
 import com.fizzly.backend.service.QuizSessionService;
-import com.fizzly.backend.entity.QuizEvent;
 import com.fizzly.backend.utils.WebSocketTopics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -58,6 +58,7 @@ public class QuizControlController {
                     .sorted(Comparator.comparingInt(QuestionEndedPlayerDTO::getPoints))
                     .toList();
             messagingTemplate.convertAndSend(topic, new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), players));
+            quizSessionService.endQuiz(joinCode);
             return;
         }
 
@@ -89,11 +90,11 @@ public class QuizControlController {
 
     @MessageMapping("/submit-answer")
     public void submitAnswer(@Payload SubmitAnswerRequest request) {
-        quizSessionService.submitAnswer(request.getJoinCode(), request.getUsername(), request.getAnswer());
+        List<String> usersLeft = quizSessionService.submitAnswer(request.getJoinCode(), request.getUsername(), request.getAnswer());
 
         final String topic = String.format(WebSocketTopics.JOIN_TOPIC, request.getJoinCode());
         messagingTemplate.convertAndSend(topic, new SubmitAnswerResponse(
-                QuizEvent.ANSWER_SUBMITTED.getId(), request.getUsername())
+                QuizEvent.ANSWER_SUBMITTED.getId(), request.getUsername(), usersLeft)
         );
     }
 }

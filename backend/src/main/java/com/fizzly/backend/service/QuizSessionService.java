@@ -16,9 +16,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class QuizSessionService {
 
     private final Map<String, QuizSession> activeSessions = new ConcurrentHashMap<>();
     private final Map<String, List<QuizSessionDTO>> activeQuizQuestions = new ConcurrentHashMap<>();
+    private final Map<Long, Set<String>> submittedAnswersByQuestion = new ConcurrentHashMap<>();
 
     private final QuizSessionRepository quizSessionRepository;
     private final SessionParticipantRepository sessionParticipantRepository;
@@ -36,7 +40,12 @@ public class QuizSessionService {
     public QuizSession startQuiz(Long quizId, Long userId) {
         Quiz quiz = quizService.findByQuizId(quizId);
 
-        String joinCode = JoinCodeUtils.generateJoinCode();
+        boolean isUnique = false;
+        String joinCode = null;
+        while (!isUnique) {
+            joinCode = JoinCodeUtils.generateJoinCode();
+            isUnique = !activeSessions.containsKey(joinCode);
+        }
         QuizSession quizSession = new QuizSession();
         quizSession.setActive(false);
         quizSession.setJoinCode(joinCode);
@@ -52,7 +61,7 @@ public class QuizSessionService {
     public void addParticipant(String joinCode, String username) {
         QuizSession session = getSession(joinCode);
         if (session == null) {
-            throw new TelegrotionException("Invalid join code");
+            throw new InvalidJoinCodeException();
         }
 
         SessionParticipant participant = new SessionParticipant();
@@ -135,7 +144,7 @@ public class QuizSessionService {
         }
     }
 
-    public void submitAnswer(String joinCode, String username, int answerOrder) {
+    public List<String> submitAnswer(String joinCode, String username, int answerOrder) {
         List<QuizSessionDTO> questions = activeQuizQuestions.get(joinCode);
         if (questions == null) {
             throw new TelegrotionException("Invalid join code");
@@ -149,13 +158,28 @@ public class QuizSessionService {
                         (String.format("Не найден правильный ответ на вопрос: %d", activeQuestion.getQuestionId()))
                 ));
 
+        Set<String> usersByQuestion = submittedAnswersByQuestion.getOrDefault(activeQuestion.getQuestionId(), new HashSet<>());
+        usersByQuestion.add(username);
+
+        QuizSession quizSession = activeSessions.get(joinCode);
         if (correctAnswer.getOrder() == answerOrder) {
-            QuizSession quizSession = activeSessions.get(joinCode);
             SessionParticipant sessionParticipant = quizSession.getParticipants().stream()
                     .filter(participant -> participant.getUsername().equals(username))
                     .findFirst()
                     .orElseThrow(() -> new UserNotFoundException(username));
             sessionParticipant.setPoints(sessionParticipant.getPoints() + activeQuestion.getPoints());
         }
+
+        List<String> allQuizParticipants = quizSession.getParticipants().stream()
+                .map(SessionParticipant::getUsername)
+                .collect(Collectors.toList());
+        allQuizParticipants.removeAll(usersByQuestion);
+
+        return allQuizParticipants;
+    }
+
+    public void endQuiz(String joinCode) {
+        activeQuizQuestions.remove(joinCode);
+        activeSessions.remove(joinCode);
     }
 }
