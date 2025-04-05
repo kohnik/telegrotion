@@ -72,6 +72,16 @@ public class QuizControlController {
         }
         quizSessionService.endQuestion(joinCode);
 
+        if (question.isLast()) {
+            final QuizSession session = quizSessionService.getSession(joinCode);
+            List<QuestionEndedPlayerDTO> players = session.getParticipants().stream()
+                    .map(participant -> new QuestionEndedPlayerDTO(participant.getUsername(), participant.getPoints()))
+                    .sorted(Comparator.comparingInt(QuestionEndedPlayerDTO::getPoints))
+                    .toList();
+            messagingTemplate.convertAndSend(topic, new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), players));
+            quizSessionService.endQuiz(joinCode);
+            return;
+        }
         final QuizSession session = quizSessionService.getSession(joinCode);
         List<QuestionEndedPlayerDTO> players = session.getParticipants().stream()
                 .map(participant -> new QuestionEndedPlayerDTO(participant.getUsername(), participant.getPoints()))

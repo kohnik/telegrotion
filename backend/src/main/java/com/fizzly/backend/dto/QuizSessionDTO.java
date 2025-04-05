@@ -17,4 +17,5 @@ public class QuizSessionDTO {
     private int points;
     private boolean isActive;
     private boolean isNext;
+    private boolean isLast;
 }

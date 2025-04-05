@@ -118,10 +118,16 @@ public class QuizSessionService {
         }
 
         //typical order
-        for (QuizSessionDTO question : questions) {
-            if (question.isNext()) {
-                question.setActive(true);
-                return question;
+        for (int i = 0; i < questions.size(); i++) {
+            if (questions.get(i).isNext()) {
+                questions.get(i).setActive(true);
+                questions.get(i).setNext(false);
+                questions.get(i).setLast(true);
+                if(i + 1 < questions.size()) {
+                    questions.get(i).setLast(false);
+                    questions.get(i + 1).setNext(true);
+                }
+                return questions.get(i);
             }
         }
         return null;
@@ -134,12 +140,8 @@ public class QuizSessionService {
         }
 
         for (int i = 0; i < questions.size(); i++) {
-            if (questions.get(i).isNext()) {
+            if (questions.get(i).isActive()) {
                 questions.get(i).setActive(false);
-                questions.get(i).setNext(false);
-                if (i + 1 < questions.size()) {
-                    questions.get(i + 1).setNext(true);
-                }
             }
         }
     }

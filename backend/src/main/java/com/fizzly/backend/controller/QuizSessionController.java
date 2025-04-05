@@ -45,7 +45,7 @@ public class QuizSessionController {
         QuizSession session = quizSessionService.getSession(joinRequest.getJoinCode());
 
         final String topic = String.format(WebSocketTopics.JOIN_TOPIC, session.getJoinCode());
-        final UserJoinResponse response = new UserJoinResponse(session.getParticipants().size(), session.getJoinCode());
+        final UserJoinResponse response = new UserJoinResponse(session.getParticipants().size(), joinRequest.username, session.getJoinCode());
         messagingTemplate.convertAndSend(topic, response);
         return ResponseEntity.ok().build();
     }
@@ -90,6 +90,7 @@ public class QuizSessionController {
     @AllArgsConstructor
     private static class UserJoinResponse {
         private int userCount;
+        private String username;
         private String joinCode;
     }
 
