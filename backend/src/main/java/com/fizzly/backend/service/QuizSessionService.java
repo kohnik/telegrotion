@@ -3,7 +3,11 @@ package com.fizzly.backend.service;
 import com.fizzly.backend.dto.FullQuizGetDTO;
 import com.fizzly.backend.dto.QuizSessionAnswerDTO;
 import com.fizzly.backend.dto.QuizSessionDTO;
+import com.fizzly.backend.dto.websocket.QuestionEndedPlayerDTO;
+import com.fizzly.backend.dto.websocket.response.QuestionEndedResponse;
+import com.fizzly.backend.dto.websocket.response.QuizEndedResponse;
 import com.fizzly.backend.entity.Quiz;
+import com.fizzly.backend.entity.QuizEvent;
 import com.fizzly.backend.entity.QuizSession;
 import com.fizzly.backend.entity.SessionParticipant;
 import com.fizzly.backend.exception.InvalidJoinCodeException;
@@ -12,21 +16,31 @@ import com.fizzly.backend.exception.UserNotFoundException;
 import com.fizzly.backend.repository.QuizSessionRepository;
 import com.fizzly.backend.repository.SessionParticipantRepository;
 import com.fizzly.backend.utils.JoinCodeUtils;
+import com.fizzly.backend.utils.WebSocketTopics;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class QuizSessionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuizSessionService.class);
 
     private final Map<String, QuizSession> activeSessions = new ConcurrentHashMap<>();
     private final Map<String, List<QuizSessionDTO>> activeQuizQuestions = new ConcurrentHashMap<>();
@@ -36,8 +50,10 @@ public class QuizSessionService {
     private final SessionParticipantRepository sessionParticipantRepository;
     private final QuizService quizService;
     private final FullQuizService fullQuizService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public QuizSession startQuiz(Long quizId, Long userId) {
+        LOGGER.info("Starting quiz with id {}", quizId);
         Quiz quiz = quizService.findByQuizId(quizId);
 
         boolean isUnique = false;
@@ -54,6 +70,7 @@ public class QuizSessionService {
 
         QuizSession savedSessionQuiz = quizSessionRepository.save(quizSession);
         activeSessions.put(joinCode, savedSessionQuiz);
+        LOGGER.info("Quiz with id {} and joinCode {} started", quizId, joinCode);
 
         return savedSessionQuiz;
     }
@@ -70,6 +87,7 @@ public class QuizSessionService {
         sessionParticipantRepository.save(participant);
 
         session.getParticipants().add(participant);
+        LOGGER.info("Player with username {} joined to session {}", username, joinCode);
     }
 
     public QuizSession getSession(String joinCode) {
@@ -78,6 +96,7 @@ public class QuizSessionService {
 
     @Transactional
     public int activateSession(String joinCode) {
+        LOGGER.info("Activation session room {}", joinCode);
         QuizSession session = activeSessions.get(joinCode);
         if (session == null) {
             throw new InvalidJoinCodeException();
@@ -107,11 +126,12 @@ public class QuizSessionService {
                 }).toList();
         questions.getFirst().setNext(true);
         activeQuizQuestions.put(joinCode, questions);
+        LOGGER.info("session room {} was activated", joinCode);
 
         return fullQuiz.getQuestions().size();
     }
 
-    public QuizSessionDTO nextQuestion(String joinCode) {
+    public QuizSessionDTO getNextQuestion(String joinCode) {
         List<QuizSessionDTO> questions = activeQuizQuestions.get(joinCode);
         if (questions == null) {
             throw new InvalidJoinCodeException();
@@ -144,6 +164,7 @@ public class QuizSessionService {
                 questions.get(i).setActive(false);
             }
         }
+        LOGGER.info("Active question in session room {} was ended", joinCode);
     }
 
     public List<String> submitAnswer(String joinCode, String username, int answerOrder, double answerTime) {
@@ -162,6 +183,8 @@ public class QuizSessionService {
 
         Set<String> usersByQuestion = submittedAnswersByQuestion.getOrDefault(activeQuestion.getQuestionId(), new HashSet<>());
         usersByQuestion.add(username);
+        submittedAnswersByQuestion.put(activeQuestion.getQuestionId(), usersByQuestion);
+        LOGGER.info("User {} in session room submit answer", username);
 
         QuizSession quizSession = activeSessions.get(joinCode);
         if (correctAnswer.getOrder() == answerOrder) {
@@ -183,6 +206,26 @@ public class QuizSessionService {
         return allQuizParticipants;
     }
 
+    private List<String> getLeftUsers(String joinCode) {
+        List<QuizSessionDTO> questions = activeQuizQuestions.get(joinCode);
+        if (questions == null) {
+            throw new TelegrotionException("Invalid join code");
+        }
+
+        QuizSession quizSession = activeSessions.get(joinCode);
+        final QuizSessionDTO activeQuestion = questions.stream().filter(QuizSessionDTO::isActive).findFirst()
+                .orElseThrow(() -> new TelegrotionException("Не найдена активная сессия"));
+
+        Set<String> usersByQuestion = submittedAnswersByQuestion.getOrDefault(activeQuestion.getQuestionId(), new HashSet<>());
+        List<String> allQuizParticipants = quizSession.getParticipants().stream()
+                .map(SessionParticipant::getUsername)
+                .collect(Collectors.toList());
+        allQuizParticipants.removeAll(usersByQuestion);
+        LOGGER.info("Left users in session room {}: {}", joinCode, allQuizParticipants);
+
+        return allQuizParticipants;
+    }
+
     private int calcUserPoints(double answerTime, int questionTime, int questionPoints) {
         return (int) Math.round((1 - answerTime / questionTime) * questionPoints);
     }
@@ -190,11 +233,64 @@ public class QuizSessionService {
     public void endQuiz(String joinCode) {
         activeQuizQuestions.remove(joinCode);
         activeSessions.remove(joinCode);
+        LOGGER.info("Session room was closed {}", joinCode);
     }
 
     public void validateJoinCode(String joinCode) {
         if (activeSessions.get(joinCode) == null) {
             throw new InvalidJoinCodeException();
         }
+    }
+
+    public void nextQuestion(String joinCode) {
+        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, joinCode);
+        final QuizSession session = getSession(joinCode);
+        final List<QuestionEndedPlayerDTO> players = session.getParticipants().stream()
+                .map(participant -> new QuestionEndedPlayerDTO(participant.getUsername(), participant.getPoints()))
+                .sorted(Comparator.comparingInt(QuestionEndedPlayerDTO::getPoints).reversed())
+                .toList();
+
+        QuizSessionDTO question = getNextQuestion(joinCode);
+        if (question == null) {
+            messagingTemplate.convertAndSend(topic, new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), players));
+            endQuiz(joinCode);
+            return;
+        }
+
+        messagingTemplate.convertAndSend(topic, question);
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(() -> {
+            final int seconds = question.getTimeLeft();
+            try {
+                for (int i = 0; i < seconds; i++) {
+                    TimeUnit.SECONDS.sleep(1);
+                    if (getLeftUsers(joinCode).isEmpty()) {
+                        break;
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            endQuestion(joinCode);
+
+            if (question.isLast()) {
+                messagingTemplate.convertAndSend(topic, new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), players));
+                endQuiz(joinCode);
+                return;
+            }
+            int order = question.getAnswers().stream()
+                    .filter(QuizSessionAnswerDTO::isCorrect)
+                    .findFirst().orElseThrow(() -> new TelegrotionException(
+                            String.format("Не найден правильный ответ на вопрос: %s", question.getQuestionId()))
+                    )
+                    .getOrder();
+
+            messagingTemplate.convertAndSend(topic,
+                    new QuestionEndedResponse(QuizEvent.QUESTION_ENDED.getId(), order, players)
+            );
+            LOGGER.info("Question in session room {} was ended", joinCode);
+        });
+        executorService.shutdown();
     }
 }
