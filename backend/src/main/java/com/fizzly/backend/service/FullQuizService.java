@@ -107,4 +107,15 @@ public class FullQuizService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteQuizById(Long quizId) {
+        Quiz quiz = quizService.findByQuizId(quizId);
+        List<QuizQuestion> questions = quizQuestionService.findAllByQuizId(quizId);
+        questions.forEach(question -> {
+            List<QuizAnswer> answers = quizAnswerService.getAllAnswersByQuestionId(question.getId());
+            quizAnswerService.deleteAnswers(answers);
+        });
+        quizQuestionService.deleteQuestions(questions);
+        quizService.deleteQuiz(quiz);
+    }
 }

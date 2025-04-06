@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,6 +46,13 @@ public class FullQuizController {
     @Operation(summary = "Получить полный список квизов по пользователю")
     public List<GetListQuizDTO> getQuizzesList(@PathVariable("userId") Long userId) {
         return fullQuizService.getAllQuizzesByUserId(userId);
+    }
+
+    @DeleteMapping("/{quizId}")
+    @Operation(summary = "Удалить квиз по ИД")
+    public ResponseEntity<Void> deleteQuizById(@PathVariable("quizId") Long quizId) {
+        fullQuizService.deleteQuizById(quizId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }

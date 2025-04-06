@@ -7,6 +7,7 @@ import com.fizzly.backend.repository.QuizQuestionRepository;
 import com.fizzly.backend.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,5 +30,10 @@ public class QuizQuestionService {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new QuizNotFoundException(quizId));
 
         return quizQuestionRepository.findAllByQuiz(quiz);
+    }
+
+    @Transactional
+    public void deleteQuestions(List<QuizQuestion> questions) {
+        quizQuestionRepository.deleteAll(questions);
     }
 }
