@@ -1,5 +1,6 @@
 package com.fizzly.backend.controller.brainring;
 
+import com.fizzly.backend.entity.BrainRingEvent;
 import com.fizzly.backend.service.brainring.BrainRingService;
 import com.fizzly.backend.utils.WebSocketTopics;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,8 +45,10 @@ public class BrainRingSessionController {
         String topic = String.format(WebSocketTopics.JOIN_BRAIN_RING_TOPIC, roomDTO.getRoomId());
         BrainRingService.BrainRingRoomFullDTO rooFullInfo = brainRingService.getRooFullInfo(roomDTO.getRoomId());
         messagingTemplate.convertAndSend(topic, new RoomDescriptionDTO(
+                BrainRingEvent.USER_ADDED.getId(),
                 request.teamName,
                 request.joinCode,
+                roomDTO.getTeamId(),
                 rooFullInfo.getTeams().size()
         ));
 
@@ -55,7 +58,7 @@ public class BrainRingSessionController {
     @DeleteMapping("/teams")
     @Operation(summary = "Удалить команду")
     public ResponseEntity<Void> deleteTeamById(@RequestBody DeleteTeamRequestDTO request) {
-        brainRingService.deleteTeam(request.teamName, request.getRoomId());
+        brainRingService.deleteTeam(request.teamId, request.getRoomId());
         return ResponseEntity.noContent().build();
     }
 
@@ -75,7 +78,7 @@ public class BrainRingSessionController {
     @Getter
     @Setter
     public static class DeleteTeamRequestDTO {
-        private String teamName;
+        private UUID teamId;
         private UUID roomId;
     }
 
@@ -83,8 +86,10 @@ public class BrainRingSessionController {
     @Setter
     @AllArgsConstructor
     public static class RoomDescriptionDTO {
+        private Long eventId;
         private String teamName;
         private String joinCode;
+        private UUID teamId;
         private int teamCount;
     }
 }

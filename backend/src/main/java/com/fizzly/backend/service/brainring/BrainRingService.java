@@ -3,9 +3,13 @@ package com.fizzly.backend.service.brainring;
 import com.fizzly.backend.exception.InvalidJoinCodeException;
 import com.fizzly.backend.exception.TelegrotionException;
 import com.fizzly.backend.utils.JoinCodeUtils;
+import com.fizzly.backend.websocket.braintring.BrainRingController;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,8 +22,11 @@ import java.util.UUID;
 @Service
 public class BrainRingService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BrainRingService.class);
+
     private static final Map<UUID, String> rooms = new HashMap();
     private static final Map<UUID, List<BrainRingTeam>> teams = new HashMap();
+    private static final Map<UUID, BrainRingActiveRoom> activeRooms = new HashMap<>();
 
     public BrainRingRoomDTO createRoom() {
         String joinCode = JoinCodeUtils.generateJoinCode();
@@ -45,12 +52,12 @@ public class BrainRingService {
         return new BrainRingJoinRoomDTO(room.getKey(), joinCode, teamName, teamId);
     }
 
-    public void deleteTeam(String teamName, UUID roomId) {
-        if (!teamExists(teamName)) {
-            throw new TelegrotionException("Team " + teamName + " does not exist");
+    public void deleteTeam(UUID teamId, UUID roomId) {
+        if (!teamExists(teamId)) {
+            throw new TelegrotionException("Team " + teamId + " does not exist");
         }
         List<BrainRingTeam> brainRingTeams = teams.get(roomId);
-        brainRingTeams.removeIf(brainRingTeam -> brainRingTeam.getTeamName().equals(teamName));
+        brainRingTeams.removeIf(brainRingTeam -> brainRingTeam.getTeamId().equals(teamId));
     }
 
     public BrainRingRoomFullDTO getRooFullInfo(UUID roomId) {
@@ -71,6 +78,57 @@ public class BrainRingService {
     private boolean teamExists(String teamName) {
         return teams.values().stream().flatMap(Collection::stream).map(BrainRingTeam::getTeamName)
                 .anyMatch(teamName::equals);
+    }
+
+    public BrainRingActiveRoom activateRoom(UUID roomId) {
+        if (!rooms.containsKey(roomId)) {
+            throw new TelegrotionException("Room " + roomId + " does not exist");
+        }
+        String joinCode = rooms.get(roomId);
+        List<BrainRingTeam> activeTeams = teams.get(roomId);
+
+        BrainRingActiveRoom activeRoom = new BrainRingActiveRoom(true, joinCode, activeTeams);
+        activeRooms.put(roomId, activeRoom);
+
+        return activeRoom;
+    }
+
+    private boolean teamExists(UUID teamId) {
+        return teams.values().stream().flatMap(Collection::stream).map(BrainRingTeam::getTeamId)
+                .anyMatch(teamId::equals);
+    }
+
+    public BrainRingController.AnswerResponseDTO submitAnswer(UUID roomId, UUID teamId, double answerTime) {
+        BrainRingActiveRoom activeRoom = getActiveRoom(roomId);
+        if (!activeRoom.ready) {
+            return null;
+        }
+
+        activeRoom.setReady(false);
+        activeRooms.put(roomId, activeRoom);
+
+        LOGGER.info("Team %s submitted answer with time %d", teamId.toString(), answerTime);
+
+        final BrainRingTeam brainRingTeam = activeRoom.getTeams().stream()
+                .filter(team -> team.getTeamId().equals(teamId))
+                .findFirst()
+                .orElseThrow(() -> new TelegrotionException("Team " + teamId + " does not exist"));
+        return new BrainRingController.AnswerResponseDTO(teamId, brainRingTeam.getTeamName(), answerTime);
+    }
+
+    private BrainRingActiveRoom getActiveRoom(UUID roomId) {
+        BrainRingActiveRoom activeRoom = activeRooms.get(roomId);
+        if (activeRoom == null) {
+            throw new TelegrotionException("Room " + roomId + " does not exist");
+        }
+        return activeRoom;
+    }
+
+    public void activateNextQuestionInRoom(UUID roomId) {
+        BrainRingActiveRoom activeRoom = getActiveRoom(roomId);
+
+        activeRoom.setReady(true);
+        activeRooms.put(roomId, activeRoom);
     }
 
     @Getter
@@ -104,6 +162,16 @@ public class BrainRingService {
     @AllArgsConstructor
     public static class BrainRingRoomFullDTO {
         private UUID roomId;
+        private String joinCode;
+        private List<BrainRingTeam> teams;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class BrainRingActiveRoom {
+        private boolean ready;
         private String joinCode;
         private List<BrainRingTeam> teams;
     }
