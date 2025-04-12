@@ -1,13 +1,16 @@
 package com.fizzly.backend.controller.brainring;
 
 import com.fizzly.backend.service.brainring.BrainRingService;
+import com.fizzly.backend.utils.WebSocketTopics;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +28,7 @@ import java.util.UUID;
 public class BrainRingSessionController {
 
     private final BrainRingService brainRingService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/create-room")
     @Operation(summary = "Создать комнату")
@@ -35,7 +39,17 @@ public class BrainRingSessionController {
     @PostMapping("/join-room")
     @Operation(summary = "Присоединить команду")
     public ResponseEntity<BrainRingService.BrainRingJoinRoomDTO> joinRoom(@RequestBody JoinRoomRequestDTO request) {
-        return ResponseEntity.ok(brainRingService.joinRoom(request.joinCode, request.teamName));
+        BrainRingService.BrainRingJoinRoomDTO roomDTO = brainRingService.joinRoom(request.joinCode, request.teamName);
+
+        String topic = String.format(WebSocketTopics.JOIN_BRAIN_RING_TOPIC, roomDTO.getRoomId());
+        BrainRingService.BrainRingRoomFullDTO rooFullInfo = brainRingService.getRooFullInfo(roomDTO.getRoomId());
+        messagingTemplate.convertAndSend(topic, new RoomDescriptionDTO(
+                request.teamName,
+                request.joinCode,
+                rooFullInfo.getTeams().size()
+        ));
+
+        return ResponseEntity.ok(roomDTO);
     }
 
     @DeleteMapping("/teams")
@@ -63,5 +77,14 @@ public class BrainRingSessionController {
     public static class DeleteTeamRequestDTO {
         private String teamName;
         private UUID roomId;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class RoomDescriptionDTO {
+        private String teamName;
+        private String joinCode;
+        private int teamCount;
     }
 }
