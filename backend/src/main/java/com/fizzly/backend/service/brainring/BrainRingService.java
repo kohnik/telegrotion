@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class BrainRingService {
 
     public BrainRingJoinRoomDTO joinRoom(String joinCode, String teamName) {
         Map.Entry<UUID, String> room = getRoomByJoinCode(joinCode);
-        if (teamExists(teamName)) {
+        if (teamExists(room.getKey(), teamName)) {
             throw new TelegrotionException("Team " + teamName + " already exists");
         }
 
@@ -53,7 +52,7 @@ public class BrainRingService {
     }
 
     public void deleteTeam(UUID teamId, UUID roomId) {
-        if (!teamExists(teamId)) {
+        if (!teamExists(roomId, teamId)) {
             throw new TelegrotionException("Team " + teamId + " does not exist");
         }
         List<BrainRingTeam> brainRingTeams = teams.get(roomId);
@@ -75,8 +74,12 @@ public class BrainRingService {
                 .findFirst().orElseThrow(InvalidJoinCodeException::new);
     }
 
-    private boolean teamExists(String teamName) {
-        return teams.values().stream().flatMap(Collection::stream).map(BrainRingTeam::getTeamName)
+    private boolean teamExists(UUID roomId, String teamName) {
+        List<BrainRingTeam> brainRingTeams = teams.get(roomId);
+        if (brainRingTeams == null) {
+            return false;
+        }
+        return brainRingTeams.stream().map(BrainRingTeam::getTeamName)
                 .anyMatch(teamName::equals);
     }
 
@@ -93,8 +96,12 @@ public class BrainRingService {
         return activeRoom;
     }
 
-    private boolean teamExists(UUID teamId) {
-        return teams.values().stream().flatMap(Collection::stream).map(BrainRingTeam::getTeamId)
+    private boolean teamExists(UUID roomId, UUID teamId) {
+        List<BrainRingTeam> brainRingTeams = teams.get(roomId);
+        if (brainRingTeams == null) {
+            return false;
+        }
+        return brainRingTeams.stream().map(BrainRingTeam::getTeamId)
                 .anyMatch(teamId::equals);
     }
 
