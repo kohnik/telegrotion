@@ -1,4 +1,4 @@
-package com.fizzly.backend.websocket;
+package com.fizzly.backend.websocket.quiz;
 
 import com.fizzly.backend.dto.websocket.request.NextQuestionRequest;
 import com.fizzly.backend.dto.websocket.request.StartSessionRequest;
@@ -6,7 +6,7 @@ import com.fizzly.backend.dto.websocket.request.SubmitAnswerRequest;
 import com.fizzly.backend.dto.websocket.response.StartSessionResponse;
 import com.fizzly.backend.dto.websocket.response.SubmitAnswerResponse;
 import com.fizzly.backend.entity.QuizEvent;
-import com.fizzly.backend.service.QuizSessionService;
+import com.fizzly.backend.service.quiz.QuizSessionService;
 import com.fizzly.backend.utils.WebSocketTopics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;

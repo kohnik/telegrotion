@@ -1,4 +1,4 @@
-package com.fizzly.backend.service;
+package com.fizzly.backend.service.quiz;
 
 import com.fizzly.backend.dto.FullQuizGetDTO;
 import com.fizzly.backend.dto.QuizSessionAnswerDTO;

@@ -1,8 +1,8 @@
-package com.fizzly.backend.controller;
+package com.fizzly.backend.controller.quiz;
 
 import com.fizzly.backend.entity.QuizSession;
 import com.fizzly.backend.entity.SessionParticipant;
-import com.fizzly.backend.service.QuizSessionService;
+import com.fizzly.backend.service.quiz.QuizSessionService;
 import com.fizzly.backend.utils.WebSocketTopics;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

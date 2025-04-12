@@ -1,4 +1,4 @@
-package com.fizzly.backend.service;
+package com.fizzly.backend.service.quiz;
 
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizQuestion;

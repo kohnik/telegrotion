@@ -1,10 +1,10 @@
-package com.fizzly.backend.controller;
+package com.fizzly.backend.controller.quiz;
 
 import com.fizzly.backend.dto.QuizAnswerCreateDTO;
 import com.fizzly.backend.dto.QuizAnswerMultipleCreateDTO;
 import com.fizzly.backend.entity.QuizAnswer;
 import com.fizzly.backend.mapper.QuizAnswerMapper;
-import com.fizzly.backend.service.QuizAnswerService;
+import com.fizzly.backend.service.quiz.QuizAnswerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
