@@ -1,0 +1,86 @@
+.game-controller{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("../../../../assets/images/background-welcome.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+
+  &.is-game {
+    //align-items: flex-end;
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: white;
+
+
+    &.is-game {
+      width: 100%;
+      padding: 0 20px;
+    }
+
+    input {
+      background-color: rgb(255 217 217);
+      text-align: center;
+      color: #000000;
+      border-radius: 20px;
+      border: none;
+      padding: 6px 8px;
+      outline: none;
+      font-family: "Gilroy", sans-serif;
+      font-weight: normal;
+      font-size: 18px;
+    }
+  }
+
+  &__title {
+    font-family: "Gilroy", sans-serif;
+    font-weight: bold;
+    font-size: 30px;
+    text-align: center;
+  }
+
+  &__go {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #81a17f;
+    width: 40%;
+    padding: 6px 10px;
+    color: #ffffff;
+    font-size: 15px;
+    border-radius: 10px;
+    border: navajowhite;
+    margin-top: 30px;
+    cursor: pointer;
+
+    font-family: "Gilroy", sans-serif;
+    font-weight: bold;
+
+    &.disabled {
+      opacity: 0.3;
+    }
+  }
+
+  &__click-btn {
+    display: inline-flex;
+    width: 50vw;
+    height: 50vw;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 70px;
+    color: black;
+    background: wheat;
+    box-shadow: 1px 0px 7px 6px #ff0000;
+    cursor: pointer;
+  }
+}

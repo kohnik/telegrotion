@@ -1,0 +1,21 @@
+<div class="main">
+  <div class="main__header">
+    <span (click)="goToHome()">Fizzly</span>
+    <span (click)="goToQuizList()">К списку квизов</span>
+  </div>
+  <div class="main__content">
+    @for (quiz of quizzes$ | async; track $index) {
+      <div class="main__quiz" (click)="goToQuiz(quiz)">
+        <div class="main__top-container">
+          <img src="../../../../assets/images/bg_2.jpeg" alt="bg">
+          <span class="main__questions-count">25 вопросов</span>
+        </div>
+        <div class="main__bottom-container">
+          <span>{{quiz.name}}</span>
+          <span>{{quiz.owner.username}}</span>
+        </div>
+        <span class="main__start" (click)="$event.stopPropagation(); startQuiz(quiz)">ЗАПУСТИТЬ</span>
+      </div>
+    }
+  </div>
+</div>

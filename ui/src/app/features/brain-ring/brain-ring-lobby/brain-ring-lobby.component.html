@@ -1,0 +1,53 @@
+<div class="lobby">
+  <div class="lobby__connect-data">
+    <div class="lobby__connect-link">
+      <span>Сканируй qr-code или переходи по ссылке</span>
+    </div>
+    <div class="lobby__connect-code">
+      <span>КОД ДЛЯ ВХОДА:</span>
+      <span>{{joinCode}}</span>
+    </div>
+
+    <qrcode [qrdata]="'https://fizzly-648a1.web.app/join-to-brain-ring'" [width]="100" [errorCorrectionLevel]="'M'"></qrcode>
+
+  </div>
+
+  <div class="lobby__start-btn" (click)="startBrainRing()">
+    <span>Начать</span>
+  </div>
+
+  <div class="lobby__participants">
+    @if (joinedTeams.length) {
+      @for (team of joinedTeams; track $index) {
+        <span class="lobby__participant">
+         {{team.teamName}}
+          <svg (click)="deleteTeam(team.teamName)">
+            <use [attr.xlink:href]="'trash' | symbolSprite" ></use>
+          </svg>
+        </span>
+      }
+    } @else {
+      <span class="lobby__empty">Ждём людей...</span>
+    }
+  </div>
+
+  <div class="lobby__settings">
+    <div class="lobby__count-participants">
+      <span>{{teamsCount ?? 0}}</span>
+      <svg>
+        <use [attr.xlink:href]="'user' | symbolSprite" ></use>
+      </svg>
+    </div>
+    <div class="lobby__settings-config">
+      <svg>
+        <use [attr.xlink:href]="'calendar' | symbolSprite" ></use>
+      </svg>
+      <svg>
+        <use [attr.xlink:href]="'gear' | symbolSprite" ></use>
+      </svg>
+      <svg>
+        <use [attr.xlink:href]="'vk-logo' | symbolSprite" ></use>
+      </svg>
+    </div>
+  </div>
+</div>

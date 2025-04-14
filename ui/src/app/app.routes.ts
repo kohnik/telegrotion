@@ -1,15 +1,15 @@
 import { Routes } from '@angular/router';
-import {QuizComponent} from './pages/create-quiz/quiz.component';
-import {QuizLobbyComponent} from './pages/quiz-lobby/quiz-lobby.component';
+import {QuizCreator} from './features/quiz/quiz-creator/quiz-creator';
+import {QuizLobbyComponent} from './features/quiz/quiz-lobby/quiz-lobby.component';
 
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./pages/welcome-page/welcome-page.component').then(m => m.WelcomePageComponent),
+    loadComponent: () => import('./features/quiz/quiz-welcome-page/quiz-welcome-page.component').then(m => m.QuizWelcomePageComponent),
   },
   {
     path: 'main',
-    loadComponent: () => import('./pages/main/main.component').then(m => m.MainComponent),
+    loadComponent: () => import('./features/quiz/quiz-library/quiz-library.component').then(m => m.QuizLibraryComponent),
   },
   {
     path: 'authorization',
@@ -21,32 +21,49 @@ export const routes: Routes = [
       },
       {
         path: 'login',
-        loadComponent: () => import('./pages/authorization/login/login.component').then(m => m.LoginComponent),
+        loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent),
       },
       {
         path: 'registration',
-        loadComponent: () => import('./pages/authorization/registration/registration.component').then(m => m.RegistrationComponent),
+        loadComponent: () => import('./auth/registration/registration.component').then(m => m.RegistrationComponent),
       },
     ]
   },
   {
     path: 'quiz-lobby/:id',
-    loadComponent: () => import('./pages/quiz-lobby/quiz-lobby.component').then(m => m.QuizLobbyComponent),
+    loadComponent: () => import('./features/quiz/quiz-lobby/quiz-lobby.component').then(m => m.QuizLobbyComponent),
   },
   {
     path: 'quiz',
-    loadComponent: () => import('./pages/create-quiz/quiz.component').then(m => m.QuizComponent),
+    loadComponent: () => import('./features/quiz/quiz-creator/quiz-creator').then(m => m.QuizCreator),
   },
   {
     path: 'quiz/:id',
-    loadComponent: () => import('./pages/create-quiz/quiz.component').then(m => m.QuizComponent),
+    loadComponent: () => import('./features/quiz/quiz-creator/quiz-creator').then(m => m.QuizCreator),
   },
   {
     path: 'game-window',
-    loadComponent: () => import('./pages/quiz-lobby/components/game-window/game-window.component').then(m => m.GameWindowComponent),
+    loadComponent: () => import('./features/quiz/quiz-lobby/game-window/game-window.component').then(m => m.GameWindowComponent),
   },
   {
     path: 'join',
-    loadComponent: () => import('./pages/quiz-lobby/components/game-controller/game-controller.component').then(m => m.GameControllerComponent),
+    loadComponent: () => import('./features/quiz/quiz-game-controller/quiz-game-controller.component').then(m => m.QuizGameControllerComponent),
+  },
+  // brainRing
+  {
+    path: 'brain-ring-welcome',
+    loadComponent: () => import('./features/brain-ring/brain-ring-welcome-page/brain-ring-welcome-page.component').then(m => m.BrainRingWelcomePageComponent),
+  },
+  {
+    path: 'join-to-brain-ring',
+    loadComponent: () => import('./features/brain-ring/brain-ring-game-controller/brain-ring-game-controller.component').then(m => m.BrainRingGameControllerComponent),
+  },
+  {
+    path: 'brain-ring-lobby',
+    loadComponent: () => import('./features/brain-ring/brain-ring-lobby/brain-ring-lobby.component').then(m => m.BrainRingLobbyComponent),
+  },
+  {
+    path: 'brain-ring-game-window',
+    loadComponent: () => import('./features/brain-ring/brain-ring-game-window/brain-ring-game-window.component').then(m => m.BrainRingGameWindowComponent),
   },
 ];

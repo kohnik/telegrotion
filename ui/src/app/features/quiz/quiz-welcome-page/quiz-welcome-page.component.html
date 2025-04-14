@@ -1,0 +1,19 @@
+<div class="welcome-page">
+  <div class="welcome-page__container">
+    <img src="assets/images/logo.png">
+    <div class="welcome-page__buttons">
+      <span class="welcome-page__join" (click)="connectToQuiz()">
+        <svg>
+          <use [attr.xlink:href]="'blue-play' | symbolSprite" ></use>
+        </svg>
+        <span>Присоедениться к комнате</span>
+      </span>
+      <span class="welcome-page__new" (click)="createQuiz()">
+        <svg>
+          <use [attr.xlink:href]="'green-plus' | symbolSprite" ></use>
+        </svg>
+        <span>Создать Викторину</span>
+      </span>
+    </div>
+  </div>
+</div>

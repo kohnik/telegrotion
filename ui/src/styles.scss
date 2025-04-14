@@ -95,3 +95,21 @@ select {
   $input-border: rgba(255, 255, 255, 0.3); // Граница полей ввода
   $input-background: rgba(255, 255, 255, 0.1); // Фон полей ввода
 
+
+
+@font-face {
+  font-family: 'Gilroy';
+  src: url('./assets/fonts/Gilroy/Gilroy-Light.otf') format('opentype');
+  font-weight: 300;  /* Light */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Gilroy ExtraBold */
+@font-face {
+  font-family: 'Gilroy';
+  src: url('./assets/fonts/Gilroy/Gilroy-ExtraBold.otf') format('opentype');
+  font-weight: 800;  /* ExtraBold */
+  font-style: normal;
+  font-display: swap;
+}
