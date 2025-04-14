@@ -1,6 +1,5 @@
 package com.fizzly.backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,27 +8,23 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
-@Table(name = "QUIZ_QUESTIONS")
+@Table(name = "SESSION_PARTICIPANTS")
 @Getter
 @Setter
-public class QuizQuestion {
+@ToString
+public class SessionParticipant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String question;
+    private String username;
+
+    private int points = 0;
 
     @ManyToOne
-    @JsonIgnore
-    private Quiz quiz;
-
-    private int points;
-
-    private int ordering;
-
-    private int seconds;
-
+    private QuizSession session;
 }

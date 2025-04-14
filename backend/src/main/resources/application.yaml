@@ -19,3 +19,11 @@ springdoc:
     enabled: true
   api-docs:
     path: /v3/api-docs
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          socket: DEBUG
+        messaging: DEBUG

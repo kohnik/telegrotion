@@ -1,4 +1,4 @@
-package com.fizzly.backend.service;
+package com.fizzly.backend.service.quiz;
 
 import com.fizzly.backend.entity.QuizAnswer;
 import com.fizzly.backend.entity.QuizQuestion;
@@ -8,6 +8,7 @@ import com.fizzly.backend.repository.QuizQuestionRepository;
 import com.fizzly.backend.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -42,5 +43,10 @@ public class QuizAnswerService {
                 .orElseThrow(() -> new QuizQuestionNotFoundException(questionId));
 
         return answerRepository.findAllByQuestion(question);
+    }
+
+    @Transactional
+    public void deleteAnswers(List<QuizAnswer> answers) {
+        answerRepository.deleteAll(answers);
     }
 }
