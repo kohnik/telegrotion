@@ -4,10 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
-@Schema(description = "DTO для добавления вопроса к квизу")
-public class QuizQuestionCreateDTO {
+@Schema(description = "DTO для создания полного квиза (DTO вопрос)")
+public class FullQuizQuestionCreateDTO {
 
     @Schema(description = "Название вопроса")
     private String question;
@@ -15,9 +17,9 @@ public class QuizQuestionCreateDTO {
     @Schema(description = "Кол-во очков за правильный ответ")
     private int points;
 
-    @Schema(description = "ИД квиза")
-    private Long quizId;
-
     @Schema(description = "Порядковый номер вопроса")
     private int order;
+
+    @Schema(description = "Список ответов")
+    private List<FullQuizAnswerCreateDTO> answers;
 }

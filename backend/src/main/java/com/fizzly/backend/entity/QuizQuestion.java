@@ -25,4 +25,9 @@ public class QuizQuestion {
     @ManyToOne
     @JsonIgnore
     private Quiz quiz;
+
+    private int points;
+
+    private int ordering;
+
 }
