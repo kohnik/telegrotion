@@ -1,0 +1,24 @@
+@if (slide) {
+  <div class="slide">
+    <div class="slide__container">
+      <span class="slide__timer">{{timeLeft}}</span>
+
+      <div class="slide__question">
+        <span class="slide__question">{{slide.questionName}}</span>
+      </div>
+      <div class="slide__img">
+        картинка
+      </div>
+
+      <div class="slide__answers">
+
+        @for (item of slide.answers; track $index) {
+          <span class="slide__answer">
+              <span>{{item.order}}.</span>
+              <span>{{item.answer}}</span>
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+}

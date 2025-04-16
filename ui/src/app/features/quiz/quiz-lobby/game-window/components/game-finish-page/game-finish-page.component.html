@@ -1,0 +1,14 @@
+<div class="finish-page">
+  <div class="finish-page__container">
+    <span class="finish-page__title">Наши победители</span>
+    <div class="finish-page__prizes">
+      @for (player of prizesPlayers; track $index) {
+        <div class="finish-page__prize">
+          <span>{{$index + 1}} место:</span>
+          <span><b>{{player.username}}</b></span>
+          <span>{{player.points}} очков</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>

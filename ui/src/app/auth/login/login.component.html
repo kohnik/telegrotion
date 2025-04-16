@@ -1,0 +1,40 @@
+<div class="auth">
+  <span class="auth__back" (click)="back()"><----</span>
+
+  <div class="auth__modal">
+    <h1 class="auth__title">Авторизация</h1>
+    <form class="auth__form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="auth__form-group">
+        <label for="username" class="auth__label">Логин</label>
+        <input
+          type="text"
+          id="username"
+          class="auth__input"
+          formControlName="username"
+          placeholder="Введите ваш логин"
+        />
+        <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="auth__error">
+          Логин обязателен
+        </div>
+      </div>
+      <div class="auth__form-group">
+        <label for="password" class="auth__label">Пароль</label>
+        <input
+          type="password"
+          id="password"
+          class="auth__input"
+          formControlName="password"
+          placeholder="Введите ваш пароль"
+        />
+        <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="auth__error">
+          Пароль обязателен
+        </div>
+      </div>
+      <button type="submit" class="auth__button" [disabled]="loginForm.invalid">Войти</button>
+      <div class="auth__links">
+        <span class="auth__link auth__link--forgot">Забыли пароль?</span>
+        <span class="auth__link auth__link--register" (click)="registration()">Регистрация</span>
+      </div>
+    </form>
+  </div>
+</div>

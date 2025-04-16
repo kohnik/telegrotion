@@ -1,0 +1,30 @@
+<div class="game-controller" [class.is-game]="isWaitingGameAfterJoin">
+  <div class="game-controller__container" [class.is-game]="isWaitingGameAfterJoin">
+    @if (isJoined) {
+      @if (isWaitingGameAfterJoin) {
+        @if (isNeedStartedTimer) {
+          <app-pre-game-timer></app-pre-game-timer>
+        } @else {
+          <span>Ожидание</span>
+        }
+      } @else {
+        <h2 class="game-controller__answers-title">ОТВЕЧАЙ НА ВОПРОС</h2>
+        @if (answers.length) {
+          <div class="game-controller__buttons">
+            @for (data of answers; track $index) {
+              <div class="game-controller__button" (click)="submitAnswer(data.order)">{{data.order}}</div>
+            }
+          </div>
+        }
+        <span class="game-controller__timer">{{timeLeft}}</span>
+      }
+
+    } @else {
+      <span class="game-controller__title">Введите код комнаты и ник</span>
+      <input placeholder="код комнаты" [(ngModel)]="joinCode">
+      <input placeholder="ник" [(ngModel)]="username">
+      <span class="game-controller__go" (click)="goToLobby()">Вход</span>
+    }
+
+  </div>
+</div>

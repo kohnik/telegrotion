@@ -1,0 +1,9 @@
+<div class="game-window">
+
+  @if(isFirstTeamAnswer) {
+    <span class="game-window__text">команда <b>{{answeredTeam.teamName}}</b> нажала кнопку спустя {{answeredTeam.answerTime}} секунд</span>
+
+    <button class="game-window__next-btn" (click)="$event.preventDefault(); nextQuestion()">Далее</button>
+  }
+
+</div>

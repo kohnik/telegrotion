@@ -1,0 +1,7 @@
+export enum EWSEventQuizTypes {
+  QUIZ_STARTED = 1,
+  QUESTION_ENDED = 2,
+  ANSWER_SUBMITTED = 3,
+  QUIZ_FINISHED = 4,
+  NEW_QUESTION = 5
+}

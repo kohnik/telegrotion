@@ -1,0 +1,23 @@
+<div class="create-quiz">
+  <div class="create-quiz__header">
+    <span (click)="goToHome()">Fizzly</span>
+    <span (click)="goToQuizList()">К списку квизов</span>
+  </div>
+  <div class="create-quiz__content">
+    <div class="create-quiz__slides">
+      <app-quiz-slides></app-quiz-slides>
+    </div>
+
+    <div class="create-quiz__workflow">
+      <app-quiz-workflow></app-quiz-workflow>
+    </div>
+
+    <div class="create-quiz__themes">
+      <app-quiz-slide-property (quizNameChange)="quizName = $event"></app-quiz-slide-property>
+    </div>
+  </div>
+
+  <div class="create-quiz__actions">
+    <span class="create-quiz__action" (click)="createQuiz()">{{isEditing ? 'Редактировать' : 'Создать'}}</span>
+  </div>
+</div>

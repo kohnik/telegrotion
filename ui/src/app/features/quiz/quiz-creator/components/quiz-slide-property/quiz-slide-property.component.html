@@ -1,0 +1,23 @@
+<div class="property" [formGroup]="form">
+  @if (slide) {
+    <div>
+      <span>Названия квиза:</span>
+      <input
+        [(ngModel)]="quizName"
+        [ngModelOptions]="{standalone: true}"
+        (ngModelChange)="setQuizName($event)">
+    </div>
+    <div>
+      <span>Очки за правильный ответ:</span>
+      <input formControlName="points">
+    </div>
+
+    <div>
+      <span>Время на ответ:</span>
+      <input formControlName="seconds">
+    </div>
+
+  }
+
+
+</div>

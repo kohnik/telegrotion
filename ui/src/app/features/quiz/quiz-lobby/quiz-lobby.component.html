@@ -1,0 +1,47 @@
+<div class="lobby">
+  <div class="lobby__connect-data">
+    <div class="lobby__connect-link">
+      <span>ЗАЛЕТАЙ НА ФИЗЛИ</span>
+    </div>
+    <div class="lobby__connect-code">
+      <span>КОД ДЛЯ ВХОДА:</span>
+      <span>{{joinCode}}</span>
+    </div>
+  </div>
+
+  <div class="lobby__start-btn" (click)="startQuiz()">
+    <span>Начать</span>
+  </div>
+
+  <div class="lobby__participants">
+    @if (joinedUsers.length) {
+      @for (user of joinedUsers; track $index) {
+        <span class="lobby__participant">
+         {{user.username}}
+        </span>
+      }
+    } @else {
+      <span class="lobby__empty">Ждём людей...</span>
+    }
+  </div>
+
+  <div class="lobby__settings">
+    <div class="lobby__count-participants">
+      <span>{{userCount ?? 0}}</span>
+      <svg>
+        <use [attr.xlink:href]="'user' | symbolSprite" ></use>
+      </svg>
+    </div>
+    <div class="lobby__settings-config">
+      <svg>
+        <use [attr.xlink:href]="'calendar' | symbolSprite" ></use>
+      </svg>
+      <svg>
+        <use [attr.xlink:href]="'gear' | symbolSprite" ></use>
+      </svg>
+      <svg>
+        <use [attr.xlink:href]="'vk-logo' | symbolSprite" ></use>
+      </svg>
+    </div>
+  </div>
+</div>

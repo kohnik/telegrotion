@@ -1,0 +1,32 @@
+@if ((slide$ | async); as slide) {
+  <div class="workflow">
+    <div class="workflow__title">
+      <input
+        class="workflow__question"
+        [ngModel]="slide.question"
+        (ngModelChange)="setQuestion($event)"
+      >
+    </div>
+    <div class="workflow__source-content">
+      <span></span>
+    </div>
+    <div class="workflow__answers">
+      @for (answer of slide.answers; track $index) {
+        <div class="workflow__answer">
+          <span>{{answer.order}}</span>
+          <input
+            class="workflow__answer-input"
+            #answerInput
+            [ngModel]="answer.answer"
+            (focusout)="setAnswer(answer, answerInput.value)"
+            (keydown.enter)="setAnswer(answer, answerInput.value)"
+          >
+          <span
+            (click)="setCorrectAnswer(answer)"
+            class="workflow__circle" [class.correct]="answer.correct"></span>
+        </div>
+      }
+    </div>
+  </div>
+}
+

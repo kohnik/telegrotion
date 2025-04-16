@@ -1,0 +1,86 @@
+<div class="auth">
+  <span class="auth__back" (click)="back()"><----</span>
+
+  <div class="auth__modal">
+    <h1 class="auth__title">Регистрация</h1>
+    <form class="auth__form" [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
+      <!-- Поле: Имя -->
+      <div class="auth__form-group">
+        <label for="name" class="auth__label">Имя</label>
+        <input
+          type="text"
+          id="name"
+          class="auth__input"
+          formControlName="name"
+          placeholder="Введите ваше имя"
+        />
+        <div *ngIf="registrationForm.get('name')?.invalid && registrationForm.get('name')?.touched" class="auth__error">
+          Имя обязательно
+        </div>
+      </div>
+
+      <!-- Поле: Почта -->
+      <div class="auth__form-group">
+        <label for="email" class="auth__label">Почта</label>
+        <input
+          type="email"
+          id="email"
+          class="auth__input"
+          formControlName="email"
+          placeholder="Введите вашу почту"
+        />
+        <div *ngIf="registrationForm.get('email')?.invalid && registrationForm.get('email')?.touched" class="auth__error">
+          Введите корректную почту
+        </div>
+      </div>
+
+      <!-- Поле: Пароль -->
+      <div class="auth__form-group">
+        <label for="password" class="auth__label">Пароль</label>
+        <input
+          type="password"
+          id="password"
+          class="auth__input"
+          formControlName="password"
+          placeholder="Введите пароль"
+        />
+        <div *ngIf="registrationForm.get('password')?.invalid && registrationForm.get('password')?.touched" class="auth__error">
+          Пароль обязателен
+        </div>
+      </div>
+
+      <!-- Поле: Повтор пароля -->
+      <div class="auth__form-group">
+        <label for="confirmPassword" class="auth__label">Повторите пароль</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          class="auth__input"
+          formControlName="confirmPassword"
+          placeholder="Повторите пароль"
+        />
+        <div *ngIf="registrationForm.get('confirmPassword')?.invalid && registrationForm.get('confirmPassword')?.touched" class="auth__error">
+          Пароли не совпадают
+        </div>
+      </div>
+
+      <!-- Кнопка: Зарегистрироваться -->
+      <button type="submit" class="auth__button" [disabled]="registrationForm.invalid">Зарегистрироваться</button>
+
+      <!-- Ссылка: Уже зарегистрированы? Войти -->
+      <div class="auth__links">
+        <span (click)="login()" class="auth__link auth__link--login">Уже зарегистрированы? Войти</span>
+      </div>
+
+      <!-- Разделитель -->
+      <div class="auth__divider">или</div>
+
+      <!-- Кнопка: Вход через Google -->
+      <div class="auth__social">
+        <button type="button" class="auth__social-button">
+          <img src="assets/icons/google-icon.svg" alt="Google" class="auth__social-icon" />
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

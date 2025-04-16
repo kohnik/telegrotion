@@ -1,0 +1,29 @@
+<div class="game-controller" [class.is-game]="isWaiting">
+  <div class="game-controller__container" [class.is-game]="isWaiting">
+    @if (isJoined) {
+      @if (isWaiting) {
+        <span>Ожидание</span>
+      } @else {
+        <span class="game-controller__click-btn" (click)="submitAnswer()">
+          ЖМИ
+        </span>
+      }
+
+    } @else {
+      <ng-container [formGroup]="form">
+        <span class="game-controller__title">Введите код комнаты и название команды!</span>
+        <input placeholder="код комнаты" formControlName="joinCode">
+        <input placeholder="название команды" formControlName="teamName">
+
+        <button
+          [disabled]="form.invalid"
+          [class.disabled]="form.invalid"
+          class="game-controller__go"
+          (click)="$event.preventDefault(); goRoRoom()">
+          Вход
+        </button>
+      </ng-container>
+    }
+
+  </div>
+</div>
