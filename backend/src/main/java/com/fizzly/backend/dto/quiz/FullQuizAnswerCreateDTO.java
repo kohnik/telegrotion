@@ -1,4 +1,4 @@
-package com.fizzly.backend.dto;
+package com.fizzly.backend.dto.quiz;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -6,8 +6,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Schema(description = "DTO для получения полного квиза (DTO для ответа)")
-public class FullQuizAnswerGetDTO {
+@Schema(description = "DTO для создания полного квиза (DTO для ответа)")
+public class FullQuizAnswerCreateDTO {
 
     @Schema(description = "Название вопроса")
     private String answer;

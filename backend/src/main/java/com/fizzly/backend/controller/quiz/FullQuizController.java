@@ -1,8 +1,8 @@
 package com.fizzly.backend.controller.quiz;
 
-import com.fizzly.backend.dto.FullQuizCreateDTO;
-import com.fizzly.backend.dto.FullQuizGetDTO;
-import com.fizzly.backend.dto.GetListQuizDTO;
+import com.fizzly.backend.dto.quiz.FullQuizCreateDTO;
+import com.fizzly.backend.dto.quiz.FullQuizGetDTO;
+import com.fizzly.backend.dto.quiz.GetListQuizDTO;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.service.quiz.FullQuizService;
 import io.swagger.v3.oas.annotations.Operation;

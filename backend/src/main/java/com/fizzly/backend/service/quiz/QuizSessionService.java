@@ -1,8 +1,8 @@
 package com.fizzly.backend.service.quiz;
 
-import com.fizzly.backend.dto.FullQuizGetDTO;
-import com.fizzly.backend.dto.QuizSessionAnswerDTO;
-import com.fizzly.backend.dto.QuizSessionDTO;
+import com.fizzly.backend.dto.quiz.FullQuizGetDTO;
+import com.fizzly.backend.dto.quiz.QuizSessionAnswerDTO;
+import com.fizzly.backend.dto.quiz.QuizSessionDTO;
 import com.fizzly.backend.dto.websocket.QuestionEndedPlayerDTO;
 import com.fizzly.backend.dto.websocket.response.QuestionEndedResponse;
 import com.fizzly.backend.dto.websocket.response.QuizEndedResponse;

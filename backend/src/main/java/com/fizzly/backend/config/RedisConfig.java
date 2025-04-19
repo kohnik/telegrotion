@@ -1,9 +1,15 @@
 package com.fizzly.backend.config;
 
-import com.fizzly.backend.service.brainring.BrainRingService;
+import com.fizzly.backend.dto.brainring.BrainRingActiveRoom;
+import com.fizzly.backend.dto.brainring.BrainRingTeam;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisPassword;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 
@@ -12,6 +18,28 @@ import java.util.UUID;
 
 @Configuration
 public class RedisConfig {
+
+    @Value("${heroku.redis.host}")
+    private String host;
+    @Value("${heroku.redis.port}")
+    private int port;
+    @Value("${heroku.redis.password}")
+    private String password;
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        config.setHostName(host);
+        config.setPort(port);
+        config.setPassword(RedisPassword.of(password));
+
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .useSsl()
+                .disablePeerVerification()
+                .build();
+
+        return new LettuceConnectionFactory(config, clientConfig);
+    }
 
     @Bean
     public RedisTemplate<UUID, String> roomRedisTemplate(RedisConnectionFactory factory) {
@@ -28,16 +56,16 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, List<BrainRingService.BrainRingTeam>> teamRedisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<String, List<BrainRingService.BrainRingTeam>> template = new RedisTemplate<>();
+    public RedisTemplate<String, List<BrainRingTeam>> teamRedisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, List<BrainRingTeam>> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;
     }
 
     @Bean
-    public RedisTemplate<String, BrainRingService.BrainRingActiveRoom> activeRoomRedisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<String, BrainRingService.BrainRingActiveRoom> template = new RedisTemplate<>();
+    public RedisTemplate<String, BrainRingActiveRoom> activeRoomRedisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, BrainRingActiveRoom> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;

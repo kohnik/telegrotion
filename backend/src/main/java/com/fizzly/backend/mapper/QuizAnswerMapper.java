@@ -1,6 +1,6 @@
 package com.fizzly.backend.mapper;
 
-import com.fizzly.backend.dto.QuizAnswerCreateDTO;
+import com.fizzly.backend.dto.quiz.QuizAnswerCreateDTO;
 import com.fizzly.backend.entity.QuizAnswer;
 import org.mapstruct.Mapper;
 

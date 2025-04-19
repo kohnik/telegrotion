@@ -1,4 +1,4 @@
-package com.fizzly.backend.dto;
+package com.fizzly.backend.dto.quiz;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

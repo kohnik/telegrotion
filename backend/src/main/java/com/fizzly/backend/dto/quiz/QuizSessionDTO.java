@@ -1,4 +1,4 @@
-package com.fizzly.backend.dto;
+package com.fizzly.backend.dto.quiz;
 
 import com.fizzly.backend.entity.QuizEvent;
 import lombok.Getter;

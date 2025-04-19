@@ -1,10 +1,10 @@
 package com.fizzly.backend.service.quiz;
 
-import com.fizzly.backend.dto.FullQuizAnswerGetDTO;
-import com.fizzly.backend.dto.FullQuizCreateDTO;
-import com.fizzly.backend.dto.FullQuizGetDTO;
-import com.fizzly.backend.dto.FullQuizQuestionGetDTO;
-import com.fizzly.backend.dto.GetListQuizDTO;
+import com.fizzly.backend.dto.quiz.FullQuizAnswerGetDTO;
+import com.fizzly.backend.dto.quiz.FullQuizCreateDTO;
+import com.fizzly.backend.dto.quiz.FullQuizGetDTO;
+import com.fizzly.backend.dto.quiz.FullQuizQuestionGetDTO;
+import com.fizzly.backend.dto.quiz.GetListQuizDTO;
 import com.fizzly.backend.dto.UserGetDTO;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizAnswer;

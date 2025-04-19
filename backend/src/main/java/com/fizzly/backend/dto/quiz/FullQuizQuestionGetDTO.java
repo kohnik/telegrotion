@@ -1,4 +1,4 @@
-package com.fizzly.backend.dto;
+package com.fizzly.backend.dto.quiz;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -8,8 +8,11 @@ import java.util.List;
 
 @Getter
 @Setter
-@Schema(description = "DTO для создания полного квиза (DTO вопрос)")
-public class FullQuizQuestionCreateDTO {
+@Schema(description = "DTO для получения полного квиза (DTO вопрос)")
+public class FullQuizQuestionGetDTO {
+
+    @Schema(description = "ИД вопроса")
+    private Long questionId;
 
     @Schema(description = "Название вопроса")
     private String question;
@@ -20,9 +23,9 @@ public class FullQuizQuestionCreateDTO {
     @Schema(description = "Порядковый номер вопроса")
     private int order;
 
-    @Schema(description = "Кол-во секунд на ответ")
+    @Schema(description = "Время ответа на вопрос")
     private int seconds;
 
     @Schema(description = "Список ответов")
-    private List<FullQuizAnswerCreateDTO> answers;
+    private List<FullQuizAnswerGetDTO> answers;
 }

@@ -1,13 +1,14 @@
 package com.fizzly.backend.service.brainring;
 
+import com.fizzly.backend.dto.brainring.AnswerResponseDTO;
+import com.fizzly.backend.dto.brainring.BrainRingActiveRoom;
+import com.fizzly.backend.dto.brainring.BrainRingJoinRoomDTO;
+import com.fizzly.backend.dto.brainring.BrainRingRoomDTO;
+import com.fizzly.backend.dto.brainring.BrainRingRoomFullDTO;
+import com.fizzly.backend.dto.brainring.BrainRingTeam;
 import com.fizzly.backend.exception.TelegrotionException;
 import com.fizzly.backend.utils.JoinCodeUtils;
-import com.fizzly.backend.websocket.braintring.BrainRingController;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -114,9 +115,9 @@ public class BrainRingService {
                 .anyMatch(teamId::equals);
     }
 
-    public BrainRingController.AnswerResponseDTO submitAnswer(UUID roomId, UUID teamId, double answerTime) {
+    public AnswerResponseDTO submitAnswer(UUID roomId, UUID teamId, double answerTime) {
         BrainRingActiveRoom activeRoom = getActiveRoom(roomId);
-        if (!activeRoom.ready) {
+        if (!activeRoom.isReady()) {
             return null;
         }
 
@@ -129,7 +130,7 @@ public class BrainRingService {
                 .filter(team -> team.getTeamId().equals(teamId))
                 .findFirst()
                 .orElseThrow(() -> new TelegrotionException("Team " + teamId + " does not exist"));
-        return new BrainRingController.AnswerResponseDTO(teamId, brainRingTeam.getTeamName(), answerTime);
+        return new AnswerResponseDTO(teamId, brainRingTeam.getTeamName(), answerTime);
     }
 
     private BrainRingActiveRoom getActiveRoom(UUID roomId) {
@@ -145,55 +146,6 @@ public class BrainRingService {
 
         activeRoom.setReady(true);
         activeRoomRedisTemplate.opsForValue().set("activeRoom:" + roomId, activeRoom);
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class BrainRingRoomDTO {
-        private UUID roomId;
-        private String joinCode;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class BrainRingJoinRoomDTO {
-        private UUID roomId;
-        private String joinCode;
-        private String teamName;
-        private UUID teamId;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class BrainRingTeam {
-        private UUID teamId;
-        private String teamName;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class BrainRingRoomFullDTO {
-        private UUID roomId;
-        private String joinCode;
-        private List<BrainRingTeam> teams;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class BrainRingActiveRoom {
-        private boolean ready;
-        private String joinCode;
-        private List<BrainRingTeam> teams;
     }
 
 }

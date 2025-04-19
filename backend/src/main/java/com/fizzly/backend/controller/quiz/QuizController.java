@@ -1,6 +1,6 @@
 package com.fizzly.backend.controller.quiz;
 
-import com.fizzly.backend.dto.QuizCreateDTO;
+import com.fizzly.backend.dto.quiz.QuizCreateDTO;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.mapper.QuizMapper;
 import com.fizzly.backend.service.quiz.QuizService;

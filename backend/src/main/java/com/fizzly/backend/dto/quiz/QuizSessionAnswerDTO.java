@@ -1,4 +1,4 @@
-package com.fizzly.backend.dto;
+package com.fizzly.backend.dto.quiz;
 
 import lombok.Getter;
 import lombok.Setter;
