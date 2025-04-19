@@ -21,6 +21,7 @@
     "@angular/router": "^19.2.0",
     "@stomp/stompjs": "^7.1.0",
     "angularx-qrcode": "^19.0.0",
+    "firebase-tools": "^14.1.0",
     "rxjs": "~7.8.0",
     "svg-sprite": "^2.0.4",
     "tslib": "^2.3.0",

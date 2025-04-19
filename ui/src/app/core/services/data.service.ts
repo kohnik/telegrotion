@@ -14,7 +14,7 @@ import {Observable} from 'rxjs';
 })
 export class DataService {
 
-  private readonly baseApi = 'https://206.189.1.17:8090'
+  private readonly baseApi = 'https://fizzly-7dba31943cb3.herokuapp.com'
 
   constructor(private readonly http: HttpClient) { }
 
