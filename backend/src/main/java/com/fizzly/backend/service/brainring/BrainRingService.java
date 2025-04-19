@@ -1,81 +1,90 @@
 package com.fizzly.backend.service.brainring;
 
-import com.fizzly.backend.exception.InvalidJoinCodeException;
 import com.fizzly.backend.exception.TelegrotionException;
 import com.fizzly.backend.utils.JoinCodeUtils;
 import com.fizzly.backend.websocket.braintring.BrainRingController;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class BrainRingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BrainRingService.class);
 
-    private static final Map<UUID, String> rooms = new HashMap();
-    private static final Map<UUID, List<BrainRingTeam>> teams = new HashMap();
-    private static final Map<UUID, BrainRingActiveRoom> activeRooms = new HashMap<>();
+    private final RedisTemplate<UUID, String> roomRedisTemplate;
+    private final RedisTemplate<String, UUID> roomRedisTemplateInvert;
+    private final RedisTemplate<String, List<BrainRingTeam>> teamRedisTemplate;
+    private final RedisTemplate<String, BrainRingActiveRoom> activeRoomRedisTemplate;
 
     public BrainRingRoomDTO createRoom() {
         String joinCode = JoinCodeUtils.generateJoinCode();
         UUID roomId = UUID.randomUUID();
-        rooms.put(roomId, joinCode);
+        roomRedisTemplate.opsForValue().set(roomId, joinCode);
+        roomRedisTemplateInvert.opsForValue().set(joinCode, roomId);
 
         return new BrainRingRoomDTO(roomId, joinCode);
     }
 
     public BrainRingJoinRoomDTO joinRoom(String joinCode, String teamName) {
-        Map.Entry<UUID, String> room = getRoomByJoinCode(joinCode);
-        if (teamExists(room.getKey(), teamName)) {
-            throw new TelegrotionException("Team " + teamName + " already exists");
+        UUID roomId = getRoomByJoinCode(joinCode);
+        if (teamExists(roomId, teamName)) {
+            String exMessage = "Team " + teamName + " already exists";
+            LOGGER.error(exMessage);
+            throw new TelegrotionException(exMessage);
         }
 
         UUID teamId = UUID.randomUUID();
         BrainRingTeam brainRingTeam = new BrainRingTeam(teamId, teamName);
 
-        List<BrainRingTeam> brainRingTeams = teams.getOrDefault(room.getKey(), new ArrayList<>());
-        brainRingTeams.add(brainRingTeam);
-        teams.put(room.getKey(), brainRingTeams);
+        List<BrainRingTeam> brainRingTeams;
+        if (teamRedisTemplate.hasKey("team:" + roomId)) {
+            brainRingTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
+        } else {
+            brainRingTeams = new ArrayList<>();
+        }
 
-        return new BrainRingJoinRoomDTO(room.getKey(), joinCode, teamName, teamId);
+        brainRingTeams.add(brainRingTeam);
+        teamRedisTemplate.opsForValue().set("team:" + roomId, brainRingTeams);
+        LOGGER.info("Team with id %s created", teamId);
+
+        return new BrainRingJoinRoomDTO(roomId, joinCode, teamName, teamId);
     }
 
     public void deleteTeam(UUID teamId, UUID roomId) {
         if (!teamExists(roomId, teamId)) {
             throw new TelegrotionException("Team " + teamId + " does not exist");
         }
-        List<BrainRingTeam> brainRingTeams = teams.get(roomId);
+        List<BrainRingTeam> brainRingTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
         brainRingTeams.removeIf(brainRingTeam -> brainRingTeam.getTeamId().equals(teamId));
     }
 
     public BrainRingRoomFullDTO getRooFullInfo(UUID roomId) {
-        if (!rooms.containsKey(roomId)) {
+        if (!roomRedisTemplate.hasKey(roomId)) {
             throw new TelegrotionException("Room " + roomId + " does not exist");
         }
-        String joinCode = rooms.get(roomId);
+        String joinCode = roomRedisTemplate.opsForValue().get(roomId);
 
-        return new BrainRingRoomFullDTO(roomId, joinCode, teams.get(roomId));
+        return new BrainRingRoomFullDTO(roomId, joinCode, teamRedisTemplate.opsForValue().get("team:" + roomId));
     }
 
-    private Map.Entry<UUID, String> getRoomByJoinCode(String joinCode) {
-        return rooms.entrySet().stream()
-                .filter(existingJoinCode -> existingJoinCode.getValue().equals(joinCode))
-                .findFirst().orElseThrow(InvalidJoinCodeException::new);
+    private UUID getRoomByJoinCode(String joinCode) {
+        return roomRedisTemplateInvert.opsForValue().get(joinCode);
     }
 
     private boolean teamExists(UUID roomId, String teamName) {
-        List<BrainRingTeam> brainRingTeams = teams.get(roomId);
+        List<BrainRingTeam> brainRingTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
         if (brainRingTeams == null) {
             return false;
         }
@@ -84,20 +93,20 @@ public class BrainRingService {
     }
 
     public BrainRingActiveRoom activateRoom(UUID roomId) {
-        if (!rooms.containsKey(roomId)) {
+        if (!roomRedisTemplate.hasKey(roomId)) {
             throw new TelegrotionException("Room " + roomId + " does not exist");
         }
-        String joinCode = rooms.get(roomId);
-        List<BrainRingTeam> activeTeams = teams.get(roomId);
+        String joinCode = roomRedisTemplate.opsForValue().get(roomId);
+        List<BrainRingTeam> activeTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
 
         BrainRingActiveRoom activeRoom = new BrainRingActiveRoom(true, joinCode, activeTeams);
-        activeRooms.put(roomId, activeRoom);
+        activeRoomRedisTemplate.opsForValue().set("activeRoom:" + roomId, activeRoom);
 
         return activeRoom;
     }
 
     private boolean teamExists(UUID roomId, UUID teamId) {
-        List<BrainRingTeam> brainRingTeams = teams.get(roomId);
+        List<BrainRingTeam> brainRingTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
         if (brainRingTeams == null) {
             return false;
         }
@@ -112,7 +121,7 @@ public class BrainRingService {
         }
 
         activeRoom.setReady(false);
-        activeRooms.put(roomId, activeRoom);
+        activeRoomRedisTemplate.opsForValue().set("activeRoom:" + roomId, activeRoom);
 
         LOGGER.info("Team %s submitted answer with time %d", teamId.toString(), answerTime);
 
@@ -124,7 +133,7 @@ public class BrainRingService {
     }
 
     private BrainRingActiveRoom getActiveRoom(UUID roomId) {
-        BrainRingActiveRoom activeRoom = activeRooms.get(roomId);
+        BrainRingActiveRoom activeRoom = activeRoomRedisTemplate.opsForValue().get("activeRoom:" + roomId);
         if (activeRoom == null) {
             throw new TelegrotionException("Room " + roomId + " does not exist");
         }
@@ -135,12 +144,13 @@ public class BrainRingService {
         BrainRingActiveRoom activeRoom = getActiveRoom(roomId);
 
         activeRoom.setReady(true);
-        activeRooms.put(roomId, activeRoom);
+        activeRoomRedisTemplate.opsForValue().set("activeRoom:" + roomId, activeRoom);
     }
 
     @Getter
     @Setter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class BrainRingRoomDTO {
         private UUID roomId;
         private String joinCode;
@@ -149,6 +159,7 @@ public class BrainRingService {
     @Getter
     @Setter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class BrainRingJoinRoomDTO {
         private UUID roomId;
         private String joinCode;
@@ -159,6 +170,7 @@ public class BrainRingService {
     @Getter
     @Setter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class BrainRingTeam {
         private UUID teamId;
         private String teamName;
@@ -167,6 +179,7 @@ public class BrainRingService {
     @Getter
     @Setter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class BrainRingRoomFullDTO {
         private UUID roomId;
         private String joinCode;

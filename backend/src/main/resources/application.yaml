@@ -12,6 +12,13 @@ spring:
   data:
     jdbc:
       dialect: postgresql
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+#      username: ${REDIS_USERNAME:redis}
+#      password: ${REDIS_PASSWORD:redis}
+#      sentinel:
+#        username: ${REDIS_SENTINEL_USERNAME:redis}
 
 springdoc:
   swagger-ui:

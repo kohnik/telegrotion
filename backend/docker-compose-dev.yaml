@@ -1,0 +1,14 @@
+FROM eclipse-temurin:21-jre-jammy
+
+WORKDIR /app
+  
+  # Копируем JAR-файл и SSL-сертификат
+COPY target/backend-1.0.jar app.jar
+COPY src/main/resources/keystore.p12 /app/keystore.p12
+  
+  # Открываем порты для HTTP и HTTPS
+EXPOSE 8080
+EXPOSE 8443
+  
+  # Запуск с HTTPS
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.ssl.key-store=/app/keystore.p12"]
