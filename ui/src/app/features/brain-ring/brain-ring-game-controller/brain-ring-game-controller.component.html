@@ -1,53 +1,17 @@
 <div class="game-controller" [class.is-game]="isWaiting">
   <div class="game-controller__logo" (click)="goToMainPage()">Fizzly</div>
   <div class="game-controller__container" [class.is-game]="isWaiting">
-    @if (isJoined) {
-      @if (isWaiting) {
-        <span class="game-controller__waiting">Ожидание</span>
-        <div class="game-controller__loader">
-          <span class="game-controller__dot"></span>
-          <span class="game-controller__dot"></span>
-          <span class="game-controller__dot"></span>
-        </div>
-      } @else {
-        <button class="game-controller__buzz-button" (click)="submitAnswer()">
-          ЖМИ
-        </button>
-      }
-
+    @if (isWaiting) {
+      <span class="game-controller__waiting">Ожидание</span>
+      <div class="game-controller__loader">
+        <span class="game-controller__dot"></span>
+        <span class="game-controller__dot"></span>
+        <span class="game-controller__dot"></span>
+      </div>
     } @else {
-      <ng-container [formGroup]="form">
-        <div class="game-controller__login" [formGroup]="form">
-          <span class="game-controller__login-title">
-            Введите {{ isAfterQrCodeRedirect ? '' : 'код комнаты и'}} название команды!
-          </span>
-
-          @if (!isAfterQrCodeRedirect) {
-            <input
-              placeholder="КОД КОМНАТЫ"
-              class="game-controller__login-input"
-              formControlName="joinCode"
-            />
-          }
-
-          <input
-            placeholder="НАЗВАНИЕ КОМАНДЫ"
-            class="game-controller__login-input"
-            formControlName="teamName"
-          />
-
-          <button
-            class="game-controller__login-button"
-            [disabled]="form.invalid"
-            [class.disabled]="form.invalid"
-            (click)="$event.preventDefault(); goRoRoom()"
-          >
-            Вход
-          </button>
-
-          <span  class="game-controller__error">{{errorMessage}}</span>
-        </div>
-      </ng-container>
+      <button class="game-controller__buzz-button" (click)="submitAnswer()">
+        ЖМИ
+      </button>
     }
   </div>
 </div>

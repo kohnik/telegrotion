@@ -38,6 +38,8 @@ export class BrainRingGameWindowComponent implements OnInit {
         if(parseContent.eventId === EWSEventBrainRingTypes.ANSWER_SUBMITTED) {
           this.answeredTeam = {...parseContent}
           this.isFirstTeamAnswer = true
+
+          this.playReadySound();
         }
 
         if(parseContent.eventId === EWSEventBrainRingTypes.NEXT_ROUND) {
@@ -60,6 +62,13 @@ export class BrainRingGameWindowComponent implements OnInit {
 
     this.startSession()
   }
+
+  playReadySound(): void {
+    const audio = new Audio('assets/sounds/buzz-ready.mp3');
+    audio.play().catch(e => console.error('Ошибка воспроизведения:', e));
+    this.cdr.markForCheck();
+  }
+
 
   nextQuestion(): void {
     this.wsService.send(

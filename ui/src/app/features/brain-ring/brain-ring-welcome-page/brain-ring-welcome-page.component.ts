@@ -23,7 +23,7 @@ export class BrainRingWelcomePageComponent {
   constructor(private readonly router: Router, private readonly brainRingService: BrainRingService) { }
 
   joinToRoom(): void {
-    this.router.navigate(['/join-to-brain-ring']);
+    this.router.navigate(['/brain-ring-join-to']);
   }
 
   createRoom(): void {

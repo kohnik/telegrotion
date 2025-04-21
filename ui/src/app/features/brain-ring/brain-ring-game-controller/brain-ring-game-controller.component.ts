@@ -27,35 +27,21 @@ import {LoaderComponent} from '../../../shared/components/loader/loader.componen
   providers: [BrainRingService]
 })
 export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
-  public isJoined = false;
-  public isWaiting = false;
-  public form: FormGroup
+  public isWaiting = true;
   public roomId: string;
   public teamId: string;
   public answerTime = 0 ;
   public timer: number;
   public isLoading = false;
-  public isAfterQrCodeRedirect = false;
-  public errorMessage = '';
 
   private destroy$ = new Subject<void>();
-
-  get joinCode(): string {
-    return this.form.get('joinCode')!.value;
-  }
-
-  get teamName(): string {
-    return this.form.get('teamName')!.value;
-  }
-
   constructor(
     private readonly route: ActivatedRoute,
     private wsService: WebSocketService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private brainRingService: BrainRingService,) {
-    this.form = this.setForm();
+    private fb: FormBuilder
+  ) {
 
     this.wsService.messages
       .pipe(takeUntil(this.destroy$))
@@ -89,15 +75,9 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    let joinCode = this.route.snapshot.queryParams['joinCode'];
-    let roomId = this.route.snapshot.queryParams['roomId'];
-
-    if(joinCode ?? roomId) {
-      this.isAfterQrCodeRedirect = true;
-      return this.form.get('joinCode')?.setValue(joinCode)
-    }
-
-    this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(el=> this.errorMessage = '')
+    this.roomId = this.route.snapshot.queryParams['roomId'];
+    this.teamId = this.route.snapshot.queryParams['teamId'];
+    this.startSession();
   }
 
   private startSession() {
@@ -106,35 +86,6 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
       this.wsService.subscribe(brainRingWSTopic + `${this.roomId}`)
       this.cdr.markForCheck();
     },1000)
-  }
-
-  public goRoRoom(): void {
-    this.isLoading = true;
-    this.brainRingService.goToRoom({
-      teamName: this.teamName,
-      joinCode: this.joinCode,
-    }).subscribe({
-      next: (el) => {
-          this.roomId = el.roomId;
-          this.teamId = el.teamId;
-          this.isJoined = true;
-          this.isWaiting = true;
-          this.startSession()
-          this.isLoading = false;
-
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.log(err);
-        this.errorMessage = err.error.message;
-        this.isLoading = false;
-
-        this.cdr.markForCheck();
-      },
-      complete: () => {
-
-      }
-    })
   }
 
   submitAnswer(): void {
@@ -156,13 +107,6 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
     clearInterval(this.timer)
   }
 
-  public setForm(): FormGroup {
-    return this.fb.group({
-      joinCode: ['', [Validators.required]],
-      teamName: ['', [Validators.required]],
-    })
-  }
-
   public goToMainPage(): void {
     this.router.navigate(['/']);
   }
@@ -170,6 +114,5 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    // this.wsService.disconnect();
   }
 }

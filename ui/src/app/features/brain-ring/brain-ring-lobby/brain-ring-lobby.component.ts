@@ -118,10 +118,9 @@ export class BrainRingLobbyComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    // this.wsService.disconnect();
   }
 
   public setLinkByQrCode(): string {
-    return `https://fizzly.by/join-to-brain-ring?roomId=${this.roomId}&joinCode=${this.joinCode}`;
+    return `https://fizzly.by/brain-ring-join-to?roomId=${this.roomId}&joinCode=${this.joinCode}`;
   }
 }

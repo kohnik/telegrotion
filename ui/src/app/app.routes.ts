@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import {QuizCreator} from './features/quiz/quiz-creator/quiz-creator';
 import {QuizLobbyComponent} from './features/quiz/quiz-lobby/quiz-lobby.component';
+import {BrainRingJoinToComponent} from './features/brain-ring/brain-ring-join-to/brain-ring-join-to.component';
 
 export const routes: Routes = [
   {
@@ -57,7 +58,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/brain-ring/brain-ring-welcome-page/brain-ring-welcome-page.component').then(m => m.BrainRingWelcomePageComponent),
   },
   {
-    path: 'join-to-brain-ring',
+    path: 'brain-ring-join-to',
+    loadComponent: () => import('./features/brain-ring/brain-ring-join-to/brain-ring-join-to.component').then(m => m.BrainRingJoinToComponent),
+  },
+  {
+    path: 'brain-ring-controller',
     loadComponent: () => import('./features/brain-ring/brain-ring-game-controller/brain-ring-game-controller.component').then(m => m.BrainRingGameControllerComponent),
   },
   {
