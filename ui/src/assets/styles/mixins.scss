@@ -1,0 +1,38 @@
+@import "colors";
+
+@mixin logo-style($color: $color-text-dark, $size: 48px) {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.2;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: $size;
+  color: $color;
+  cursor: pointer;
+
+  @media (max-width: 768px) {
+    font-size: 40px;
+  }
+}
+
+@mixin main-background() {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to bottom, $color-primary-light, $color-primary-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 0 20px;
+}
+
+@mixin text-style($color: $color-white-soft, $size: 20px, $font-family: 'Fredoka', $font-weight: 700) {
+  color: $color;
+  font-size: $size;
+  font-family: $font-family, sans-serif;
+  font-weight: $font-weight;
+}

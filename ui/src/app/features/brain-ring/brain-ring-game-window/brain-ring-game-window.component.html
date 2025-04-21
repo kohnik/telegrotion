@@ -1,9 +1,16 @@
 <div class="game-window">
-
   @if(isFirstTeamAnswer) {
     <span class="game-window__text">команда <b>{{answeredTeam.teamName}}</b> нажала кнопку спустя {{answeredTeam.answerTime}} секунд</span>
 
     <button class="game-window__next-btn" (click)="$event.preventDefault(); nextQuestion()">Далее</button>
+  } @else {
+    <span class="game-window__empty">
+        Ждём кого-то...
+        <span class="game-window__dots">
+          <span class="game-window__dot"></span>
+          <span class="game-window__dot"></span>
+          <span class="game-window__dot"></span>
+        </span>
+      </span>
   }
-
 </div>

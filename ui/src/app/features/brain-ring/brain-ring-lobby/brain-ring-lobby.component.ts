@@ -48,6 +48,7 @@ export class BrainRingLobbyComponent implements OnInit, OnDestroy {
               teamName: `${parseContent.teamName}`,
               teamId: parseContent.teamId ?? '',
             });
+          this.teamsCount = this.joinedTeams.length;
           this.cdr.markForCheck()
         }
 
@@ -118,5 +119,9 @@ export class BrainRingLobbyComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     // this.wsService.disconnect();
+  }
+
+  public setLinkByQrCode(): string {
+    return `https://fizzly.by/join-to-brain-ring?roomId=${this.roomId}&joinCode=${this.joinCode}`;
   }
 }

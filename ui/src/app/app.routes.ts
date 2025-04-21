@@ -5,7 +5,9 @@ import {QuizLobbyComponent} from './features/quiz/quiz-lobby/quiz-lobby.componen
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./features/quiz/quiz-welcome-page/quiz-welcome-page.component').then(m => m.QuizWelcomePageComponent),
+    redirectTo: 'brain-ring-welcome',
+    pathMatch: 'full'
+    // loadComponent: () => import('./features/quiz/quiz-welcome-page/quiz-welcome-page.component').then(m => m.QuizWelcomePageComponent),
   },
   {
     path: 'main',

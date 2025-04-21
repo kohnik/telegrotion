@@ -1,1 +1,1 @@
-export const spritesHash = {symbol:"636d9444"}
+export const spritesHash = {symbol:"2f81eaa2"}
