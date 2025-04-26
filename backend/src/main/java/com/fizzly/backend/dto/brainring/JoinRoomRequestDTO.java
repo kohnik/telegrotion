@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class JoinRoomRequestDTO {
-    private String teamName;
+    private String playerName;
     private String joinCode;
 }

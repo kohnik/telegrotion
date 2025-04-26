@@ -9,14 +9,13 @@ import com.fizzly.backend.dto.brainring.AnswerResponseWithEventDTO;
 import com.fizzly.backend.dto.brainring.BrainRingActiveRoom;
 import com.fizzly.backend.dto.brainring.BrainRingActiveRoomWithEventDTO;
 import com.fizzly.backend.dto.brainring.NextQuestionResponseDTO;
+import com.fizzly.backend.dto.websocket.request.CurrentStateRequest;
+import com.fizzly.backend.dto.websocket.request.CurrentStateResponse;
 import com.fizzly.backend.entity.BrainRingEvent;
 import com.fizzly.backend.service.brainring.BrainRingService;
+import com.fizzly.backend.utils.WebSocketEndpoints;
 import com.fizzly.backend.utils.WebSocketTopics;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -40,14 +39,14 @@ public class BrainRingController {
     private final BrainRingService brainRingService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/brain-ring/start")
+    @MessageMapping(WebSocketEndpoints.BR_START)
     public void activateRoom(@Payload ActiveRoomRequestDTO requestDTO) throws JsonProcessingException {
         BrainRingActiveRoom room = brainRingService.activateRoom(requestDTO.getRoomId());
 
         BrainRingActiveRoomWithEventDTO brainRing = new BrainRingActiveRoomWithEventDTO(
                 room.isReady(),
                 room.getJoinCode(),
-                room.getTeams(),
+                room.getPlayers(),
                 BrainRingEvent.ROOM_ACTIVATED.getId());
         currentEventRedisTemplate.opsForValue().set(requestDTO.getRoomId(), BrainRingEvent.ROOM_ACTIVATED);
         currentEventPayloadRedisTemplate.opsForValue().set(
@@ -60,17 +59,16 @@ public class BrainRingController {
         messagingTemplate.convertAndSend(topic, brainRing);
     }
 
-    //TODO: add sessionID to all mappings
-    @MessageMapping("/brain-ring/submit-answer")
-    public void submitAnswer(@Payload AnswerRequestDTO requestDTO, @Header("simpSessionId") String sessionId) throws JsonProcessingException {
+    @MessageMapping(WebSocketEndpoints.BR_SUBMIT_ANSWER)
+    public void submitAnswer(@Payload AnswerRequestDTO requestDTO) throws JsonProcessingException {
         AnswerResponseDTO answer = brainRingService.submitAnswer(
-                requestDTO.getRoomId(), requestDTO.getTeamId(), requestDTO.getAnswerTime()
+                requestDTO.getRoomId(), requestDTO.getPlayerId(), requestDTO.getAnswerTime()
         );
         if (answer != null) {
             AnswerResponseWithEventDTO answerResponse = new AnswerResponseWithEventDTO(
                     BrainRingEvent.ANSWER_SUBMITTED.getId(),
-                    answer.getTeamId(),
-                    answer.getTeamName(),
+                    answer.getPlayerId(),
+                    answer.getPlayerName(),
                     answer.getAnswerTime()
             );
             currentEventRedisTemplate.opsForValue().set(requestDTO.getRoomId(), BrainRingEvent.ANSWER_SUBMITTED);
@@ -84,7 +82,7 @@ public class BrainRingController {
         }
     }
 
-    @MessageMapping("/brain-ring/nextQuestion")
+    @MessageMapping(WebSocketEndpoints.BR_NEXT_QUESTION)
     public void nextQuestion(@Payload ActiveRoomRequestDTO requestDTO) throws JsonProcessingException {
         brainRingService.activateNextQuestionInRoom(requestDTO.getRoomId());
 
@@ -103,38 +101,18 @@ public class BrainRingController {
         messagingTemplate.convertAndSend(topic, nextQuestionResponseDTO);
     }
 
-    @MessageMapping("/brain-ring/current-state")
-    public void currentState(@Payload CurrentStateRequest request) {
+    @MessageMapping(WebSocketEndpoints.BR_CURRENT_STATE)
+    public void currentState(@Payload CurrentStateRequest request, @Header("simpSessionId") String sessionId) {
         String topic = String.format(WebSocketTopics.JOIN_BRAIN_RING_TOPIC, request.getRoomId());
         String brainRingEventStr = String.valueOf(currentEventRedisTemplate
                 .opsForValue().get(request.getRoomId()));
         BrainRingEvent brainRingEvent = BrainRingEvent.valueOf(brainRingEventStr);
-        messagingTemplate.convertAndSend(topic, new CurrentStateResponse(
+        CurrentStateResponse response = new CurrentStateResponse(
                 BrainRingEvent.CURRENT_EVENT.getId(),
-                request.getPlayerId(),
                 brainRingEvent != null ? brainRingEvent.getId() : -1,
-                currentEventPayloadRedisTemplate.opsForValue().get("currentEventPayload:" + request.getRoomId()))
-        );
-    }
+                currentEventPayloadRedisTemplate.opsForValue().get("currentEventPayload:" + request.getRoomId()));
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class CurrentStateRequest {
-        private UUID roomId;
-        private UUID playerId;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class CurrentStateResponse {
-        private Long eventId;
-        private UUID playerId;
-        private Long currentEventId;
-        private String payload;
+        messagingTemplate.convertAndSendToUser(sessionId, topic, response);
     }
 
 }

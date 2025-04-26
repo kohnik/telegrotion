@@ -11,6 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class SubmitAnswerResponse {
     private Long eventId;
-    private String username;
-    private List<String> usersLeft;
+    private String playerName;
+    private List<String> playersLeft;
 }

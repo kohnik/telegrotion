@@ -11,8 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RoomDescriptionDTO {
     private Long eventId;
-    private String teamName;
+    private String playerName;
     private String joinCode;
-    private UUID teamId;
-    private int teamCount;
+    private UUID playerId;
+    private int playerCount;
 }

@@ -14,5 +14,5 @@ import java.util.List;
 public class BrainRingActiveRoom {
     private boolean ready;
     private String joinCode;
-    private List<BrainRingTeam> teams;
+    private List<BrainRingPlayer> players;
 }

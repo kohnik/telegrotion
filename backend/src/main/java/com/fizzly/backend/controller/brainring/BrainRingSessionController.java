@@ -3,7 +3,7 @@ package com.fizzly.backend.controller.brainring;
 import com.fizzly.backend.dto.brainring.BrainRingJoinRoomDTO;
 import com.fizzly.backend.dto.brainring.BrainRingRoomDTO;
 import com.fizzly.backend.dto.brainring.BrainRingRoomFullDTO;
-import com.fizzly.backend.dto.brainring.DeleteTeamRequestDTO;
+import com.fizzly.backend.dto.brainring.DeletePlayerRequestDTO;
 import com.fizzly.backend.dto.brainring.JoinRoomRequestDTO;
 import com.fizzly.backend.dto.brainring.PlayerExistsRequest;
 import com.fizzly.backend.dto.brainring.PlayerExistsResponse;
@@ -13,9 +13,7 @@ import com.fizzly.backend.service.brainring.BrainRingService;
 import com.fizzly.backend.utils.WebSocketTopics;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -47,41 +45,19 @@ public class BrainRingSessionController {
     @PostMapping("/join-room")
     @Operation(summary = "Присоединить команду")
     public ResponseEntity<BrainRingJoinRoomDTO> joinRoom(@RequestBody JoinRoomRequestDTO request) {
-        BrainRingJoinRoomDTO roomDTO = brainRingService.joinRoom(request.getJoinCode(), request.getTeamName());
+        BrainRingJoinRoomDTO roomDTO = brainRingService.joinRoom(request.getJoinCode(), request.getPlayerName());
 
         String topic = String.format(WebSocketTopics.JOIN_BRAIN_RING_TOPIC, roomDTO.getRoomId());
         BrainRingRoomFullDTO rooFullInfo = brainRingService.getRooFullInfo(roomDTO.getRoomId());
         messagingTemplate.convertAndSend(topic, new RoomDescriptionDTO(
                 BrainRingEvent.USER_ADDED.getId(),
-                request.getTeamName(),
+                request.getPlayerName(),
                 request.getJoinCode(),
-                roomDTO.getTeamId(),
-                rooFullInfo.getTeams().size()
+                roomDTO.getPlayerId(),
+                rooFullInfo.getPlayers().size()
         ));
 
         return ResponseEntity.ok(roomDTO);
-    }
-
-    @PostMapping("/rejoin-room")
-    @Operation(summary = "Переподключение команды (пока заглушка)")
-    public ResponseEntity<RejoinResponse> rejoinRoom(@RequestBody RejoinRequest request) {
-        return ResponseEntity.ok().build();
-    }
-
-    @Getter
-    @Setter
-    public static class RejoinRequest {
-        private UUID roomId;
-        private UUID playerId;
-    }
-
-    @Getter
-    @Setter
-    public static class RejoinResponse {
-        private UUID roomId;
-        private UUID playerId;
-        private UUID teamName;
-        private String rejoinTopic;
     }
 
     @PostMapping("/player-exists")
@@ -94,8 +70,8 @@ public class BrainRingSessionController {
 
     @DeleteMapping("/teams")
     @Operation(summary = "Удалить команду")
-    public ResponseEntity<Void> deleteTeamById(@RequestBody DeleteTeamRequestDTO request) {
-        brainRingService.deleteTeam(request.getTeamId(), request.getRoomId());
+    public ResponseEntity<Void> deleteTeamById(@RequestBody DeletePlayerRequestDTO request) {
+        brainRingService.deleteTeam(request.getPlayerId(), request.getRoomId());
         return ResponseEntity.noContent().build();
     }
 

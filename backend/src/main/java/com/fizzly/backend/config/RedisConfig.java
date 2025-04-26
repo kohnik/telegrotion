@@ -1,7 +1,7 @@
 package com.fizzly.backend.config;
 
 import com.fizzly.backend.dto.brainring.BrainRingActiveRoom;
-import com.fizzly.backend.dto.brainring.BrainRingTeam;
+import com.fizzly.backend.dto.brainring.BrainRingPlayer;
 import com.fizzly.backend.entity.BrainRingEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -57,8 +57,8 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, List<BrainRingTeam>> teamRedisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<String, List<BrainRingTeam>> template = new RedisTemplate<>();
+    public RedisTemplate<String, List<BrainRingPlayer>> teamRedisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, List<BrainRingPlayer>> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;

@@ -27,7 +27,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setHeartbeatValue(new long[]{10000, 10000})
                 .setTaskScheduler(taskScheduler());
         config.setApplicationDestinationPrefixes("/app");
-        config.setUserDestinationPrefix("/topic");
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override

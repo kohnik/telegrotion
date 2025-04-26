@@ -9,7 +9,7 @@ import java.util.UUID;
 @Setter
 public class PlayerExistsResponse {
     private boolean exists;
-    private String teamName;
+    private String playerName;
     private UUID playerId;
     private UUID roomId;
 }

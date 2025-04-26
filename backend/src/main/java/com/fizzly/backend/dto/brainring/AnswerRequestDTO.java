@@ -9,6 +9,6 @@ import java.util.UUID;
 @Setter
 public class AnswerRequestDTO {
     private UUID roomId;
-    private UUID teamId;
+    private UUID playerId;
     private double answerTime;
 }

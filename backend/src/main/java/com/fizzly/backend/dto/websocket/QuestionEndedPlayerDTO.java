@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class QuestionEndedPlayerDTO {
-    private String username;
+    private String playerName;
     private int points;
 }

@@ -11,9 +11,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BrainRingJoinRoomDTO {
-    private UUID roomId;
-    private String joinCode;
-    private String playerName;
+public class BrainRingPlayer {
     private UUID playerId;
+    private String playerName;
 }

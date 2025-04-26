@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class DeleteTeamRequestDTO {
-    private UUID teamId;
+public class DeletePlayerRequestDTO {
+    private UUID playerId;
     private UUID roomId;
 }
