@@ -8,7 +8,8 @@ public enum BrainRingEvent {
     USER_ADDED(1L, "userAdded"),
     ROOM_ACTIVATED(2L, "roomActivated"),
     ANSWER_SUBMITTED(3L, "answerSubmitted"),
-    NEXT_ROUND(4L, "nextRound");
+    NEXT_ROUND(4L, "nextRound"),
+    CURRENT_EVENT(5L, "currentEvent");
 
     private final Long id;
     private final String name;
