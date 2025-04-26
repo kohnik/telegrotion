@@ -1,11 +1,10 @@
 package com.fizzly.backend.config;
 
-import com.fizzly.backend.dto.brainring.BrainRingActiveRoom;
-import com.fizzly.backend.dto.brainring.BrainRingPlayer;
-import com.fizzly.backend.entity.BrainRingEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -13,9 +12,10 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.util.List;
-import java.util.UUID;
+import java.time.Duration;
 
 @Configuration
 public class RedisConfig {
@@ -43,49 +43,23 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<UUID, String> roomRedisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<UUID, String> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-        return template;
-    }
-
-    @Bean
-    public RedisTemplate<String, UUID> roomRedisTemplateInvert(RedisConnectionFactory factory) {
-        RedisTemplate<String, UUID> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-        return template;
-    }
-
-    @Bean
-    public RedisTemplate<String, List<BrainRingPlayer>> teamRedisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<String, List<BrainRingPlayer>> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;
     }
 
     @Bean
-    public RedisTemplate<String, BrainRingActiveRoom> activeRoomRedisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<String, BrainRingActiveRoom> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        return template;
-    }
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(12))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                        new GenericJackson2JsonRedisSerializer()));
 
-    @Bean
-    public RedisTemplate<UUID, BrainRingEvent> currentEventRedisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<UUID, BrainRingEvent> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        return template;
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(config)
+                .build();
     }
-
-    @Bean
-    public RedisTemplate<String, String> currentEventPayloadRedisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<String, String> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        return template;
-    }
-
 }

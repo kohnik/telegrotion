@@ -2,8 +2,10 @@ package com.fizzly.backend.entity;
 
 import lombok.Getter;
 
+import java.io.Serializable;
+
 @Getter
-public enum BrainRingEvent {
+public enum BrainRingEvent implements Serializable {
 
     USER_ADDED(1L, "userAdded"),
     ROOM_ACTIVATED(2L, "roomActivated"),

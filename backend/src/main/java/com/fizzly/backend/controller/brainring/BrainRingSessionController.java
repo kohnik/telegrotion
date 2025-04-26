@@ -48,7 +48,7 @@ public class BrainRingSessionController {
         BrainRingJoinRoomDTO roomDTO = brainRingService.joinRoom(request.getJoinCode(), request.getPlayerName());
 
         String topic = String.format(WebSocketTopics.JOIN_BRAIN_RING_TOPIC, roomDTO.getRoomId());
-        BrainRingRoomFullDTO rooFullInfo = brainRingService.getRooFullInfo(roomDTO.getRoomId());
+        BrainRingRoomFullDTO rooFullInfo = brainRingService.getRoomFullInfo(roomDTO.getRoomId());
         messagingTemplate.convertAndSend(topic, new RoomDescriptionDTO(
                 BrainRingEvent.USER_ADDED.getId(),
                 request.getPlayerName(),
@@ -71,14 +71,14 @@ public class BrainRingSessionController {
     @DeleteMapping("/teams")
     @Operation(summary = "Удалить команду")
     public ResponseEntity<Void> deleteTeamById(@RequestBody DeletePlayerRequestDTO request) {
-        brainRingService.deleteTeam(request.getPlayerId(), request.getRoomId());
+        brainRingService.deletePlayer(request.getPlayerId(), request.getRoomId());
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/rooms/{roomId}")
     @Operation(summary = "Полная инфа по комнате")
     public ResponseEntity<BrainRingRoomFullDTO> getRoomFull(@PathVariable UUID roomId) {
-        return ResponseEntity.ok(brainRingService.getRooFullInfo(roomId));
+        return ResponseEntity.ok(brainRingService.getRoomFullInfo(roomId));
     }
 
 }
