@@ -6,6 +6,7 @@ import com.fizzly.backend.dto.brainring.BrainRingJoinRoomDTO;
 import com.fizzly.backend.dto.brainring.BrainRingRoomDTO;
 import com.fizzly.backend.dto.brainring.BrainRingRoomFullDTO;
 import com.fizzly.backend.dto.brainring.BrainRingTeam;
+import com.fizzly.backend.dto.brainring.PlayerExistsResponse;
 import com.fizzly.backend.exception.TelegrotionException;
 import com.fizzly.backend.utils.JoinCodeUtils;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -40,6 +42,9 @@ public class BrainRingService {
 
     public BrainRingJoinRoomDTO joinRoom(String joinCode, String teamName) {
         UUID roomId = getRoomByJoinCode(joinCode);
+        if (roomId == null) {
+            throw new TelegrotionException("Не найдена комната с кодом комнаты: " + joinCode);
+        }
         if (teamExists(roomId, teamName)) {
             String exMessage = "Team " + teamName + " already exists";
             LOGGER.error(exMessage);
@@ -146,6 +151,28 @@ public class BrainRingService {
 
         activeRoom.setReady(true);
         activeRoomRedisTemplate.opsForValue().set("activeRoom:" + roomId, activeRoom);
+    }
+
+    public PlayerExistsResponse playerExistsInRoom(UUID roomId, UUID playerId) {
+        List<BrainRingTeam> teams = teamRedisTemplate.opsForValue().get("team:" + roomId);
+        PlayerExistsResponse response = new PlayerExistsResponse();
+        if (teams == null) {
+            response.setExists(false);
+            return response;
+        }
+        Optional<BrainRingTeam> brainRingTeam = teams.stream()
+                .filter(team -> team.getTeamId().equals(playerId))
+                .findFirst();
+        if (brainRingTeam.isEmpty()) {
+            response.setExists(false);
+            return response;
+        }
+        response.setExists(true);
+        response.setPlayerId(playerId);
+        response.setRoomId(roomId);
+        response.setTeamName(brainRingTeam.get().getTeamName());
+
+        return response;
     }
 
 }
