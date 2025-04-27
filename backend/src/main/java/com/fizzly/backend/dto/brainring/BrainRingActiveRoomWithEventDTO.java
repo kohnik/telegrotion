@@ -10,7 +10,7 @@ import java.util.List;
 public class BrainRingActiveRoomWithEventDTO extends BrainRingActiveRoom {
     private Long eventId;
 
-    public BrainRingActiveRoomWithEventDTO(boolean ready, String joinCode, List<BrainRingTeam> teams, Long eventId) {
+    public BrainRingActiveRoomWithEventDTO(boolean ready, String joinCode, List<BrainRingPlayer> teams, Long eventId) {
         super(ready, joinCode, teams);
         this.eventId = eventId;
     }

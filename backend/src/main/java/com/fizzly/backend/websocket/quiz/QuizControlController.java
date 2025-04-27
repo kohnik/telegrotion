@@ -45,14 +45,14 @@ public class QuizControlController {
     public void submitAnswer(@Payload SubmitAnswerRequest request) {
         List<String> usersLeft = quizSessionService.submitAnswer(
                 request.getJoinCode(),
-                request.getUsername(),
+                request.getPlayerName(),
                 request.getAnswer(),
                 request.getTimeSpent()
         );
 
         final String topic = String.format(WebSocketTopics.JOIN_TOPIC, request.getJoinCode());
         messagingTemplate.convertAndSend(topic, new SubmitAnswerResponse(
-                QuizEvent.ANSWER_SUBMITTED.getId(), request.getUsername(), usersLeft)
+                QuizEvent.ANSWER_SUBMITTED.getId(), request.getPlayerName(), usersLeft)
         );
 
 //        if (usersLeft.isEmpty()) {

@@ -3,21 +3,25 @@ package com.fizzly.backend.service.brainring;
 import com.fizzly.backend.dto.brainring.AnswerResponseDTO;
 import com.fizzly.backend.dto.brainring.BrainRingActiveRoom;
 import com.fizzly.backend.dto.brainring.BrainRingJoinRoomDTO;
+import com.fizzly.backend.dto.brainring.BrainRingPlayer;
 import com.fizzly.backend.dto.brainring.BrainRingRoomDTO;
 import com.fizzly.backend.dto.brainring.BrainRingRoomFullDTO;
-import com.fizzly.backend.dto.brainring.BrainRingTeam;
 import com.fizzly.backend.dto.brainring.PlayerExistsResponse;
+import com.fizzly.backend.exception.PLayerNotFoundException;
+import com.fizzly.backend.exception.RoomNotFoundException;
 import com.fizzly.backend.exception.TelegrotionException;
 import com.fizzly.backend.utils.JoinCodeUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -26,153 +30,170 @@ public class BrainRingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BrainRingService.class);
 
-    private final RedisTemplate<UUID, String> roomRedisTemplate;
-    private final RedisTemplate<String, UUID> roomRedisTemplateInvert;
-    private final RedisTemplate<String, List<BrainRingTeam>> teamRedisTemplate;
-    private final RedisTemplate<String, BrainRingActiveRoom> activeRoomRedisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String ROOM_PREFIX = "room:";
+    private static final String JOIN_CODE_PREFIX = "joinCode:";
+    private static final String PLAYERS_PREFIX = "room:players:";
+    private static final String ACTIVE_ROOM_PREFIX = "activeRoom:";
 
     public BrainRingRoomDTO createRoom() {
         String joinCode = JoinCodeUtils.generateJoinCode();
         UUID roomId = UUID.randomUUID();
-        roomRedisTemplate.opsForValue().set(roomId, joinCode);
-        roomRedisTemplateInvert.opsForValue().set(joinCode, roomId);
 
+        redisTemplate.opsForValue().set(ROOM_PREFIX + roomId, joinCode);
+        redisTemplate.opsForValue().set(JOIN_CODE_PREFIX + joinCode, roomId.toString());
+
+        LOGGER.info("Created room: id={}, joinCode={}", roomId, joinCode);
         return new BrainRingRoomDTO(roomId, joinCode);
     }
 
-    public BrainRingJoinRoomDTO joinRoom(String joinCode, String teamName) {
+    public BrainRingJoinRoomDTO joinRoom(String joinCode, String playerName) {
         UUID roomId = getRoomByJoinCode(joinCode);
         if (roomId == null) {
-            throw new TelegrotionException("Не найдена комната с кодом комнаты: " + joinCode);
+            throw new RoomNotFoundException(joinCode);
         }
-        if (teamExists(roomId, teamName)) {
-            String exMessage = "Team " + teamName + " already exists";
+        if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(PLAYERS_PREFIX + "names:" + roomId, playerName))) {
+            String exMessage = String.format("Игрок с никнеймом %s уже существует", playerName);
             LOGGER.error(exMessage);
             throw new TelegrotionException(exMessage);
         }
 
-        UUID teamId = UUID.randomUUID();
-        BrainRingTeam brainRingTeam = new BrainRingTeam(teamId, teamName);
+        BrainRingPlayer player = new BrainRingPlayer(UUID.randomUUID(), playerName);
 
-        List<BrainRingTeam> brainRingTeams;
-        if (teamRedisTemplate.hasKey("team:" + roomId)) {
-            brainRingTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
-        } else {
-            brainRingTeams = new ArrayList<>();
-        }
+        redisTemplate.opsForHash().put(
+                PLAYERS_PREFIX + roomId,
+                player.getPlayerId().toString(),
+                player
+        );
 
-        brainRingTeams.add(brainRingTeam);
-        teamRedisTemplate.opsForValue().set("team:" + roomId, brainRingTeams);
-        LOGGER.info("Team with id %s created", teamId);
+        redisTemplate.opsForSet().add(PLAYERS_PREFIX + "names:" + roomId, playerName);
 
-        return new BrainRingJoinRoomDTO(roomId, joinCode, teamName, teamId);
+        LOGGER.info("Player joined: roomId={}, player={}", roomId, playerName);
+        return new BrainRingJoinRoomDTO(roomId, joinCode, playerName, player.getPlayerId());
     }
 
-    public void deleteTeam(UUID teamId, UUID roomId) {
-        if (!teamExists(roomId, teamId)) {
-            throw new TelegrotionException("Team " + teamId + " does not exist");
+    public void deletePlayer(UUID playerId, UUID roomId) {
+        BrainRingPlayer player = (BrainRingPlayer) redisTemplate.opsForHash().get(PLAYERS_PREFIX + roomId, playerId.toString());
+        if (player == null) {
+            throw new PLayerNotFoundException(playerId);
         }
-        List<BrainRingTeam> brainRingTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
-        brainRingTeams.removeIf(brainRingTeam -> brainRingTeam.getTeamId().equals(teamId));
+
+        redisTemplate.opsForHash().delete(PLAYERS_PREFIX + roomId, playerId.toString());
+        redisTemplate.opsForSet().remove(PLAYERS_PREFIX + "names:" + roomId, player.getPlayerName());
     }
 
-    public BrainRingRoomFullDTO getRooFullInfo(UUID roomId) {
-        if (!roomRedisTemplate.hasKey(roomId)) {
-            throw new TelegrotionException("Room " + roomId + " does not exist");
+    public BrainRingRoomFullDTO getRoomFullInfo(UUID roomId) {
+        String joinCode = (String) redisTemplate.opsForValue().get(ROOM_PREFIX + roomId);
+        if (joinCode == null) {
+            throw new RoomNotFoundException(roomId);
         }
-        String joinCode = roomRedisTemplate.opsForValue().get(roomId);
 
-        return new BrainRingRoomFullDTO(roomId, joinCode, teamRedisTemplate.opsForValue().get("team:" + roomId));
+        List<BrainRingPlayer> players = redisTemplate.opsForHash()
+                .values(PLAYERS_PREFIX + roomId)
+                .stream()
+                .map(BrainRingPlayer.class::cast)
+                .toList();
+
+        return new BrainRingRoomFullDTO(roomId, joinCode, players);
     }
 
     private UUID getRoomByJoinCode(String joinCode) {
-        return roomRedisTemplateInvert.opsForValue().get(joinCode);
-    }
-
-    private boolean teamExists(UUID roomId, String teamName) {
-        List<BrainRingTeam> brainRingTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
-        if (brainRingTeams == null) {
-            return false;
-        }
-        return brainRingTeams.stream().map(BrainRingTeam::getTeamName)
-                .anyMatch(teamName::equals);
+        String roomIdStr = (String) redisTemplate.opsForValue().get(JOIN_CODE_PREFIX + joinCode);
+        return roomIdStr != null ? UUID.fromString(roomIdStr) : null;
     }
 
     public BrainRingActiveRoom activateRoom(UUID roomId) {
-        if (!roomRedisTemplate.hasKey(roomId)) {
-            throw new TelegrotionException("Room " + roomId + " does not exist");
+        String joinCode = (String) redisTemplate.opsForValue().get(ROOM_PREFIX + roomId);
+        if (joinCode == null) {
+            throw new RoomNotFoundException(roomId);
         }
-        String joinCode = roomRedisTemplate.opsForValue().get(roomId);
-        List<BrainRingTeam> activeTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
 
-        BrainRingActiveRoom activeRoom = new BrainRingActiveRoom(true, joinCode, activeTeams);
-        activeRoomRedisTemplate.opsForValue().set("activeRoom:" + roomId, activeRoom);
+        List<BrainRingPlayer> players = getRoomFullInfo(roomId).getPlayers();
+        BrainRingActiveRoom activeRoom = new BrainRingActiveRoom(true, joinCode, players);
 
+        redisTemplate.opsForValue().set(ACTIVE_ROOM_PREFIX + roomId, activeRoom);
         return activeRoom;
     }
 
-    private boolean teamExists(UUID roomId, UUID teamId) {
-        List<BrainRingTeam> brainRingTeams = teamRedisTemplate.opsForValue().get("team:" + roomId);
-        if (brainRingTeams == null) {
-            return false;
-        }
-        return brainRingTeams.stream().map(BrainRingTeam::getTeamId)
-                .anyMatch(teamId::equals);
-    }
-
-    public AnswerResponseDTO submitAnswer(UUID roomId, UUID teamId, double answerTime) {
-        BrainRingActiveRoom activeRoom = getActiveRoom(roomId);
-        if (!activeRoom.isReady()) {
+    public AnswerResponseDTO submitAnswer(UUID roomId, UUID playerId, double answerTime) {
+        BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) redisTemplate.opsForValue().get(ACTIVE_ROOM_PREFIX + roomId);
+        if (activeRoom == null || !activeRoom.isReady()) {
             return null;
         }
 
         activeRoom.setReady(false);
-        activeRoomRedisTemplate.opsForValue().set("activeRoom:" + roomId, activeRoom);
+        redisTemplate.opsForValue().set(ACTIVE_ROOM_PREFIX + roomId, activeRoom);
 
-        LOGGER.info("Team %s submitted answer with time %d", teamId.toString(), answerTime);
-
-        final BrainRingTeam brainRingTeam = activeRoom.getTeams().stream()
-                .filter(team -> team.getTeamId().equals(teamId))
+        BrainRingPlayer player = activeRoom.getPlayers().stream()
+                .filter(p -> p.getPlayerId().equals(playerId))
                 .findFirst()
-                .orElseThrow(() -> new TelegrotionException("Team " + teamId + " does not exist"));
-        return new AnswerResponseDTO(teamId, brainRingTeam.getTeamName(), answerTime);
+                .orElseThrow(() -> new PLayerNotFoundException(playerId));
+
+        LOGGER.info("Answer submitted: player={}, time={}", player.getPlayerName(), answerTime);
+        return new AnswerResponseDTO(playerId, player.getPlayerName(), answerTime);
     }
 
     private BrainRingActiveRoom getActiveRoom(UUID roomId) {
-        BrainRingActiveRoom activeRoom = activeRoomRedisTemplate.opsForValue().get("activeRoom:" + roomId);
+        BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) redisTemplate.opsForValue().get(ACTIVE_ROOM_PREFIX + roomId);
         if (activeRoom == null) {
-            throw new TelegrotionException("Room " + roomId + " does not exist");
+            LOGGER.warn("Active room not found: {}", roomId);
+            throw new RoomNotFoundException(roomId);
         }
         return activeRoom;
     }
 
     public void activateNextQuestionInRoom(UUID roomId) {
-        BrainRingActiveRoom activeRoom = getActiveRoom(roomId);
+        redisTemplate.execute(new SessionCallback<>() {
+            @Override
+            public Object execute(RedisOperations operations) throws DataAccessException {
+                operations.watch(ACTIVE_ROOM_PREFIX + roomId);
 
-        activeRoom.setReady(true);
-        activeRoomRedisTemplate.opsForValue().set("activeRoom:" + roomId, activeRoom);
+                BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) operations.opsForValue().get(ACTIVE_ROOM_PREFIX + roomId);
+                if (activeRoom == null) {
+                    operations.unwatch();
+                    throw new RoomNotFoundException(roomId);
+                }
+
+                operations.multi();
+                activeRoom.setReady(true);
+                operations.opsForValue().set(ACTIVE_ROOM_PREFIX + roomId, activeRoom);
+
+                return operations.exec();
+            }
+        });
+
+        LOGGER.info("Next question activated for room: {}", roomId);
     }
 
     public PlayerExistsResponse playerExistsInRoom(UUID roomId, UUID playerId) {
-        List<BrainRingTeam> teams = teamRedisTemplate.opsForValue().get("team:" + roomId);
         PlayerExistsResponse response = new PlayerExistsResponse();
-        if (teams == null) {
-            response.setExists(false);
-            return response;
-        }
-        Optional<BrainRingTeam> brainRingTeam = teams.stream()
-                .filter(team -> team.getTeamId().equals(playerId))
-                .findFirst();
-        if (brainRingTeam.isEmpty()) {
-            response.setExists(false);
-            return response;
-        }
-        response.setExists(true);
-        response.setPlayerId(playerId);
-        response.setRoomId(roomId);
-        response.setTeamName(brainRingTeam.get().getTeamName());
+        BrainRingPlayer player = (BrainRingPlayer) redisTemplate.opsForHash().get(PLAYERS_PREFIX + roomId, playerId.toString());
 
+        if (player != null) {
+            response.setExists(true);
+            response.setPlayerId(playerId);
+            response.setRoomId(roomId);
+            response.setPlayerName(player.getPlayerName());
+        } else {
+            response.setExists(false);
+        }
         return response;
+    }
+
+    public void finishRoom(UUID roomId) {
+        deleteRoomData(roomId);
+
+        LOGGER.info("Game session ended for room: {}", roomId);
+    }
+
+    private void deleteRoomData(UUID roomId) {
+        Set<String> keys = redisTemplate.keys(
+                String.format("*%s*", roomId) // Шаблон для поиска всех ключей комнаты
+        );
+
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
     }
 
 }

@@ -15,5 +15,5 @@ import java.util.UUID;
 public class BrainRingRoomFullDTO {
     private UUID roomId;
     private String joinCode;
-    private List<BrainRingTeam> teams;
+    private List<BrainRingPlayer> players;
 }

@@ -1,4 +1,4 @@
-package com.fizzly.backend.dto.brainring;
+package com.fizzly.backend.dto.websocket.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,9 +11,9 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BrainRingJoinRoomDTO {
+public class BrainRingSessionEndedResponse {
+
+    private Long eventId;
     private UUID roomId;
-    private String joinCode;
-    private String playerName;
-    private UUID playerId;
+
 }

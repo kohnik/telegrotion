@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class SubmitAnswerRequest {
     private String joinCode;
-    private String username;
+    private String playerName;
     private int answer;
     private double timeSpent;
 }

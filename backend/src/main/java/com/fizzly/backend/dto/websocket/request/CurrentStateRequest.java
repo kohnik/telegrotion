@@ -1,4 +1,4 @@
-package com.fizzly.backend.dto.brainring;
+package com.fizzly.backend.dto.websocket.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BrainRingTeam {
-    private UUID teamId;
-    private String teamName;
+public class CurrentStateRequest {
+    private UUID roomId;
+    private UUID playerId;
 }

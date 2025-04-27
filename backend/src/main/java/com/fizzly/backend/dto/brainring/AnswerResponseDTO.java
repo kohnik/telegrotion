@@ -10,7 +10,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 public class AnswerResponseDTO {
-    private UUID teamId;
-    private String teamName;
+    private UUID playerId;
+    private String playerName;
     private double answerTime;
 }
