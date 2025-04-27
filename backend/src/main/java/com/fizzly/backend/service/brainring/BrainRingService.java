@@ -21,6 +21,7 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -177,6 +178,22 @@ public class BrainRingService {
             response.setExists(false);
         }
         return response;
+    }
+
+    public void finishRoom(UUID roomId) {
+        deleteRoomData(roomId);
+
+        LOGGER.info("Game session ended for room: {}", roomId);
+    }
+
+    private void deleteRoomData(UUID roomId) {
+        Set<String> keys = redisTemplate.keys(
+                String.format("*%s*", roomId) // Шаблон для поиска всех ключей комнаты
+        );
+
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
     }
 
 }

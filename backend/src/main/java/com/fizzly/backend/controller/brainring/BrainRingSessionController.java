@@ -1,5 +1,6 @@
 package com.fizzly.backend.controller.brainring;
 
+import com.fizzly.backend.dto.brainring.BrainRingEndSessionRequest;
 import com.fizzly.backend.dto.brainring.BrainRingJoinRoomDTO;
 import com.fizzly.backend.dto.brainring.BrainRingRoomDTO;
 import com.fizzly.backend.dto.brainring.BrainRingRoomFullDTO;
@@ -8,6 +9,7 @@ import com.fizzly.backend.dto.brainring.JoinRoomRequestDTO;
 import com.fizzly.backend.dto.brainring.PlayerExistsRequest;
 import com.fizzly.backend.dto.brainring.PlayerExistsResponse;
 import com.fizzly.backend.dto.brainring.RoomDescriptionDTO;
+import com.fizzly.backend.dto.websocket.response.BrainRingSessionEndedResponse;
 import com.fizzly.backend.entity.BrainRingEvent;
 import com.fizzly.backend.service.brainring.BrainRingService;
 import com.fizzly.backend.utils.WebSocketTopics;
@@ -79,6 +81,20 @@ public class BrainRingSessionController {
     @Operation(summary = "Полная инфа по комнате")
     public ResponseEntity<BrainRingRoomFullDTO> getRoomFull(@PathVariable UUID roomId) {
         return ResponseEntity.ok(brainRingService.getRoomFullInfo(roomId));
+    }
+
+    @PostMapping("/rooms/finish")
+    @Operation(summary = "Завершение игровой сессии")
+    public ResponseEntity<Void> finishRoom(@RequestBody BrainRingEndSessionRequest request) {
+        brainRingService.finishRoom(request.getRoomId());
+
+        String topic = String.format(WebSocketTopics.JOIN_BRAIN_RING_TOPIC, request.getRoomId());
+        messagingTemplate.convertAndSend(topic, new BrainRingSessionEndedResponse(
+                BrainRingEvent.SESSION_ENDED.getId(),
+                request.getRoomId()
+        ));
+
+        return ResponseEntity.ok().build();
     }
 
 }

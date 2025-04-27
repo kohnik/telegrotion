@@ -11,7 +11,8 @@ public enum BrainRingEvent implements Serializable {
     ROOM_ACTIVATED(2L, "roomActivated"),
     ANSWER_SUBMITTED(3L, "answerSubmitted"),
     NEXT_ROUND(4L, "nextRound"),
-    CURRENT_EVENT(5L, "currentEvent");
+    CURRENT_EVENT(5L, "currentEvent"),
+    SESSION_ENDED(6L, "sessionEnded");
 
     private final Long id;
     private final String name;
