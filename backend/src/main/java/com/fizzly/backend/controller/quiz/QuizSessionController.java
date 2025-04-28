@@ -1,7 +1,7 @@
 package com.fizzly.backend.controller.quiz;
 
 import com.fizzly.backend.entity.QuizSession;
-import com.fizzly.backend.entity.SessionParticipant;
+import com.fizzly.backend.entity.quiz.session.QuizSessionRoom;
 import com.fizzly.backend.service.quiz.QuizSessionService;
 import com.fizzly.backend.utils.WebSocketTopics;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/quiz-session")
@@ -32,7 +34,7 @@ public class QuizSessionController {
 
     @PostMapping("/start")
     @Operation(summary = "Создать комнату квиза")
-    public ResponseEntity<QuizSession> startQuizSession(@RequestBody QuizStartDTO quizStartDTO) {
+    public ResponseEntity<QuizSessionRoom> startQuizSession(@RequestBody QuizStartDTO quizStartDTO) {
         return ResponseEntity.ok(
                 quizSessionService.startQuiz(quizStartDTO.quizId, quizStartDTO.userId)
         );
@@ -41,12 +43,12 @@ public class QuizSessionController {
     @PostMapping("/join")
     @Operation(summary = "Присоединить участника")
     public ResponseEntity<Void> joinParticipant(@RequestBody JoinRequest joinRequest) {
-        quizSessionService.addParticipant(joinRequest.getJoinCode(), joinRequest.getUsername());
-        QuizSession session = quizSessionService.getSession(joinRequest.getJoinCode());
+        quizSessionService.joinParticipant(joinRequest.getJoinCode(), joinRequest.getUsername());
+//        QuizSession session = quizSessionService.getSession(joinRequest.getJoinCode());
 
-        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, session.getJoinCode());
-        final UserJoinResponse response = new UserJoinResponse(session.getParticipants().size(), joinRequest.username, session.getJoinCode());
-        messagingTemplate.convertAndSend(topic, response);
+//        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, session.getJoinCode());
+//        final UserJoinResponse response = new UserJoinResponse(session.getParticipants().size(), joinRequest.username, session.getJoinCode());
+//        messagingTemplate.convertAndSend(topic, response);
         return ResponseEntity.ok().build();
     }
 
@@ -57,18 +59,19 @@ public class QuizSessionController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("{joinCode}/participants")
+    @GetMapping("{roomId}/participants")
     @Operation(summary = "Получить участников по текущей сессии")
-    public ResponseEntity<CurrentUserSessionStateResponse> getQuizParticipants(@PathVariable String joinCode) {
-        QuizSession session = quizSessionService.getSession(joinCode);
-        List<SessionParticipant> participants = session.getParticipants();
-        return ResponseEntity.ok(new CurrentUserSessionStateResponse(
-                        participants.size(), joinCode,
-                        participants.stream()
-                                .map(SessionParticipant::getUsername)
-                                .toList()
-                )
-        );
+    public Set<String> getQuizParticipants(@PathVariable UUID roomId) {
+        return quizSessionService.getAllUsersByRoomId(roomId);
+//        QuizSession session = quizSessionService.getSession(joinCode);
+//        List<SessionParticipant> participants = session.getParticipants();
+//        return ResponseEntity.ok(new CurrentUserSessionStateResponse(
+//                        participants.size(), joinCode,
+//                        participants.stream()
+//                                .map(SessionParticipant::getUsername)
+//                                .toList()
+//                )
+//        );
     }
 
     @Getter

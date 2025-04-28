@@ -23,12 +23,12 @@ public class QuizControlController {
     private final QuizSessionService quizSessionService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/start")
+    @MessageMapping("/quiz/start")
     public void startQuizSession(@Payload StartSessionRequest request) {
         final String joinCode = request.getJoinCode();
-        int questionsCount = quizSessionService.activateSession(joinCode);
+        int questionsCount = quizSessionService.activateSessionRoom(joinCode, request.getRoomId());
 
-        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, joinCode);
+        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, request.getRoomId());
         messagingTemplate.convertAndSend(topic, new StartSessionResponse(
                 QuizEvent.QUIZ_STARTED.getId(),
                 joinCode,
@@ -36,27 +36,23 @@ public class QuizControlController {
         );
     }
 
-    @MessageMapping("/nextQuestion")
+    @MessageMapping("/quiz/next-question")
     public void nextQuestion(@Payload NextQuestionRequest request) {
-        quizSessionService.nextQuestion(request.getJoinCode());
+        quizSessionService.nextQuestion(request.getJoinCode(), request.getRoomId());
     }
 
-    @MessageMapping("/submit-answer")
+    @MessageMapping("/quiz/submit-answer")
     public void submitAnswer(@Payload SubmitAnswerRequest request) {
         List<String> usersLeft = quizSessionService.submitAnswer(
-                request.getJoinCode(),
                 request.getPlayerName(),
                 request.getAnswer(),
-                request.getTimeSpent()
+                request.getTimeSpent(),
+                request.getRoomId()
         );
 
-        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, request.getJoinCode());
+        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, request.getRoomId());
         messagingTemplate.convertAndSend(topic, new SubmitAnswerResponse(
                 QuizEvent.ANSWER_SUBMITTED.getId(), request.getPlayerName(), usersLeft)
         );
-
-//        if (usersLeft.isEmpty()) {
-//            quizSessionService.endQuestion(request.getJoinCode());
-//        }
     }
 }
