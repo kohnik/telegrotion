@@ -2,11 +2,9 @@ import { Injectable } from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {IAddQuizBody, ICrateQuizAnswer, ICrateQuizSlide, IQuizConfig} from '../../interfaces';
 import {deleteAtPosition, insertAtPosition} from '../../utils';
-import {DataService} from '../../../../core/services/data.service';
+import {QuizDataService} from '../../quiz.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class QuizManagementService {
   private _slides = new BehaviorSubject<ICrateQuizSlide[]>([]);
   private _selectedSlide = new BehaviorSubject<ICrateQuizSlide | null>(null);
@@ -14,7 +12,7 @@ export class QuizManagementService {
   public slides$ = this._slides.asObservable();
   public selectedSlide$ = this._selectedSlide.asObservable();
 
-  constructor(private readonly dataService: DataService) {
+  constructor(private readonly quizDataService: QuizDataService) {
   }
 
   updateSlide(updateFn: (slide: ICrateQuizSlide) => ICrateQuizSlide): void {
@@ -149,6 +147,6 @@ export class QuizManagementService {
       userId: 1,
       questions: this._slides.value,
     }
-    return this.dataService.addQuiz(body)
+    return this.quizDataService.addQuiz(body)
   }
 }

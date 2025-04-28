@@ -14,29 +14,29 @@ import {AsyncPipe} from '@angular/common';
   templateUrl: './quiz-workflow.component.html',
   standalone: true,
   styleUrl: './quiz-workflow.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuizWorkflowComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
   public slide$: Observable<ICrateQuizSlide | null>;
 
-  constructor(public quizService: QuizManagementService) {}
+  constructor(public quizManagementService: QuizManagementService) {}
 
   ngOnInit(): void {
-    this.slide$ = this.quizService.selectedSlide$;
+    this.slide$ = this.quizManagementService.selectedSlide$;
   }
 
   setCorrectAnswer(answer: ICrateQuizAnswer): void {
-    this.quizService.updateCorrectAnswer(answer);
+    this.quizManagementService.updateCorrectAnswer(answer);
   }
 
   setQuestion(question: string): void {
-    this.quizService.updateSlideQuestion(question);
+    this.quizManagementService.updateSlideQuestion(question);
   }
 
   setAnswer(answer: ICrateQuizAnswer, text: string): void {
     console.log(answer, text);
-    this.quizService.updateAnswers(answer, text)
+    this.quizManagementService.updateAnswers(answer, text)
   }
 
   ngOnDestroy() {

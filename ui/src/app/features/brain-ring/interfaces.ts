@@ -6,28 +6,44 @@ export interface IBrainRingRoomConfig {
 export interface IBrainRingRoomInfo {
   roomId: string,
   joinCode: string
-  teams: IBrainRingTeam[]
+  players: IBrainRingTeam[]
 }
 
 export interface IBrainRingTeam {
-  teamName: string,
-  teamId: string
+  playerName: string,
+  playerId: string
 }
 
 export interface IBrainRingCreateTeamResponse {
   roomId: string,
   joinCode: string,
-  teamName: string,
-  teamId: string
+  playerName: string,
+  playerId: string
 }
 
 export interface IBrainRingTeamAnswerData {
-  teamName: string,
+  playerName: string,
   teamId: string
   answerTime: number
 }
 
 export interface IBrainRingJoinBody {
-  teamName: string,
+  playerName: string,
   joinCode: string
+}
+
+export interface IBrainRingPlayerExistsBody {
+  playerId: string,
+  roomId: string
+}
+
+export interface IBrainRingPlayerExistsResponse{
+  roomId: string,
+  exists: boolean,
+  playerName: string,
+  playerId: string
+}
+
+export interface IBrainRingEndSessionBody {
+  roomId: string,
 }

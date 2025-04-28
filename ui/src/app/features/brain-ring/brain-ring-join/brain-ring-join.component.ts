@@ -2,23 +2,22 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Subject, takeUntil} from 'rxjs';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {WebSocketService} from '../../../core/services/web-socket.service';
 import {BrainRingService} from '../brain-ring.service';
-import {brainRingWSTopic} from '../constants';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
+import {setLocalStorageUserData} from '../utils';
 
 @Component({
-  selector: 'app-brain-ring-join-to',
+  selector: 'app-brain-ring-join',
   imports: [
     ReactiveFormsModule,
     LoaderComponent
   ],
-  templateUrl: './brain-ring-join-to.component.html',
-  styleUrl: './brain-ring-join-to.component.scss',
+  templateUrl: './brain-ring-join.component.html',
+  styleUrl: './brain-ring-join.component.scss',
   standalone: true,
   providers: [BrainRingService]
 })
-export class BrainRingJoinToComponent implements OnInit, OnDestroy{
+export class BrainRingJoinComponent implements OnInit, OnDestroy{
   public form: FormGroup
   public isLoading = false;
   public isAfterQrCodeRedirect = false;
@@ -39,14 +38,14 @@ export class BrainRingJoinToComponent implements OnInit, OnDestroy{
     return this.form.get('joinCode')!.value;
   }
 
-  get teamName(): string {
-    return this.form.get('teamName')!.value;
+  get playerName(): string {
+    return this.form.get('playerName')!.value;
   }
 
   public setForm(): FormGroup {
     return this.fb.group({
       joinCode: ['', [Validators.required]],
-      teamName: ['', [Validators.required]],
+      playerName: ['', [Validators.required]],
     })
   }
 
@@ -65,14 +64,16 @@ export class BrainRingJoinToComponent implements OnInit, OnDestroy{
   public goToRoom(): void {
     this.isLoading = true;
     this.brainRingService.goToRoom({
-      teamName: this.teamName,
+      playerName: this.playerName,
       joinCode: this.joinCode,
     }).subscribe({
       next: (el) => {
+
+        setLocalStorageUserData(el)
         this.router.navigate(['/brain-ring-controller'], {
           queryParams: {
             roomId: el.roomId,
-            teamId: el.teamId
+            playerId: el.playerId
           }
         });
         this.cdr.markForCheck();

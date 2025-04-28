@@ -1,5 +1,6 @@
 @import "../../../../assets/styles/colors";
 @import "../../../../assets/styles/mixins";
+@import "../../../../assets/styles/animations";
 
 
 .lobby {
@@ -11,8 +12,12 @@
   align-items: center;
   justify-content: flex-start;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1056px) {
     padding: 82px 32px 32px;
+  }
+
+  &__logo {
+    @include logo-style();
   }
 
   &__connect-data {
@@ -25,6 +30,7 @@
     box-shadow: 0 6px 10px rgba($color-orange-dark, 0.2);
     margin-bottom: 32px;
     flex-wrap: wrap;
+    min-width: 630px;
 
     @include text-style($color: $color-text-dark, $size: 20px, $font-weight: 600);
 
@@ -35,8 +41,9 @@
       box-shadow: 0 4px 6px rgba($color-orange-darker, 0.2);
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1056px) {
       flex-direction: column;
+      min-width: unset;
     }
   }
 
@@ -72,6 +79,7 @@
     cursor: pointer;
     box-shadow: 0 4px 0 $color-button-shadow;
     transition: transform 0.1s ease;
+    border: none;
 
     &:hover {
       transform: translateY(-2px);
@@ -82,7 +90,7 @@
       box-shadow: 0 2px 0 $color-button-shadow;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1056px) {
       left: 50%;
       right: auto;
       transform: translateX(-50%);
@@ -95,6 +103,10 @@
         transform: translate(-50%, 2px);
       }
     }
+
+    &.disabled {
+      @include disabled-button()
+    }
   }
 
   &__participant {
@@ -106,6 +118,7 @@
     align-items: center;
     gap: 8px;
     @include text-style($color: $color-text-dark, $font-weight: normal);
+    @include bounceInMixin($start: 20px);
 
     svg {
       width: 16px;
@@ -135,6 +148,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    margin: 0 auto;
 
     .lobby__dots {
       display: flex;

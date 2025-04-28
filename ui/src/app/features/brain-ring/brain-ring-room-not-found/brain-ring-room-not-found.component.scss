@@ -1,0 +1,29 @@
+@import "../../../../assets/styles/colors";
+@import "../../../../assets/styles/mixins";
+
+.not-found {
+  @include main-background();
+
+  &__logo {
+    @include logo-style()
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    @include text-style($size: 40px, $color: $color-text-dark);
+
+    button {
+      @include text-style($size: 16px, $font-weight: 600);
+      background-color: $color-button;
+      padding: 5px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 $color-button-shadow;
+      transition: transform 0.1s ease;
+      border: none;
+    }
+  }
+}

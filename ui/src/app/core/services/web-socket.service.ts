@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Client, Message } from '@stomp/stompjs';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface IWsResponse {
   joinCode: string,
@@ -18,10 +19,12 @@ export class WebSocketService {
   public messages = new Subject<{ content: string; topic: string }>();
   public subscriptionsList = new BehaviorSubject<string[]>([]);
 
+  public userUiId = '';
+
   constructor() {
     this.stompClient = new Client({
       brokerURL: `wss://fizzly-7dba31943cb3.herokuapp.com/quiz-websocket`,
-      reconnectDelay: 5000,
+      reconnectDelay: 10000,
       debug: (str) => console.debug('[STOMP]', str),
     });
 
@@ -29,7 +32,12 @@ export class WebSocketService {
   }
 
   private configureCallbacks() {
+    this.userUiId = uuidv4();
     this.stompClient.onConnect = (frame) => {
+      console.log('Connected!', frame);
+
+      const sessionId = frame.headers['session'];
+      console.log('Session ID:', sessionId);
       this.connectionStatus.next(true);
       // this.subscribeToDefaultTopic();
     };
@@ -121,6 +129,9 @@ export class WebSocketService {
       return;
     }
 
+    headers = {
+      simpSessionId: this.userUiId,
+    }
     try {
       this.stompClient.publish({
         destination,

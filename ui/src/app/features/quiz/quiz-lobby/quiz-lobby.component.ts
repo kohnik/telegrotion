@@ -3,9 +3,9 @@ import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import {SymbolSpritePipe} from '../../../shared/pipes/symbol-sprite.pipe';
 import {Subject, takeUntil} from 'rxjs';
 import {IWsResponse, WebSocketService} from '../../../core/services/web-socket.service';
-import {DataService} from '../../../core/services/data.service';
 import {EWSEventQuizTypes} from '../models';
 import {quizRingWSTopic} from '../constants';
+import {QuizDataService} from '../quiz.service';
 
 @Component({
   selector: 'app-quiz-lobby',
@@ -15,7 +15,8 @@ import {quizRingWSTopic} from '../constants';
   templateUrl: './quiz-lobby.component.html',
   standalone: true,
   styleUrl: './quiz-lobby.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [QuizDataService]
 })
 export class QuizLobbyComponent implements OnInit, OnDestroy {
   public joinCode = '';
@@ -28,7 +29,7 @@ export class QuizLobbyComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly wsService: WebSocketService,
     private cdr: ChangeDetectorRef,
-    private readonly dataService: DataService,
+    private readonly quizDataService: QuizDataService,
     ) {
     this.wsService.messages
       .pipe(takeUntil(this.destroy$))
@@ -38,7 +39,7 @@ export class QuizLobbyComponent implements OnInit, OnDestroy {
         // console.log(parseContent, 'QUIZ_LOBBY')
 
         if(parseContent.eventId === EWSEventQuizTypes.QUIZ_STARTED) {
-          this.router.navigate(['/game-window'], {
+          this.router.navigate(['/quiz-game-window'], {
             queryParams: {
               joinCode: this.joinCode
             }
@@ -58,7 +59,7 @@ export class QuizLobbyComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log(this.route.snapshot)
     this.joinCode = this.route.snapshot.queryParams['joinCode'];
-    this.dataService.getParticipantsByCurrentSession(this.joinCode).subscribe(el => {
+    this.quizDataService.getParticipantsByCurrentSession(this.joinCode).subscribe(el => {
       this.userCount = el.userCount;
       this.joinedUsers = el.users.map(el => ({username: el}))
       this.cdr.markForCheck()

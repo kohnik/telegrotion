@@ -1,8 +1,9 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {BrainRingService} from '../brain-ring.service';
 import {SymbolSpritePipe} from '../../../shared/pipes/symbol-sprite.pipe';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
+import {getLocalStorageUserData, setLocalStorageUserData} from '../utils';
 
 @Component({
   selector: 'app-brain-ring-welcome-page',
@@ -16,14 +17,37 @@ import {LoaderComponent} from '../../../shared/components/loader/loader.componen
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [BrainRingService],
 })
-export class BrainRingWelcomePageComponent {
+export class BrainRingWelcomePageComponent implements OnInit{
 
   public isLoading = false;
 
-  constructor(private readonly router: Router, private readonly brainRingService: BrainRingService) { }
+  constructor(private readonly router: Router, private readonly brainRingService: BrainRingService,private cdr: ChangeDetectorRef) { }
+
+  ngOnInit() {
+    let userLocalData = getLocalStorageUserData();
+    if(userLocalData) {
+      // this.brainRingService.checkPlayerExists(
+      //   {
+      //     playerId: userLocalData.playerId,
+      //     roomId: userLocalData.roomId,
+      //   }
+      // ).subscribe(data => {
+      //   if(data.exists) {
+      //     this.router.navigate(['/brain-ring-controller'], {
+      //       queryParams: {
+      //         roomId: data.roomId,
+      //         playerId: data.playerId
+      //       }
+      //     });
+      //   }
+      //
+      //   this.cdr.markForCheck();
+      // })
+    }
+  }
 
   joinToRoom(): void {
-    this.router.navigate(['/brain-ring-join-to']);
+    this.router.navigate(['/brain-ring-join']);
   }
 
   createRoom(): void {

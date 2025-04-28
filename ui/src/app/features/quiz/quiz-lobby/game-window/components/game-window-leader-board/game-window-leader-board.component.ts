@@ -8,7 +8,8 @@ import {GameWindowSlideComponent} from '../game-window-slide/game-window-slide.c
     GameWindowSlideComponent
   ],
   templateUrl: './game-window-leader-board.component.html',
-  styleUrl: './game-window-leader-board.component.scss'
+  styleUrl: './game-window-leader-board.component.scss',
+  standalone: true,
 })
 export class GameWindowLeaderBoardComponent {
   @Input() players: ILeaderBoardPlayers[] = []

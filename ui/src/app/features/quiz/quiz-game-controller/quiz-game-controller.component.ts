@@ -1,13 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {WebSocketService} from '../../../core/services/web-socket.service';
 import {Router} from '@angular/router';
-import {DataService} from '../../../core/services/data.service';
 import {FormsModule} from '@angular/forms';
 import {Subject, takeUntil} from 'rxjs';
 import {EWSEventQuizTypes} from '../models';
 import {ICrateQuizAnswer} from '../interfaces';
 import {PreGameTimerComponent} from '../pre-game-timer/pre-game-timer.component';
 import {quizRingWSTopic} from '../constants';
+import {QuizDataService} from '../quiz.service';
 
 @Component({
   selector: 'app-quiz-game-controller',
@@ -18,7 +18,8 @@ import {quizRingWSTopic} from '../constants';
   templateUrl: './quiz-game-controller.component.html',
   styleUrl: './quiz-game-controller.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [QuizDataService]
 })
 export class QuizGameControllerComponent implements OnInit, OnDestroy {
   public joinCode: string;
@@ -34,7 +35,7 @@ export class QuizGameControllerComponent implements OnInit, OnDestroy {
     private wsService: WebSocketService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private dataService: DataService,) {
+    private quizDataService: QuizDataService,) {
 
     this.wsService.messages
       .pipe(takeUntil(this.destroy$))
@@ -85,7 +86,7 @@ export class QuizGameControllerComponent implements OnInit, OnDestroy {
   }
 
   public goToLobby(): void {
-    this.dataService.gotToLobby(this.joinCode, this.username).subscribe(el =>
+    this.quizDataService.gotToLobby(this.joinCode, this.username).subscribe(el =>
       {
         this.isJoined = true;
         this.isWaitingGameAfterJoin = true;

@@ -1,5 +1,6 @@
 @import "../../../../assets/styles/colors";
 @import "../../../../assets/styles/mixins";
+@import "../../../../assets/styles/animations";
 
 .welcome-screen{
   @include main-background();
@@ -11,6 +12,8 @@
     box-shadow: 0 8px 0 $color-orange-dark;
     text-align: center;
     max-width: 480px;
+
+    @include zoomInMixin($start: 10px, $time: 0.2s);
   }
 
   &__logo {

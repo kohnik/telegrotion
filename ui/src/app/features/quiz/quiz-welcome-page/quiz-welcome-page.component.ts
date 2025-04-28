@@ -22,7 +22,7 @@ export class QuizWelcomePageComponent {
     if (!this.isAuthorized) {
       this.router.navigate(['/authorization'])
     } else {
-      this.router.navigate(['/quiz'])
+      this.router.navigate(['/quiz-creator'])
     }
   }
 
@@ -30,7 +30,7 @@ export class QuizWelcomePageComponent {
     if (!this.isAuthorized) {
       this.router.navigate(['/authorization'])
     } else {
-      this.router.navigate(['/join'])
+      this.router.navigate(['/quiz-join'])
     }
   }
 }

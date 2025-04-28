@@ -6,6 +6,22 @@
   flex-direction: column;
   gap: 40px;
 
+  &__logo {
+    @include logo-style();
+  }
+
+  &__end-game {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+
+    @include text-style($size: 20px, $font-weight: 600);
+    background-color: $color-text-dark;
+    padding: 10px;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+  }
 
   &__text {
     @include text-style($color: $color-text-dark, $size: 20px, $font-weight: 600);

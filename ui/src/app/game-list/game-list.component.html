@@ -1,0 +1,22 @@
+<section class="game-select">
+  <div class="game-select__logo">Fizzly</div>
+  <header class="game-select__header">
+    <h1 class="game-select__title">Выберите игру</h1>
+  </header>
+
+  <section class="game-select__cards">
+    <div class="game-select__card">
+      <div class="game-select__icon">🎯</div>
+      <div class="game-select__name">Quiz</div>
+      <div class="game-select__description">Быстрая викторина на скорость и знание.</div>
+      <button class="game-select__button" (click)="selectGame(EGameType.QUIZ)">Выбрать</button>
+    </div>
+
+    <div class="game-select__card">
+      <div class="game-select__icon">🧠</div>
+      <div class="game-select__name">BrainRing</div>
+      <div class="game-select__description">Ответь первым и заработай баллы!</div>
+      <button class="game-select__button" (click)="selectGame(EGameType.BRAIN_RING)">Выбрать</button>
+    </div>
+  </section>
+</section>

@@ -11,6 +11,7 @@ import {ICrateQuizSlide} from '../../../interfaces';
 import {QuizManagementService} from '../../services/quiz-management.service';
 import {Subject, takeUntil} from 'rxjs';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {QuizDataService} from '../../../quiz.service';
 
 @Component({
   selector: 'app-quiz-slide-property',
@@ -20,7 +21,8 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
   ],
   templateUrl: './quiz-slide-property.component.html',
   styleUrl: './quiz-slide-property.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class QuizSlidePropertyComponent implements OnInit, OnDestroy {
 
@@ -31,7 +33,9 @@ export class QuizSlidePropertyComponent implements OnInit, OnDestroy {
 
   @Output() quizNameChange = new EventEmitter<string>();
 
-  constructor(private quizService: QuizManagementService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {
+  constructor(
+    private quizManagementService: QuizManagementService,
+    private fb: FormBuilder, private cdr: ChangeDetectorRef) {
     this.form = this.fb.group({
       seconds: [null, [Validators.required]],
       points: [null, [Validators.required]],
@@ -39,7 +43,7 @@ export class QuizSlidePropertyComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.quizService.selectedSlide$
+    this.quizManagementService.selectedSlide$
       .pipe(takeUntil(this.destroy$))
       .subscribe((selectedSlide) => {
         if(!selectedSlide) return
@@ -66,7 +70,7 @@ export class QuizSlidePropertyComponent implements OnInit, OnDestroy {
   }
 
   updateProperty(updatedSlide: ICrateQuizSlide): void {
-    this.quizService.updateSlideProperty(updatedSlide);
+    this.quizManagementService.updateSlideProperty(updatedSlide);
   }
 
   setQuizName(name: string): void {

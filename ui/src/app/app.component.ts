@@ -1,6 +1,7 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {QuizWelcomePageComponent} from './features/quiz/quiz-welcome-page/quiz-welcome-page.component';
+import {window} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,6 @@ import {QuizWelcomePageComponent} from './features/quiz/quiz-welcome-page/quiz-w
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent {
+export class AppComponent{
   title = 'ui';
 }

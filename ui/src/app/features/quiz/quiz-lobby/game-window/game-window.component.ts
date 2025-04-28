@@ -3,7 +3,6 @@ import {PreGameTimerComponent} from '../../pre-game-timer/pre-game-timer.compone
 import {Subject, takeUntil} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {WebSocketService} from '../../../../core/services/web-socket.service';
-import {DataService} from '../../../../core/services/data.service';
 import {ICurrentSlide} from '../interfaces';
 import {EWSEventQuizTypes} from '../../models';
 import {GameWindowSlideComponent} from './components/game-window-slide/game-window-slide.component';
@@ -20,7 +19,8 @@ import {GameFinishPageComponent} from './components/game-finish-page/game-finish
   ],
   templateUrl: './game-window.component.html',
   styleUrl: './game-window.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class GameWindowComponent implements OnInit, OnDestroy {
   public quizStarted = false;
@@ -36,7 +36,6 @@ export class GameWindowComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly wsService: WebSocketService,
     private cdr: ChangeDetectorRef,
-    private readonly dataService: DataService,
   ) {
     this.wsService.messages
       .pipe(takeUntil(this.destroy$))
