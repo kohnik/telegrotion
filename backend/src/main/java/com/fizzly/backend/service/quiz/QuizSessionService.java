@@ -1,12 +1,16 @@
 package com.fizzly.backend.service.quiz;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fizzly.backend.converter.QuizConverter;
 import com.fizzly.backend.dto.quiz.FullQuizGetDTO;
+import com.fizzly.backend.dto.quiz.PlayerJoinedResponse;
 import com.fizzly.backend.dto.quiz.QuizSessionAnswerDTO;
 import com.fizzly.backend.dto.quiz.QuizSessionDTO;
 import com.fizzly.backend.dto.websocket.QuestionEndedPlayerDTO;
 import com.fizzly.backend.dto.websocket.response.QuestionEndedResponse;
 import com.fizzly.backend.dto.websocket.response.QuizEndedResponse;
+import com.fizzly.backend.dto.websocket.response.UserJoinResponse;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizEvent;
 import com.fizzly.backend.entity.quiz.session.QuizSessionRoom;
@@ -46,6 +50,7 @@ public class QuizSessionService {
     private static final String ACTIVE_SESSIONS_KEY = "quiz:sessions:";
     private static final String ACTIVE_SESSIONS_JOIN_CODE_KEY = "quiz:sessions:joinCode:";
     private static final String SESSION_PARTICIPANTS_KEY = "quiz:sessions:participants:";
+    private static final String SESSION_PARTICIPANTS_UUID_KEY = "quiz:sessions:participants:uuid";
     private static final String ACTIVE_QUESTIONS_KEY = "quiz:questions:rooms:";
     private static final String SESSION_PARTICIPANTS_WITH_RESULTS_KEY = "quiz:participants:results:";
     private static final String ACTIVE_QUESTION_KEY = "quiz:question:room:";
@@ -55,6 +60,7 @@ public class QuizSessionService {
     private final QuizService quizService;
     private final FullQuizService fullQuizService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ObjectMapper objectMapper;
 
     public QuizSessionRoom startQuiz(Long quizId, Long userId) {
         LOGGER.info("Attempt to start quiz with id {}", quizId);
@@ -101,26 +107,39 @@ public class QuizSessionService {
         return room;
     }
 
-    public void joinParticipant(String joinCode, String username) {
+    public PlayerJoinedResponse joinPlayer(String joinCode, String playerName) {
         QuizSessionRoom room = getSessionRoomByJoinCode(joinCode);
 
-        boolean memberExists = redisTemplate.opsForSet().isMember(SESSION_PARTICIPANTS_KEY + room, username);
-        if (memberExists) {
-            throw new UserAlreadyExistsException(username, room.getRoomId());
+        Boolean memberExists = redisTemplate.opsForSet().isMember(SESSION_PARTICIPANTS_KEY + room.getRoomId(), playerName);
+        if (memberExists == Boolean.TRUE) {
+            throw new UserAlreadyExistsException(playerName, room.getRoomId());
         }
 
-        redisTemplate.opsForSet().add(SESSION_PARTICIPANTS_KEY + room.getRoomId(), username);
+        UUID playerId = UUID.randomUUID();
+        redisTemplate.opsForSet().add(SESSION_PARTICIPANTS_KEY + room.getRoomId(), playerName);
+        redisTemplate.opsForSet().add(SESSION_PARTICIPANTS_UUID_KEY + room.getRoomId(), playerId);
         redisTemplate.opsForSet().add(SESSION_PARTICIPANTS_WITH_RESULTS_KEY + room.getRoomId(),
-                new QuestionEndedPlayerDTO(username, 0));
-        LOGGER.info("Player with username {} joined to session with roomId {}", username, room.getRoomId());
+                new QuestionEndedPlayerDTO(playerId, playerName, 0));
+
+        int playerCount = redisTemplate.opsForSet()
+                .members(SESSION_PARTICIPANTS_KEY + room.getRoomId()).size();
+        final String topic = String.format(WebSocketTopics.JOIN_QUIZ_TOPIC, room.getRoomId());
+        final UserJoinResponse response = new UserJoinResponse(playerCount, playerName, joinCode);
+        messagingTemplate.convertAndSend(topic, response);
+
+        PlayerJoinedResponse playerResponse = new PlayerJoinedResponse(
+                room.getRoomId(),
+                joinCode,
+                playerId,
+                playerName
+        );
+        LOGGER.info("Player with username {} joined to session with roomId {}", playerName, room.getRoomId());
+
+        return playerResponse;
     }
 
     public Set<String> getAllUsersByRoomId(UUID roomId) {
-        Set<Object> members = redisTemplate.opsForSet().members(SESSION_PARTICIPANTS_KEY + roomId);
-        if (members == null) {
-            return Collections.emptySet();
-        }
-        return members.stream()
+        return redisTemplate.opsForSet().members(SESSION_PARTICIPANTS_KEY + roomId).stream()
                 .map(String.class::cast)
                 .collect(Collectors.toSet());
     }
@@ -159,7 +178,7 @@ public class QuizSessionService {
         return nextQuestion;
     }
 
-    public List<String> submitAnswer(String username, int answerOrder, double answerTime, UUID roomId) {
+    public List<String> submitAnswer(UUID playerId, int answerOrder, double answerTime, UUID roomId) {
         Object questionObj = redisTemplate.opsForValue().get(ACTIVE_QUESTION_KEY + roomId);
         if (questionObj == null) {
             LOGGER.warn("INVALID JOIN CODE");
@@ -175,11 +194,11 @@ public class QuizSessionService {
                         String.format("Не найден правильный ответ на вопрос: %d", activeQuestion.getQuestionId())
                 ));
 
-        redisTemplate.opsForSet().add(SUBMITTED_ANSWERS_KEY + roomId + activeQuestion.getQuestionId(), username);
-        LOGGER.info("User {} in session room submit answer", username);
+        redisTemplate.opsForSet().add(SUBMITTED_ANSWERS_KEY + roomId + activeQuestion.getQuestionId(), playerId);
+        LOGGER.info("User with id {} in session room submit answer", playerId);
 
         if (correctAnswer.getOrder() == answerOrder) {
-            LOGGER.info("User {} made right choise", username);
+            LOGGER.info("User with id {} made right chose", playerId);
             Set<Object> members = redisTemplate.opsForSet().members(SESSION_PARTICIPANTS_WITH_RESULTS_KEY + roomId);
             if (members == null) {
                 throw new TelegrotionException("Игроки для комнаты не найдены: " + roomId);
@@ -188,9 +207,9 @@ public class QuizSessionService {
                     .map(QuestionEndedPlayerDTO.class::cast)
                     .toList();
             QuestionEndedPlayerDTO submittedPlayer = players.stream()
-                    .filter(player -> player.getPlayerName().equals(username))
+                    .filter(player -> player.getPlayerId().equals(playerId))
                     .findFirst()
-                    .orElseThrow(() -> new UserNotFoundException(username));
+                    .orElseThrow(() -> new UserNotFoundException(playerId));
             redisTemplate.opsForSet().remove(SESSION_PARTICIPANTS_WITH_RESULTS_KEY + roomId, submittedPlayer);
             submittedPlayer.setPoints(
                     submittedPlayer.getPoints() +
@@ -203,11 +222,16 @@ public class QuizSessionService {
     }
 
     private List<String> getLeftUsers(UUID roomId, Long questionId) {
-        Set<String> submittedUsers = redisTemplate.opsForSet()
+        List<QuestionEndedPlayerDTO> allPlayers = getSubmittedAnswerPlayers(roomId);
+        List<UUID> playerIds = redisTemplate.opsForSet()
                 .members(SUBMITTED_ANSWERS_KEY + roomId + questionId)
                 .stream()
-                .map(String.class::cast)
-                .collect(Collectors.toSet());
+                .map(obj -> UUID.fromString((String) obj))
+                .toList();
+        List<String> submittedUsers = allPlayers.stream()
+                .filter(player -> playerIds.contains(player.getPlayerId()))
+                .map(QuestionEndedPlayerDTO::getPlayerName)
+                .toList();
 
         Set<String> allParticipants = redisTemplate.opsForSet()
                 .members(SESSION_PARTICIPANTS_KEY + roomId)
@@ -232,13 +256,13 @@ public class QuizSessionService {
     }
 
     @Transactional
-    public void endQuiz(String joinCode, UUID roomId) {
+    public void endQuiz(UUID roomId) {
         redisTemplate.delete(ACTIVE_QUESTIONS_KEY + roomId);
         redisTemplate.opsForHash().delete(ACTIVE_SESSIONS_KEY, roomId);
 
-        redisTemplate.delete(SESSION_PARTICIPANTS_KEY + joinCode);
+        redisTemplate.delete(SESSION_PARTICIPANTS_KEY + roomId);
 
-        LOGGER.info("Session room was closed {}", joinCode);
+        LOGGER.info("Session room was closed {}", roomId);
     }
 
     public void validateJoinCode(String joinCode) {
@@ -257,17 +281,18 @@ public class QuizSessionService {
                 .toList();
     }
 
-    public void nextQuestion(String joinCode, UUID roomId) {
-        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, roomId);
+    public void nextQuestion(String joinCode, UUID roomId) throws JsonProcessingException {
+        final String topic = String.format(WebSocketTopics.JOIN_QUIZ_TOPIC, roomId);
         List<QuestionEndedPlayerDTO> players = getSubmittedAnswerPlayers(roomId);
 
         QuizSessionDTO question = getNextQuestion(roomId);
         if (question == null) {
             messagingTemplate.convertAndSend(topic, new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), players));
-            endQuiz(joinCode, roomId);
+            endQuiz(roomId);
             return;
         }
 
+        saveEventData(roomId, QuizEvent.NEW_QUESTION, question, "");
         messagingTemplate.convertAndSend(topic, question);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -285,8 +310,16 @@ public class QuizSessionService {
             }
 
             if (question.isLast()) {
-                messagingTemplate.convertAndSend(topic, new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), getSubmittedAnswerPlayers(roomId)));
-                endQuiz(joinCode, roomId);
+                QuizEndedResponse response = new QuizEndedResponse(
+                        QuizEvent.QUIZ_FINISHED.getId(), getSubmittedAnswerPlayers(roomId)
+                );
+                try {
+                    saveEventData(roomId, QuizEvent.QUIZ_FINISHED, response, "");
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+                messagingTemplate.convertAndSend(topic, response);
+                endQuiz(roomId);
                 return;
             }
             int order = question.getAnswers().stream()
@@ -296,11 +329,29 @@ public class QuizSessionService {
                     )
                     .getOrder();
 
-            messagingTemplate.convertAndSend(topic,
-                    new QuestionEndedResponse(QuizEvent.QUESTION_ENDED.getId(), order, getSubmittedAnswerPlayers(roomId))
+            QuestionEndedResponse response = new QuestionEndedResponse(
+                    QuizEvent.QUESTION_ENDED.getId(), order, getSubmittedAnswerPlayers(roomId)
             );
+            messagingTemplate.convertAndSend(topic, response);
+            try {
+                saveEventData(roomId, QuizEvent.QUESTION_ENDED, response, "");
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             LOGGER.info("Question in session room {} was ended", joinCode);
         });
         executorService.shutdown();
+    }
+
+    private static final String CURRENT_EVENT_PREFIX = "events:quiz";
+    private static final String CURRENT_EVENT_PAYLOAD_PREFIX = "events:quiz:payload";
+
+    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId)
+            throws JsonProcessingException {
+        redisTemplate.opsForValue().set(CURRENT_EVENT_PREFIX + roomId.toString(), event);
+        redisTemplate.opsForValue().set(
+                CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId,
+                objectMapper.writeValueAsString(payload)
+        );
     }
 }

@@ -6,7 +6,7 @@ public class WebSocketTopics {
 
     public static final String BRAIN_RING = "/brain-ring";
 
-    public static final String JOIN_TOPIC = TOPIC_PREFIX + "/session/%s";
+    public static final String JOIN_QUIZ_TOPIC = TOPIC_PREFIX + "/quiz/%s";
 
     public static final String BRAIN_RING_TOPIC_PREFIX = TOPIC_PREFIX + BRAIN_RING;
 

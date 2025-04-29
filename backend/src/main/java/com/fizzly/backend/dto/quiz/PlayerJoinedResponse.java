@@ -1,19 +1,19 @@
-package com.fizzly.backend.dto.websocket;
+package com.fizzly.backend.dto.quiz;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuestionEndedPlayerDTO implements Serializable {
+public class PlayerJoinedResponse {
+    private UUID roomId;
+    private String joinCode;
     private UUID playerId;
     private String playerName;
-    private int points;
 }

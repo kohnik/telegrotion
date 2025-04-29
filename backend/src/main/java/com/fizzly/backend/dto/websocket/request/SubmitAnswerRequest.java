@@ -9,7 +9,7 @@ import java.util.UUID;
 @Setter
 public class SubmitAnswerRequest {
     private UUID roomId;
-    private String playerName;
+    private UUID playerId;
     private int answer;
     private double timeSpent;
 }
