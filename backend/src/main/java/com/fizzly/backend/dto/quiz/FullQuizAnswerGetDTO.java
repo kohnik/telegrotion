@@ -9,6 +9,9 @@ import lombok.Setter;
 @Schema(description = "DTO для получения полного квиза (DTO для ответа)")
 public class FullQuizAnswerGetDTO {
 
+    @Schema(description = "ИД ответа на вопрос")
+    private Long id;
+
     @Schema(description = "Название вопроса")
     private String answer;
 

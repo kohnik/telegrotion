@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +54,16 @@ public class FullQuizController {
     public ResponseEntity<Void> deleteQuizById(@PathVariable("quizId") Long quizId) {
         fullQuizService.deleteQuizById(quizId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PutMapping("/{quizId}")
+    @Operation(summary = "Обновить квиз по ИД")
+    public ResponseEntity<Void> updateQuizById(
+            @PathVariable("quizId") Long quizId,
+            @RequestBody FullQuizGetDTO dto
+    ) {
+        fullQuizService.updateQuizById(quizId, dto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }
