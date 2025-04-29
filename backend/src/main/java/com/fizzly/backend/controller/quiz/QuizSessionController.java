@@ -1,12 +1,10 @@
 package com.fizzly.backend.controller.quiz;
 
-import com.fizzly.backend.entity.QuizSession;
-import com.fizzly.backend.entity.SessionParticipant;
+import com.fizzly.backend.dto.quiz.PlayerJoinedResponse;
+import com.fizzly.backend.entity.quiz.session.QuizSessionRoom;
 import com.fizzly.backend.service.quiz.QuizSessionService;
-import com.fizzly.backend.utils.WebSocketTopics;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/quiz-session")
@@ -32,7 +31,7 @@ public class QuizSessionController {
 
     @PostMapping("/start")
     @Operation(summary = "Создать комнату квиза")
-    public ResponseEntity<QuizSession> startQuizSession(@RequestBody QuizStartDTO quizStartDTO) {
+    public ResponseEntity<QuizSessionRoom> startQuizSession(@RequestBody QuizStartDTO quizStartDTO) {
         return ResponseEntity.ok(
                 quizSessionService.startQuiz(quizStartDTO.quizId, quizStartDTO.userId)
         );
@@ -40,14 +39,10 @@ public class QuizSessionController {
 
     @PostMapping("/join")
     @Operation(summary = "Присоединить участника")
-    public ResponseEntity<Void> joinParticipant(@RequestBody JoinRequest joinRequest) {
-        quizSessionService.addParticipant(joinRequest.getJoinCode(), joinRequest.getUsername());
-        QuizSession session = quizSessionService.getSession(joinRequest.getJoinCode());
-
-        final String topic = String.format(WebSocketTopics.JOIN_TOPIC, session.getJoinCode());
-        final UserJoinResponse response = new UserJoinResponse(session.getParticipants().size(), joinRequest.username, session.getJoinCode());
-        messagingTemplate.convertAndSend(topic, response);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PlayerJoinedResponse> joinParticipant(@RequestBody JoinRequest joinRequest) {
+        return ResponseEntity.ok(
+                quizSessionService.joinPlayer(joinRequest.getJoinCode(), joinRequest.getPlayerName())
+        );
     }
 
     @PostMapping("/validate")
@@ -57,18 +52,10 @@ public class QuizSessionController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("{joinCode}/participants")
+    @GetMapping("{roomId}/players")
     @Operation(summary = "Получить участников по текущей сессии")
-    public ResponseEntity<CurrentUserSessionStateResponse> getQuizParticipants(@PathVariable String joinCode) {
-        QuizSession session = quizSessionService.getSession(joinCode);
-        List<SessionParticipant> participants = session.getParticipants();
-        return ResponseEntity.ok(new CurrentUserSessionStateResponse(
-                        participants.size(), joinCode,
-                        participants.stream()
-                                .map(SessionParticipant::getUsername)
-                                .toList()
-                )
-        );
+    public Set<String> getQuizPlayers(@PathVariable UUID roomId) {
+        return quizSessionService.getAllUsersByRoomId(roomId);
     }
 
     @Getter
@@ -82,26 +69,26 @@ public class QuizSessionController {
     @Setter
     public static class JoinRequest {
         private String joinCode;
-        private String username;
+        private String playerName;
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    private static class UserJoinResponse {
-        private int userCount;
-        private String username;
-        private String joinCode;
-    }
+//    @Getter
+//    @Setter
+//    @AllArgsConstructor
+//    private static class UserJoinResponse {
+//        private int userCount;
+//        private String username;
+//        private String joinCode;
+//    }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    private static class CurrentUserSessionStateResponse {
-        private int userCount;
-        private String joinCode;
-        private List<String> users;
-    }
+//    @Getter
+//    @Setter
+//    @AllArgsConstructor
+//    private static class CurrentUserSessionStateResponse {
+//        private int userCount;
+//        private String joinCode;
+//        private List<String> users;
+//    }
 
     @Getter
     @Setter

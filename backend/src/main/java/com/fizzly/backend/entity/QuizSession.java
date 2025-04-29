@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Table
 @Getter
 @Setter
-public class QuizSession {
+public class QuizSession implements Serializable {
 
     @Id
     private UUID id = UUID.randomUUID();

@@ -2,9 +2,9 @@ spring:
   application:
     name: telegrotion
   datasource:
-    url: ${DB.URL:jdbc:postgresql://localhost:5432/telegrotion}
-    username: ${DB.USERNAME:postgres}
-    password: ${DB.PASSWORD:postgres}
+    url: ${DB.URL:jdbc:postgresql://localhost:5432/fizzly}
+    username: ${DB.USERNAME:alexander}
+    password: ${DB.PASSWORD:}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:

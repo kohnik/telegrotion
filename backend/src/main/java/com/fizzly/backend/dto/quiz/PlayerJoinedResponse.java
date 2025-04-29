@@ -5,14 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serializable;
+import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuizSessionAnswerDTO implements Serializable {
-    private String answer;
-    private int order;
-    private boolean isCorrect;
+public class PlayerJoinedResponse {
+    private UUID roomId;
+    private String joinCode;
+    private UUID playerId;
+    private String playerName;
 }

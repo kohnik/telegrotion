@@ -10,12 +10,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "SESSION_PARTICIPANTS")
 @Getter
 @Setter
 @ToString
-public class SessionParticipant {
+public class SessionParticipant implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

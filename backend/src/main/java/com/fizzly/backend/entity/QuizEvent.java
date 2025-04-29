@@ -2,8 +2,10 @@ package com.fizzly.backend.entity;
 
 import lombok.Getter;
 
+import java.io.Serializable;
+
 @Getter
-public enum QuizEvent {
+public enum QuizEvent implements Serializable {
     QUIZ_STARTED(1L, "quizStarted"),
     QUESTION_ENDED(2L, "questionEnded"),
     ANSWER_SUBMITTED(3L, "answerSubmitted"),
