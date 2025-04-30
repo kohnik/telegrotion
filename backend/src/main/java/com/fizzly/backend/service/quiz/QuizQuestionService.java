@@ -3,6 +3,7 @@ package com.fizzly.backend.service.quiz;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizQuestion;
 import com.fizzly.backend.exception.QuizNotFoundException;
+import com.fizzly.backend.exception.QuizQuestionNotFoundException;
 import com.fizzly.backend.repository.QuizQuestionRepository;
 import com.fizzly.backend.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +36,10 @@ public class QuizQuestionService {
     @Transactional
     public void deleteQuestions(List<QuizQuestion> questions) {
         quizQuestionRepository.deleteAll(questions);
+    }
+
+    public QuizQuestion findById(Long id) {
+        return quizQuestionRepository.findById(id)
+                .orElseThrow(() -> new QuizQuestionNotFoundException(id));
     }
 }

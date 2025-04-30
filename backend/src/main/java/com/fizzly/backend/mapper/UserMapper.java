@@ -1,6 +1,6 @@
 package com.fizzly.backend.mapper;
 
-import com.fizzly.backend.dto.UserCreateDTO;
+import by.fizzly.common.dto.UserCreateDTO;
 import com.fizzly.backend.entity.User;
 import org.mapstruct.Mapper;
 

@@ -1,16 +1,16 @@
 package com.fizzly.backend.websocket.quiz;
 
+import by.fizzly.common.dto.quiz.QuizSessionDTO;
+import by.fizzly.common.dto.websocket.request.NextQuestionRequest;
+import by.fizzly.common.dto.websocket.request.StartSessionRequest;
+import by.fizzly.common.dto.websocket.request.SubmitAnswerRequest;
+import by.fizzly.common.dto.websocket.response.QuestionEndedResponse;
+import by.fizzly.common.dto.websocket.response.QuizEndedResponse;
+import by.fizzly.common.dto.websocket.response.StartSessionResponse;
+import by.fizzly.common.dto.websocket.response.SubmitAnswerResponse;
+import by.fizzly.common.event.QuizEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fizzly.backend.dto.quiz.QuizSessionDTO;
-import com.fizzly.backend.dto.websocket.request.NextQuestionRequest;
-import com.fizzly.backend.dto.websocket.request.StartSessionRequest;
-import com.fizzly.backend.dto.websocket.request.SubmitAnswerRequest;
-import com.fizzly.backend.dto.websocket.response.QuestionEndedResponse;
-import com.fizzly.backend.dto.websocket.response.QuizEndedResponse;
-import com.fizzly.backend.dto.websocket.response.StartSessionResponse;
-import com.fizzly.backend.dto.websocket.response.SubmitAnswerResponse;
-import com.fizzly.backend.entity.QuizEvent;
 import com.fizzly.backend.service.quiz.QuizSessionService;
 import com.fizzly.backend.utils.WebSocketTopics;
 import lombok.Getter;
@@ -47,7 +47,7 @@ public class QuizControlController {
                 QuizEvent.QUIZ_STARTED.getId(),
                 joinCode,
                 questionsCount);
-        saveEventData(request.getRoomId(), QuizEvent.QUIZ_STARTED, startSessionResponse, "");
+//        saveEventData(request.getRoomId(), QuizEvent.QUIZ_STARTED, startSessionResponse, "");
         messagingTemplate.convertAndSend(topic, startSessionResponse);
     }
 
@@ -69,7 +69,7 @@ public class QuizControlController {
         SubmitAnswerResponse submitAnswerResponse = new SubmitAnswerResponse(
                 QuizEvent.ANSWER_SUBMITTED.getId(), request.getPlayerId(), usersLeft
         );
-        saveEventData(request.getRoomId(), QuizEvent.ANSWER_SUBMITTED, submitAnswerResponse, request.getPlayerId().toString());
+//        saveEventData(request.getRoomId(), QuizEvent.ANSWER_SUBMITTED, submitAnswerResponse, request.getPlayerId().toString());
         messagingTemplate.convertAndSend(topic, submitAnswerResponse);
     }
 
@@ -112,14 +112,14 @@ public class QuizControlController {
         }
     }
 
-    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId)
-            throws JsonProcessingException {
-        redisTemplate.opsForValue().set(CURRENT_EVENT_PREFIX + roomId + playerId, event);
-        redisTemplate.opsForValue().set(
-                CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId,
-                objectMapper.writeValueAsString(payload)
-        );
-    }
+//    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId)
+//            throws JsonProcessingException {
+//        redisTemplate.opsForValue().set(CURRENT_EVENT_PREFIX + roomId + playerId, event);
+//        redisTemplate.opsForValue().set(
+//                CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId,
+//                objectMapper.writeValueAsString(payload)
+//        );
+//    }
 
     @Getter
     @Setter
