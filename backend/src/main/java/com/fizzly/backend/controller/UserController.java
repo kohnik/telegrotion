@@ -1,6 +1,6 @@
 package com.fizzly.backend.controller;
 
-import com.fizzly.backend.dto.UserCreateDTO;
+import by.fizzly.common.dto.UserCreateDTO;
 import com.fizzly.backend.entity.User;
 import com.fizzly.backend.mapper.UserMapper;
 import com.fizzly.backend.service.UserService;

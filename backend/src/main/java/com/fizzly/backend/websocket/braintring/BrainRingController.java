@@ -1,17 +1,17 @@
 package com.fizzly.backend.websocket.braintring;
 
+import by.fizzly.common.event.BrainRingEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fizzly.backend.dto.brainring.ActiveRoomRequestDTO;
-import com.fizzly.backend.dto.brainring.AnswerRequestDTO;
-import com.fizzly.backend.dto.brainring.AnswerResponseDTO;
-import com.fizzly.backend.dto.brainring.AnswerResponseWithEventDTO;
-import com.fizzly.backend.dto.brainring.BrainRingActiveRoom;
-import com.fizzly.backend.dto.brainring.BrainRingActiveRoomWithEventDTO;
-import com.fizzly.backend.dto.brainring.NextQuestionResponseDTO;
-import com.fizzly.backend.dto.websocket.request.CurrentStateRequest;
-import com.fizzly.backend.dto.websocket.request.CurrentStateResponse;
-import com.fizzly.backend.entity.BrainRingEvent;
+import by.fizzly.common.dto.brainring.ActiveRoomRequestDTO;
+import by.fizzly.common.dto.brainring.AnswerRequestDTO;
+import by.fizzly.common.dto.brainring.AnswerResponseDTO;
+import by.fizzly.common.dto.brainring.AnswerResponseWithEventDTO;
+import by.fizzly.common.dto.brainring.BrainRingActiveRoom;
+import by.fizzly.common.dto.brainring.BrainRingActiveRoomWithEventDTO;
+import by.fizzly.common.dto.brainring.NextQuestionResponseDTO;
+import by.fizzly.common.dto.websocket.request.CurrentStateRequest;
+import by.fizzly.common.dto.websocket.request.CurrentStateResponse;
 import com.fizzly.backend.exception.RoomNotFoundException;
 import com.fizzly.backend.service.brainring.BrainRingService;
 import com.fizzly.backend.utils.WebSocketEndpoints;

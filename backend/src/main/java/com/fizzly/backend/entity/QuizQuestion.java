@@ -1,7 +1,10 @@
 package com.fizzly.backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,5 +34,12 @@ public class QuizQuestion {
     private int ordering;
 
     private int seconds;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "media_type")
+    private QuizMediaType mediaType;
+
+    @Column(name = "file_path")
+    private String filePath;
 
 }

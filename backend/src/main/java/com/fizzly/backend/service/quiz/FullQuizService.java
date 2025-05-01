@@ -1,26 +1,33 @@
 package com.fizzly.backend.service.quiz;
 
-import com.fizzly.backend.dto.UserGetDTO;
-import com.fizzly.backend.dto.quiz.FullQuizAnswerGetDTO;
-import com.fizzly.backend.dto.quiz.FullQuizCreateDTO;
-import com.fizzly.backend.dto.quiz.FullQuizGetDTO;
-import com.fizzly.backend.dto.quiz.FullQuizQuestionGetDTO;
-import com.fizzly.backend.dto.quiz.GetListQuizDTO;
+import by.fizzly.common.dto.UserGetDTO;
+import by.fizzly.common.dto.quiz.FullQuizAnswerGetDTO;
+import by.fizzly.common.dto.quiz.FullQuizCreateDTO;
+import by.fizzly.common.dto.quiz.FullQuizGetDTO;
+import by.fizzly.common.dto.quiz.FullQuizQuestionGetDTO;
+import by.fizzly.common.dto.quiz.GetListQuizDTO;
+import by.fizzly.common.dto.quiz.QuizContentRequest;
 import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizAnswer;
+import com.fizzly.backend.entity.QuizMediaType;
 import com.fizzly.backend.entity.QuizQuestion;
-import com.fizzly.backend.exception.EntityNotFoundException;
+import com.fizzly.backend.exception.TelegrotionException;
 import com.fizzly.backend.repository.QuizAnswerRepository;
 import com.fizzly.backend.repository.QuizQuestionRepository;
 import com.fizzly.backend.repository.QuizRepository;
+import com.fizzly.backend.service.StorageService;
+import com.google.cloud.storage.Blob;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,6 +41,7 @@ public class FullQuizService {
     private final QuizQuestionRepository quizQuestionRepository;
     private final QuizAnswerRepository quizAnswerRepository;
     private final QuizRepository quizRepository;
+    private final StorageService storageService;
 
     @Transactional
     public Quiz createFullQuiz(FullQuizCreateDTO quizDTO) {
@@ -264,4 +272,31 @@ public class FullQuizService {
         return answer;
     }
 
+    @Transactional
+    public void saveQuestionContent(QuizContentRequest request, MultipartFile file) {
+        Quiz quiz = quizService.findByQuizId(request.getQuizId());
+        QuizQuestion question = quizQuestionService.findById(request.getQuestionId());
+
+        String fileName = UUID.randomUUID().toString();
+        QuizMediaType quizMediaType = QuizMediaType.fromContentType(file.getContentType());
+
+        question.setMediaType(quizMediaType);
+        question.setFilePath(fileName);
+        quizQuestionRepository.save(question);
+
+        try {
+            storageService.uploadFile(file.getInputStream(), fileName, String.valueOf(quiz.getId()));
+        } catch (IOException e) {
+            throw new TelegrotionException(e.getMessage(), e);
+        }
+    }
+
+    public byte[] getQuestionContent(Long questionId, Long quizId) {
+        Quiz quiz = quizService.findByQuizId(quizId);
+        QuizQuestion question = quizQuestionService.findById(questionId);
+
+        Blob blob = storageService.getFile(question.getFilePath(), String.valueOf(quiz.getId()));
+
+        return blob == null ? null : blob.getContent();
+    }
 }

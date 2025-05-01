@@ -73,7 +73,7 @@
             return;
         }
 
-        const wsUrl = `ws://localhost:8080/quiz-websocket`;
+        const wsUrl = `ws://localhost:8081/quiz-websocket`;
         addMessage(`Connecting to ${wsUrl}...`, 'system');
 
         stompClient = new StompJs.Client({

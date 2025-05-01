@@ -1,12 +1,12 @@
 package com.fizzly.backend.service.brainring;
 
-import com.fizzly.backend.dto.brainring.AnswerResponseDTO;
-import com.fizzly.backend.dto.brainring.BrainRingActiveRoom;
-import com.fizzly.backend.dto.brainring.BrainRingJoinRoomDTO;
-import com.fizzly.backend.dto.brainring.BrainRingPlayer;
-import com.fizzly.backend.dto.brainring.BrainRingRoomDTO;
-import com.fizzly.backend.dto.brainring.BrainRingRoomFullDTO;
-import com.fizzly.backend.dto.brainring.PlayerExistsResponse;
+import by.fizzly.common.dto.brainring.AnswerResponseDTO;
+import by.fizzly.common.dto.brainring.BrainRingActiveRoom;
+import by.fizzly.common.dto.brainring.BrainRingJoinRoomDTO;
+import by.fizzly.common.dto.brainring.BrainRingPlayer;
+import by.fizzly.common.dto.brainring.BrainRingRoomDTO;
+import by.fizzly.common.dto.brainring.BrainRingRoomFullDTO;
+import by.fizzly.common.dto.brainring.PlayerExistsResponse;
 import com.fizzly.backend.exception.PLayerNotFoundException;
 import com.fizzly.backend.exception.RoomNotFoundException;
 import com.fizzly.backend.exception.TelegrotionException;

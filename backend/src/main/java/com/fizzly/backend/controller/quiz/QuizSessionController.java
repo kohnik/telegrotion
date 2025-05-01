@@ -1,7 +1,7 @@
 package com.fizzly.backend.controller.quiz;
 
-import com.fizzly.backend.dto.quiz.PlayerJoinedResponse;
-import com.fizzly.backend.entity.quiz.session.QuizSessionRoom;
+import by.fizzly.common.dto.quiz.PlayerJoinedResponse;
+import by.fizzly.common.dto.quiz.QuizSessionRoom;
 import com.fizzly.backend.service.quiz.QuizSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

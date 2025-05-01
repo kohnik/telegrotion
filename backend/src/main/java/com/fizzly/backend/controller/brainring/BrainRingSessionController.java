@@ -1,16 +1,16 @@
 package com.fizzly.backend.controller.brainring;
 
-import com.fizzly.backend.dto.brainring.BrainRingEndSessionRequest;
-import com.fizzly.backend.dto.brainring.BrainRingJoinRoomDTO;
-import com.fizzly.backend.dto.brainring.BrainRingRoomDTO;
-import com.fizzly.backend.dto.brainring.BrainRingRoomFullDTO;
-import com.fizzly.backend.dto.brainring.DeletePlayerRequestDTO;
-import com.fizzly.backend.dto.brainring.JoinRoomRequestDTO;
-import com.fizzly.backend.dto.brainring.PlayerExistsRequest;
-import com.fizzly.backend.dto.brainring.PlayerExistsResponse;
-import com.fizzly.backend.dto.brainring.RoomDescriptionDTO;
-import com.fizzly.backend.dto.websocket.response.BrainRingSessionEndedResponse;
-import com.fizzly.backend.entity.BrainRingEvent;
+import by.fizzly.common.dto.brainring.BrainRingEndSessionRequest;
+import by.fizzly.common.dto.brainring.BrainRingJoinRoomDTO;
+import by.fizzly.common.dto.brainring.BrainRingRoomDTO;
+import by.fizzly.common.dto.brainring.BrainRingRoomFullDTO;
+import by.fizzly.common.dto.brainring.DeletePlayerRequestDTO;
+import by.fizzly.common.dto.brainring.JoinRoomRequestDTO;
+import by.fizzly.common.dto.brainring.PlayerExistsRequest;
+import by.fizzly.common.dto.brainring.PlayerExistsResponse;
+import by.fizzly.common.dto.brainring.RoomDescriptionDTO;
+import by.fizzly.common.dto.websocket.response.BrainRingSessionEndedResponse;
+import by.fizzly.common.event.BrainRingEvent;
 import com.fizzly.backend.service.brainring.BrainRingService;
 import com.fizzly.backend.utils.WebSocketTopics;
 import io.swagger.v3.oas.annotations.Operation;

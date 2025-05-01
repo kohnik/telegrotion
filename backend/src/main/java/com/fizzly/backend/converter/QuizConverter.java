@@ -1,9 +1,9 @@
 package com.fizzly.backend.converter;
 
-import com.fizzly.backend.dto.quiz.FullQuizAnswerGetDTO;
-import com.fizzly.backend.dto.quiz.FullQuizQuestionGetDTO;
-import com.fizzly.backend.dto.quiz.QuizSessionAnswerDTO;
-import com.fizzly.backend.dto.quiz.QuizSessionDTO;
+import by.fizzly.common.dto.quiz.FullQuizAnswerGetDTO;
+import by.fizzly.common.dto.quiz.FullQuizQuestionGetDTO;
+import by.fizzly.common.dto.quiz.QuizSessionAnswerDTO;
+import by.fizzly.common.dto.quiz.QuizSessionDTO;
 
 public class QuizConverter {
 

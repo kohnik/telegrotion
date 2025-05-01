@@ -1,19 +1,19 @@
 package com.fizzly.backend.service.quiz;
 
+import by.fizzly.common.dto.quiz.FullQuizGetDTO;
+import by.fizzly.common.dto.quiz.PlayerJoinedResponse;
+import by.fizzly.common.dto.quiz.QuizSessionAnswerDTO;
+import by.fizzly.common.dto.quiz.QuizSessionDTO;
+import by.fizzly.common.dto.quiz.QuizSessionRoom;
+import by.fizzly.common.dto.websocket.QuestionEndedPlayerDTO;
+import by.fizzly.common.dto.websocket.response.QuestionEndedResponse;
+import by.fizzly.common.dto.websocket.response.QuizEndedResponse;
+import by.fizzly.common.dto.websocket.response.UserJoinResponse;
+import by.fizzly.common.event.QuizEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fizzly.backend.converter.QuizConverter;
-import com.fizzly.backend.dto.quiz.FullQuizGetDTO;
-import com.fizzly.backend.dto.quiz.PlayerJoinedResponse;
-import com.fizzly.backend.dto.quiz.QuizSessionAnswerDTO;
-import com.fizzly.backend.dto.quiz.QuizSessionDTO;
-import com.fizzly.backend.dto.websocket.QuestionEndedPlayerDTO;
-import com.fizzly.backend.dto.websocket.response.QuestionEndedResponse;
-import com.fizzly.backend.dto.websocket.response.QuizEndedResponse;
-import com.fizzly.backend.dto.websocket.response.UserJoinResponse;
 import com.fizzly.backend.entity.Quiz;
-import com.fizzly.backend.entity.QuizEvent;
-import com.fizzly.backend.entity.quiz.session.QuizSessionRoom;
 import com.fizzly.backend.exception.FizzlyAccessDeniedException;
 import com.fizzly.backend.exception.InvalidJoinCodeException;
 import com.fizzly.backend.exception.RoomNotFoundException;
@@ -292,7 +292,7 @@ public class QuizSessionService {
             return;
         }
 
-        saveEventData(roomId, QuizEvent.NEW_QUESTION, question, "");
+//        saveEventData(roomId, QuizEvent.NEW_QUESTION, question, "");
         messagingTemplate.convertAndSend(topic, question);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -313,11 +313,11 @@ public class QuizSessionService {
                 QuizEndedResponse response = new QuizEndedResponse(
                         QuizEvent.QUIZ_FINISHED.getId(), getSubmittedAnswerPlayers(roomId)
                 );
-                try {
-                    saveEventData(roomId, QuizEvent.QUIZ_FINISHED, response, "");
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
+//                try {
+//                    saveEventData(roomId, QuizEvent.QUIZ_FINISHED, response, "");
+//                } catch (JsonProcessingException e) {
+//                    throw new RuntimeException(e);
+//                }
                 messagingTemplate.convertAndSend(topic, response);
                 endQuiz(roomId);
                 return;
@@ -333,11 +333,11 @@ public class QuizSessionService {
                     QuizEvent.QUESTION_ENDED.getId(), order, getSubmittedAnswerPlayers(roomId)
             );
             messagingTemplate.convertAndSend(topic, response);
-            try {
-                saveEventData(roomId, QuizEvent.QUESTION_ENDED, response, "");
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+//            try {
+//                saveEventData(roomId, QuizEvent.QUESTION_ENDED, response, "");
+//            } catch (JsonProcessingException e) {
+//                throw new RuntimeException(e);
+//            }
             LOGGER.info("Question in session room {} was ended", joinCode);
         });
         executorService.shutdown();
@@ -346,12 +346,12 @@ public class QuizSessionService {
     private static final String CURRENT_EVENT_PREFIX = "events:quiz";
     private static final String CURRENT_EVENT_PAYLOAD_PREFIX = "events:quiz:payload";
 
-    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId)
-            throws JsonProcessingException {
-        redisTemplate.opsForValue().set(CURRENT_EVENT_PREFIX + roomId.toString(), event);
-        redisTemplate.opsForValue().set(
-                CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId,
-                objectMapper.writeValueAsString(payload)
-        );
-    }
+//    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId)
+//            throws JsonProcessingException {
+//        redisTemplate.opsForValue().set(CURRENT_EVENT_PREFIX + roomId.toString(), event);
+//        redisTemplate.opsForValue().set(
+//                CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId,
+//                objectMapper.writeValueAsString(payload)
+//        );
+//    }
 }
