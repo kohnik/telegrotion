@@ -1,5 +1,6 @@
 <div class="game-controller" [class.is-game]="isWaiting">
-  <div class="game-controller__logo" (click)="goToMainPage()">Fizzly</div>
+  <app-brain-ring-logo></app-brain-ring-logo>
+
   <div class="game-controller__container" [class.is-game]="isWaiting">
     @if (isWaiting) {
       <span class="game-controller__waiting">Ожидание</span>

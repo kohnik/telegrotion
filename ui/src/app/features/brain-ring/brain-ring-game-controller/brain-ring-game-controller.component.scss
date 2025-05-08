@@ -4,10 +4,6 @@
 .game-controller {
   @include main-background();
 
-  &__logo {
-    @include logo-style();
-  }
-
   &__buzz-button {
     @include text-style($size: 48px);
 

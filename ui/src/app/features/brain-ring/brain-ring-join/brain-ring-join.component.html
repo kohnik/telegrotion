@@ -1,5 +1,5 @@
 <div class="join-to" [formGroup]="form">
-  <div class="join-to__logo" (click)="goToMainPage()">Fizzly</div>
+  <app-brain-ring-logo></app-brain-ring-logo>
   <div class="join-to__login" [formGroup]="form">
           <span class="join-to__login-title">
             Введите {{ isAfterQrCodeRedirect ? '' : 'код комнаты и'}} название команды!

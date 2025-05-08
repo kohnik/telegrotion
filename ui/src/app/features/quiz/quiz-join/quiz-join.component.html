@@ -1,0 +1,24 @@
+<div class="join">
+  <app-quiz-logo></app-quiz-logo>
+  <div class="join__container" [formGroup]="form">
+    <span class="join__title">Введите код комнаты и ник</span>
+    <input placeholder="код комнаты" formControlName="joinCode">
+    <input placeholder="ник" formControlName="playerName">
+
+    <button
+      class="join__go"
+      [disabled]="form.invalid"
+      [class.disabled]="form.invalid"
+      (click)="$event.preventDefault(); goToLobby()"
+    >
+      Вход
+    </button>
+
+    <span  class="join__error">{{errorMessage}}</span>
+  </div>
+</div>
+
+
+@if (isLoading) {
+  <app-loader></app-loader>
+}

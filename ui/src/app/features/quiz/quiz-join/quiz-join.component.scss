@@ -1,0 +1,70 @@
+@import '../styles/quiz-colors';
+@import '../styles/quiz-mixins';
+
+:host {
+  display: block;
+  background: linear-gradient(135deg, #6566e6, #4c6cee);
+}
+
+.join {
+  @include main-background;
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: $color-text-light;
+  }
+
+  &__title {
+    @include text-style($size: 30px, $font-weight: bold);
+    text-align: center;
+  }
+
+  &__go {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    padding: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+
+    background-color: $color-button-secondary;
+    box-shadow: 0 8px 16px 0 $color-box-shadow-secondary;
+
+    @include text-style($size: 14px, $font-weight: bold);
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: unset;
+    }
+
+    //&:not(.disabled):hover {
+    //  background-color: $color-orange-darker;
+    //}
+  }
+
+  input {
+    background-color: $color-text-light;
+    text-align: center;
+    border-radius: 20px;
+    border: none;
+    padding: 6px 8px;
+    outline: none;
+
+    @include text-style($size: 16px, $color: $color-text-dark);
+  }
+
+  &__error {
+    display: block;
+    height: 25px;
+    width: 100%;
+
+    @include text-style($size: 16px, $color: $color-text-dark);
+  }
+
+}

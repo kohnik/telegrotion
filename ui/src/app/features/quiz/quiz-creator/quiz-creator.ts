@@ -8,13 +8,15 @@ import {QuizManagementService} from './services/quiz-management.service';
 import {catchError, EMPTY, Observable, of, Subject, Subscription, switchMap, takeUntil, throwError} from 'rxjs';
 import {QuizSlidePropertyComponent} from './components/quiz-slide-property/quiz-slide-property.component';
 import {QuizDataService} from '../quiz.service';
+import {SymbolSpritePipe} from '../../../shared/pipes/symbol-sprite.pipe';
 
 @Component({
   selector: 'app-quiz',
   imports: [
     QuizSlidesComponent,
     QuizWorkflowComponent,
-    QuizSlidePropertyComponent
+    QuizSlidePropertyComponent,
+    SymbolSpritePipe
   ],
   templateUrl: './quiz-creator.html',
   standalone: true,
@@ -27,8 +29,6 @@ export class QuizCreator implements OnInit, OnDestroy {
   public slides$: Observable<ICrateQuizSlide[]>
   private subs = new Subscription();
   public isEditing = false;
-  public quizName = ''
-
 
   constructor(
     private readonly router: Router,
@@ -81,10 +81,11 @@ export class QuizCreator implements OnInit, OnDestroy {
     this.router.navigate(['/quiz-library'])
   }
 
-  createQuiz(): void {
-    this.quizManagementService.createNewQuiz(this.quizName).subscribe(() => {
-      this.router.navigate(['/quiz-library']);
-    })
+  isPanelOpen = false;
+
+  // Метод для переключения состояния панели
+  togglePanel() {
+    this.isPanelOpen = !this.isPanelOpen;
   }
 
 }

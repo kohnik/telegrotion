@@ -1,6 +1,11 @@
-import {IBrainRingCreateTeamResponse} from './interfaces';
+export interface IUserLocalData {
+  roomId: string,
+  joinCode: string,
+  playerName: string,
+  playerId: string
+}
 
-export const setLocalStorageUserData = (data: IBrainRingCreateTeamResponse) => {
+export const setLocalStorageUserData = (data: IUserLocalData) => {
   localStorage.setItem('user-data', JSON.stringify(data));
 }
 
@@ -8,7 +13,7 @@ export const clearLocalStorageUserData = () => {
   localStorage.removeItem('user-data');
 }
 
-export const getLocalStorageUserData = (): IBrainRingCreateTeamResponse | null => {
+export const getLocalStorageUserData = (): IUserLocalData | null => {
   try {
     let data = localStorage.getItem('user-data');
     return data ? JSON.parse(data) : null;

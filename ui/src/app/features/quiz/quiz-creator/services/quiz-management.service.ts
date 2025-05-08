@@ -50,6 +50,13 @@ export class QuizManagementService {
     }));
   }
 
+  updateSlideImage(imageUrl: string): void {
+    this.updateSlide(slide => ({
+      ...slide,
+      img: imageUrl,
+    }));
+  }
+
   updateSlideProperty(updatedSlide: ICrateQuizSlide): void {
     this.updateSlide(slide => ({
       ...updatedSlide
@@ -91,11 +98,11 @@ export class QuizManagementService {
       order: this._slides.getValue().length,
       seconds: 20,
       img: '',
-      points: 20,
+      points: 500,
       answers: [
         {
           answer: 'dfdsf',
-          correct: false,
+          correct: true,
           order: 0,
         },
         {

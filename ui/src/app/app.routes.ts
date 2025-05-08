@@ -11,7 +11,7 @@ const quizRoutes: Routes = [
     loadComponent: () => import('./features/quiz/quiz-library/quiz-library.component').then(m => m.QuizLibraryComponent)
   },
   {
-    path: 'quiz-lobby/:id',
+    path: 'quiz-lobby',
     loadComponent: () => import('./features/quiz/quiz-lobby/quiz-lobby.component').then(m => m.QuizLobbyComponent)
   },
   {
@@ -28,8 +28,12 @@ const quizRoutes: Routes = [
   },
   {
     path: 'quiz-join',
+    loadComponent: () => import('./features/quiz/quiz-join/quiz-join.component').then(m => m.QuizJoinComponent)
+  },
+  {
+    path: 'quiz-game-controller',
     loadComponent: () => import('./features/quiz/quiz-game-controller/quiz-game-controller.component').then(m => m.QuizGameControllerComponent)
-  }
+  },
 ];
 
 // Маршруты Brain Ring

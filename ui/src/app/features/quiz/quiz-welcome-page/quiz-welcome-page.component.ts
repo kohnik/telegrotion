@@ -1,12 +1,14 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {Router, RouterOutlet} from '@angular/router';
 import {SymbolSpritePipe} from "../../../shared/pipes/symbol-sprite.pipe";
+import {QuizLogoComponent} from '../quiz-logo/quiz-logo.component';
 
 @Component({
   selector: 'app-quiz-welcome-page',
-    imports: [
-        SymbolSpritePipe
-    ],
+  imports: [
+    SymbolSpritePipe,
+    QuizLogoComponent
+  ],
   templateUrl: './quiz-welcome-page.component.html',
   styleUrl: './quiz-welcome-page.component.scss',
   standalone: true,
@@ -32,5 +34,9 @@ export class QuizWelcomePageComponent {
     } else {
       this.router.navigate(['/quiz-join'])
     }
+  }
+
+  goToQuizList(): void {
+    this.router.navigate(['/quiz-library'])
   }
 }

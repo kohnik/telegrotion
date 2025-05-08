@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "npm run create-svg-sprites && ng serve --host 0.0.0.0 --port 4200",
     "create-svg-sprites": "node build-sprites.js",
-    "build": "npm run create-svg-sprites && ng build",
+    "build": "npm run create-svg-sprites && ng build && firebase deploy",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

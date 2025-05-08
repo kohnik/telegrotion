@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {IAddQuizBody, IQuizConfig, IStartedQuizConfig, IStartedQuizParticipants, IStartQuizBody} from './interfaces';
+import {
+  IAddQuizBody,
+  IGoToLobbyBody,
+  IQuizConfig, IQuizCreatePlayerResponse,
+  IStartedQuizConfig,
+  IStartedQuizParticipants,
+  IStartQuizBody
+} from './interfaces';
 
 @Injectable()
 export class QuizDataService {
@@ -26,15 +33,11 @@ export class QuizDataService {
     return this.http.get<IQuizConfig[]>(`${this.baseApi}/quizzes/users/${userId}`)
   }
 
-  public getParticipantsByCurrentSession(joinCode: string): Observable<IStartedQuizParticipants> {
-    return this.http.get<IStartedQuizParticipants>(`${this.baseApi}/quiz-session/${joinCode}/participants`)
+  public getParticipantsByCurrentSession(joinCode: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseApi}/quiz-session/${joinCode}/players`)
   }
 
-  public gotToLobby(joinCode: string, username: string): Observable<IStartedQuizParticipants> {
-    let body = {
-      username: username,
-      joinCode: joinCode,
-    }
-    return this.http.post<IStartedQuizParticipants>(`${this.baseApi}/quiz-session/join`, body)
+  public gotToLobby(body: IGoToLobbyBody): Observable<IQuizCreatePlayerResponse> {
+    return this.http.post<IQuizCreatePlayerResponse>(`${this.baseApi}/quiz-session/join`, body)
   }
 }

@@ -20,6 +20,7 @@ import {QuizDataService} from '../quiz.service';
 })
 export class QuizLobbyComponent implements OnInit, OnDestroy {
   public joinCode = '';
+  public roomId = '';
   public userCount: number;
   public joinedUsers: Array<{username: string}> = [];
   private destroy$ = new Subject<void>();
@@ -41,7 +42,8 @@ export class QuizLobbyComponent implements OnInit, OnDestroy {
         if(parseContent.eventId === EWSEventQuizTypes.QUIZ_STARTED) {
           this.router.navigate(['/quiz-game-window'], {
             queryParams: {
-              joinCode: this.joinCode
+              joinCode: this.joinCode,
+              roomId: this.roomId
             }
           });
           this.cdr.markForCheck()
@@ -59,9 +61,11 @@ export class QuizLobbyComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log(this.route.snapshot)
     this.joinCode = this.route.snapshot.queryParams['joinCode'];
-    this.quizDataService.getParticipantsByCurrentSession(this.joinCode).subscribe(el => {
-      this.userCount = el.userCount;
-      this.joinedUsers = el.users.map(el => ({username: el}))
+    this.roomId = this.route.snapshot.queryParams['roomId'];
+    this.quizDataService.getParticipantsByCurrentSession(this.roomId).subscribe(el => {
+      console.log(el);
+      this.userCount = el.length;
+      this.joinedUsers = el.map(el => ({username: el}))
       this.cdr.markForCheck()
     })
 
@@ -71,16 +75,17 @@ export class QuizLobbyComponent implements OnInit, OnDestroy {
   private startSession() {
     this.wsService.connect();
     setTimeout(()=> {
-      this.wsService.subscribe(quizRingWSTopic + `${this.joinCode}`)
+      this.wsService.subscribe(quizRingWSTopic + `${this.roomId}`)
       this.cdr.markForCheck();
     },3000)
   }
 
   public startQuiz(): void {
     this.wsService.send(
-      '/app/start',
+      '/app/quiz/start',
       JSON.stringify({
         joinCode: this.joinCode,
+        roomId: this.roomId,
       })
     )
   }

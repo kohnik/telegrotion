@@ -1,19 +1,37 @@
 <div class="welcome-page">
-  <div class="welcome-page__container">
-    <img src="assets/images/logo.png">
-    <div class="welcome-page__buttons">
-      <span class="welcome-page__join" (click)="connectToQuiz()">
-        <svg>
-          <use [attr.xlink:href]="'blue-play' | symbolSprite" ></use>
-        </svg>
-        <span>Присоедениться к комнате</span>
-      </span>
-      <span class="welcome-page__new" (click)="createQuiz()">
-        <svg>
-          <use [attr.xlink:href]="'green-plus' | symbolSprite" ></use>
-        </svg>
-        <span>Создать Викторину</span>
-      </span>
+
+  <app-quiz-logo></app-quiz-logo>
+
+  <div class="welcome-page__content">
+<!--    <h1 class="welcome-page__logo">Fizzly</h1>-->
+    <div class="logo">
+      <span class="logo__letter">Q</span>
+      <span class="logo__letter">u</span>
+      <span class="logo__letter">i</span>
+      <span class="logo__letter">z</span>
+    </div>
+
+    <div class="welcome-page__menu">
+      <button class="welcome-page__button welcome-page__button--primary" (click)="connectToQuiz()">
+        Присоединиться
+      </button>
+
+      <div class="welcome-page__actions">
+        <button class="welcome-page__button welcome-page__button--secondary" (click)="createQuiz()">
+          <svg class="welcome-page__icon">
+            <use [attr.xlink:href]="'quiz-plus' | symbolSprite" ></use>
+          </svg>
+          <span>Создать квиз</span>
+        </button>
+
+        <button class="welcome-page__button welcome-page__button--secondary" (click)="goToQuizList()">
+          <svg class="welcome-page__icon list" >
+            <use [attr.xlink:href]="'quiz-list' | symbolSprite" ></use>
+          </svg>
+          <span>Список квизов</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
+

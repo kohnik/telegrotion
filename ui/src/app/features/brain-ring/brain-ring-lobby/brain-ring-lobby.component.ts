@@ -8,13 +8,15 @@ import {BrainRingService} from '../brain-ring.service';
 import {IBrainRingTeam} from '../interfaces';
 import {EWSEventBrainRingTypes} from '../models';
 import {QRCodeComponent} from 'angularx-qrcode';
+import {BrainRingLogoComponent} from "../brain-ring-logo/brain-ring-logo.component";
 
 @Component({
   selector: 'app-brain-ring-lobby',
-  imports: [
-    SymbolSpritePipe,
-    QRCodeComponent
-  ],
+    imports: [
+        SymbolSpritePipe,
+        QRCodeComponent,
+        BrainRingLogoComponent
+    ],
   templateUrl: './brain-ring-lobby.component.html',
   styleUrl: './brain-ring-lobby.component.scss',
   standalone: true,

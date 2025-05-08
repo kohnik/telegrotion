@@ -16,10 +16,6 @@
     padding: 82px 32px 32px;
   }
 
-  &__logo {
-    @include logo-style();
-  }
-
   &__connect-data {
     display: flex;
     align-items: center;

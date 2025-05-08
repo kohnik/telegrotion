@@ -6,10 +6,6 @@
   flex-direction: column;
   gap: 40px;
 
-  &__logo {
-    @include logo-style();
-  }
-
   &__end-game {
     position: absolute;
     right: 10px;

@@ -29,11 +29,9 @@ export interface IStartQuizBody  {
 }
 
 export interface IStartedQuizConfig {
-  id: string,
+  roomId: string,
   quizId: number,
   joinCode: string,
-  ownerId: number,
-  participants: IStartedQuizParticipants
   active: boolean
 }
 
@@ -50,4 +48,16 @@ export interface IQuizConfig {
     id: number,
     username: string
   }
+}
+
+export interface IGoToLobbyBody {
+  playerName: string,
+  joinCode: string,
+}
+
+export interface IQuizCreatePlayerResponse {
+  roomId: string,
+  joinCode: string,
+  playerName: string,
+  playerId: string
 }

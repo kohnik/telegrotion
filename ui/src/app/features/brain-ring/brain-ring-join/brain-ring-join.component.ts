@@ -5,13 +5,15 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {BrainRingService} from '../brain-ring.service';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
 import {setLocalStorageUserData} from '../utils';
+import {BrainRingLogoComponent} from "../brain-ring-logo/brain-ring-logo.component";
 
 @Component({
   selector: 'app-brain-ring-join',
-  imports: [
-    ReactiveFormsModule,
-    LoaderComponent
-  ],
+    imports: [
+        ReactiveFormsModule,
+        LoaderComponent,
+        BrainRingLogoComponent
+    ],
   templateUrl: './brain-ring-join.component.html',
   styleUrl: './brain-ring-join.component.scss',
   standalone: true,
@@ -89,10 +91,6 @@ export class BrainRingJoinComponent implements OnInit, OnDestroy{
 
       }
     })
-  }
-
-  public goToMainPage(): void {
-    this.router.navigate(['/']);
   }
 
   ngOnDestroy() {

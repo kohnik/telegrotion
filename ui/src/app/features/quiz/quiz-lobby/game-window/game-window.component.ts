@@ -29,6 +29,7 @@ export class GameWindowComponent implements OnInit, OnDestroy {
   public isFinishedQuiz = false;
 
   public joinCode: string;
+  public roomId: string;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -64,15 +65,17 @@ export class GameWindowComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.joinCode = this.route.snapshot.queryParams['joinCode'];
+    this.roomId = this.route.snapshot.queryParams['roomId'];
     // this.nextQuestion()
   }
 
   nextQuestion(): void {
     this.wsService.send(
-      '/app/nextQuestion',
+      '/app/quiz/next-question',
       JSON.stringify(
         {
-          joinCode: this.joinCode
+          joinCode: this.joinCode,
+          roomId: this.roomId
         }
       )
     )

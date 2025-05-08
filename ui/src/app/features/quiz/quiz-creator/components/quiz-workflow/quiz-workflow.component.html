@@ -7,13 +7,37 @@
         (ngModelChange)="setQuestion($event)"
       >
     </div>
-    <div class="workflow__source-content">
-      <span></span>
-    </div>
+    @if (slide.img) {
+      <div class="workflow__uploaded-image">
+        <img [src]="slide.img" alt="Uploaded Image" />
+      </div>
+    } @else {
+      <div class="workflow__source-content">
+        <div>
+          <svg class="workflow__empty-image" (click)="fileInput.click()">
+            <use [attr.xlink:href]="'empty-image' | symbolSprite"></use>
+          </svg>
+          <input type="file" #fileInput (change)="onFileChange($event)" style="display: none;" accept="image/*" />
+        </div>
+      </div>
+    }
+
     <div class="workflow__answers">
       @for (answer of slide.answers; track $index) {
-        <div class="workflow__answer">
-          <span>{{answer.order}}</span>
+        <div class="workflow__answer" [ngStyle]="{'background-color': setAnswerBackground(answer.order)}">
+          <span
+            (click)="setCorrectAnswer(answer)"
+            class="workflow__answer-number"
+            [ngStyle]="{'background-color': setAnswerCircleBackground(answer.order)}"
+          >
+            @if (answer.correct) {
+              <svg class="workflow__correct-icon">
+                <use [attr.xlink:href]="'check' | symbolSprite" ></use>
+              </svg>
+            } @else {
+              {{answer.order + 1}}
+            }
+          </span>
           <input
             class="workflow__answer-input"
             #answerInput
@@ -21,9 +45,6 @@
             (focusout)="setAnswer(answer, answerInput.value)"
             (keydown.enter)="setAnswer(answer, answerInput.value)"
           >
-          <span
-            (click)="setCorrectAnswer(answer)"
-            class="workflow__circle" [class.correct]="answer.correct"></span>
         </div>
       }
     </div>

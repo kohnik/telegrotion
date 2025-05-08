@@ -1,7 +1,7 @@
 @import "../../../../assets/styles/colors";
 @import "../../../../assets/styles/mixins";
 
-:host {
+.loader-container {
   @include main-background();
   position: absolute;
   left: 50%;

@@ -1,0 +1,5 @@
+@import '../styles/quiz-mixins';
+
+.logo {
+  @include logo-style();
+}

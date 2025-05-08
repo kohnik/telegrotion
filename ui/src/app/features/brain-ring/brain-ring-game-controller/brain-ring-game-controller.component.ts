@@ -10,6 +10,7 @@ import {BrainRingService} from '../brain-ring.service';
 import {EWSEventBrainRingTypes} from '../models';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
 import {clearLocalStorageUserData} from '../utils';
+import {BrainRingLogoComponent} from '../brain-ring-logo/brain-ring-logo.component';
 
 @Component({
   selector: 'app-brain-ring-game-controller',
@@ -17,7 +18,8 @@ import {clearLocalStorageUserData} from '../utils';
     PreGameTimerComponent,
     ReactiveFormsModule,
     FormsModule,
-    LoaderComponent
+    LoaderComponent,
+    BrainRingLogoComponent
   ],
   templateUrl: './brain-ring-game-controller.component.html',
   styleUrl: './brain-ring-game-controller.component.scss',

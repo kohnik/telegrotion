@@ -4,12 +4,14 @@ import {BrainRingService} from '../brain-ring.service';
 import {SymbolSpritePipe} from '../../../shared/pipes/symbol-sprite.pipe';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
 import {getLocalStorageUserData, setLocalStorageUserData} from '../utils';
+import {BrainRingLogoComponent} from '../brain-ring-logo/brain-ring-logo.component';
 
 @Component({
   selector: 'app-brain-ring-welcome-page',
   imports: [
     SymbolSpritePipe,
-    LoaderComponent
+    LoaderComponent,
+    BrainRingLogoComponent
   ],
   templateUrl: './brain-ring-welcome-page.component.html',
   styleUrl: './brain-ring-welcome-page.component.scss',

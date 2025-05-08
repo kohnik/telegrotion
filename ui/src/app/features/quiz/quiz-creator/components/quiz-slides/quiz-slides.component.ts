@@ -6,16 +6,18 @@ import {
 } from '@angular/core';
 import {ICrateQuizSlide} from '../../../interfaces';
 import {SymbolSpritePipe} from '../../../../../shared/pipes/symbol-sprite.pipe';
-import {AsyncPipe, NgOptimizedImage} from '@angular/common';
+import {AsyncPipe, NgOptimizedImage, NgStyle} from '@angular/common';
 import {QuizManagementService} from '../../services/quiz-management.service';
 import {Observable, Subscription} from 'rxjs';
+import {bgAnswerColor, ESlideAnswersColor} from '../../constants';
 
 @Component({
   selector: 'app-quiz-slides',
   imports: [
     SymbolSpritePipe,
     NgOptimizedImage,
-    AsyncPipe
+    AsyncPipe,
+    NgStyle
   ],
   templateUrl: './quiz-slides.component.html',
   standalone: true,
@@ -53,5 +55,9 @@ export class QuizSlidesComponent implements OnInit, OnDestroy {
 
   deleteSlide(index: number): void {
     this.quizManagementService.deleteSlide(index)
+  }
+
+  setAnswerBackground(index: number): string {
+    return bgAnswerColor[index];
   }
 }

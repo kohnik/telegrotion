@@ -1,5 +1,5 @@
 <div class="game-window">
-  <div class="game-window__logo" (click)="goToMainPage()">Fizzly</div>
+  <app-brain-ring-logo></app-brain-ring-logo>
   <div class="game-window__end-game" (click)="endSession()">Закончить игру</div>
   @if(isFirstTeamAnswer) {
     <span class="game-window__text">команда <b>{{answeredTeam.playerName}}</b> нажала кнопку

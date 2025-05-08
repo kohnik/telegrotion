@@ -4,10 +4,6 @@
 .join-to {
   @include main-background();
 
-  &__logo {
-    @include logo-style();
-  }
-
   &__login {
     background-color: $color-orange;
     padding: 32px 32px 10px 32px;

@@ -16,10 +16,6 @@
     @include zoomInMixin($start: 10px, $time: 0.2s);
   }
 
-  &__logo {
-    @include logo-style();
-  }
-
   &__title {
     @include text-style($size: 24px, $color: $color-text-dark);
 

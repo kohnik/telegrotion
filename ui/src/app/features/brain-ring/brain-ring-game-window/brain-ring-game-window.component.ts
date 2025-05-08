@@ -7,10 +7,13 @@ import {brainRingWSTopic, privateUserBrainRingWSTopic} from '../constants';
 import {EWSEventBrainRingTypes} from '../models';
 import {IBrainRingTeam, IBrainRingTeamAnswerData} from '../interfaces';
 import {BrainRingService} from '../brain-ring.service';
+import {BrainRingLogoComponent} from "../brain-ring-logo/brain-ring-logo.component";
 
 @Component({
   selector: 'app-brain-ring-game-window',
-  imports: [],
+    imports: [
+        BrainRingLogoComponent
+    ],
   templateUrl: './brain-ring-game-window.component.html',
   styleUrl: './brain-ring-game-window.component.scss',
   standalone: true,

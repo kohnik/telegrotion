@@ -6,9 +6,9 @@ export const slides: ICrateQuizSlide[] = [
     question: 'Введите ваш вопрос',
     type: "Quiz",
     order: 0,
-    seconds: 20,
+    seconds: 10,
     img: '',
-    points: 20,
+    points: 500,
     answers: [
       {
         answer: 'dfdsf',

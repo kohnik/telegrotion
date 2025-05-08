@@ -1,11 +1,16 @@
-<div class="game-controller" [class.is-game]="isWaitingGameAfterJoin">
-  <div class="game-controller__container" [class.is-game]="isWaitingGameAfterJoin">
-    @if (isJoined) {
-      @if (isWaitingGameAfterJoin) {
+<div class="game-controller" [class.is-game]="isWaiting">
+  <app-quiz-logo></app-quiz-logo>
+
+  <div class="game-controller__container" [class.is-game]="isWaiting">
+      @if (isWaiting) {
         @if (isNeedStartedTimer) {
           <app-pre-game-timer></app-pre-game-timer>
         } @else {
-          <span>Ожидание</span>
+          <div class="game-controller__loader">
+            <span class="game-controller__dot"></span>
+            <span class="game-controller__dot"></span>
+            <span class="game-controller__dot"></span>
+          </div>
         }
       } @else {
         <h2 class="game-controller__answers-title">ОТВЕЧАЙ НА ВОПРОС</h2>
@@ -18,13 +23,5 @@
         }
         <span class="game-controller__timer">{{timeLeft}}</span>
       }
-
-    } @else {
-      <span class="game-controller__title">Введите код комнаты и ник</span>
-      <input placeholder="код комнаты" [(ngModel)]="joinCode">
-      <input placeholder="ник" [(ngModel)]="username">
-      <span class="game-controller__go" (click)="goToLobby()">Вход</span>
-    }
-
   </div>
 </div>
