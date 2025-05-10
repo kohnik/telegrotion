@@ -17,7 +17,7 @@ import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.exception.FizzlyAccessDeniedException;
 import com.fizzly.backend.exception.InvalidJoinCodeException;
 import com.fizzly.backend.exception.RoomNotFoundException;
-import com.fizzly.backend.exception.TelegrotionException;
+import com.fizzly.backend.exception.FizzlyGlobalException;
 import com.fizzly.backend.exception.UserAlreadyExistsException;
 import com.fizzly.backend.exception.UserNotFoundException;
 import com.fizzly.backend.utils.JoinCodeUtils;
@@ -158,7 +158,7 @@ public class QuizSessionService {
                 .map(QuizConverter::convertToQuizSessionDTO)
                 .toList();
         if (questions.isEmpty()) {
-            throw new TelegrotionException(String.format("У квиза с id %s отсутствуют вопросы", room.getQuizId()));
+            throw new FizzlyGlobalException(String.format("У квиза с id %s отсутствуют вопросы", room.getQuizId()));
         }
 
         questions.getFirst().setNext(true);
@@ -182,7 +182,7 @@ public class QuizSessionService {
         Object questionObj = redisTemplate.opsForValue().get(ACTIVE_QUESTION_KEY + roomId);
         if (questionObj == null) {
             LOGGER.warn("INVALID JOIN CODE");
-            throw new TelegrotionException("Invalid join code");
+            throw new FizzlyGlobalException("Invalid join code");
         }
 
         final QuizSessionDTO activeQuestion = (QuizSessionDTO) questionObj;
@@ -190,7 +190,7 @@ public class QuizSessionService {
         QuizSessionAnswerDTO correctAnswer = activeQuestion.getAnswers().stream()
                 .filter(QuizSessionAnswerDTO::isCorrect)
                 .findFirst()
-                .orElseThrow(() -> new TelegrotionException(
+                .orElseThrow(() -> new FizzlyGlobalException(
                         String.format("Не найден правильный ответ на вопрос: %d", activeQuestion.getQuestionId())
                 ));
 
@@ -201,7 +201,7 @@ public class QuizSessionService {
             LOGGER.info("User with id {} made right chose", playerId);
             Set<Object> members = redisTemplate.opsForSet().members(SESSION_PARTICIPANTS_WITH_RESULTS_KEY + roomId);
             if (members == null) {
-                throw new TelegrotionException("Игроки для комнаты не найдены: " + roomId);
+                throw new FizzlyGlobalException("Игроки для комнаты не найдены: " + roomId);
             }
             List<QuestionEndedPlayerDTO> players = members.stream()
                     .map(QuestionEndedPlayerDTO.class::cast)
@@ -324,7 +324,7 @@ public class QuizSessionService {
             }
             int order = question.getAnswers().stream()
                     .filter(QuizSessionAnswerDTO::isCorrect)
-                    .findFirst().orElseThrow(() -> new TelegrotionException(
+                    .findFirst().orElseThrow(() -> new FizzlyGlobalException(
                             String.format("Не найден правильный ответ на вопрос: %s", question.getQuestionId()))
                     )
                     .getOrder();
