@@ -1,6 +1,6 @@
 package com.fizzly.backend.entity;
 
-import com.fizzly.backend.exception.TelegrotionException;
+import com.fizzly.backend.exception.FizzlyGlobalException;
 
 public enum QuizMediaType {
 
@@ -19,7 +19,7 @@ public enum QuizMediaType {
         if (contentType.startsWith("audio")) {
             return QuizMediaType.AUDIO;
         }
-        throw new TelegrotionException("Данный тип файла не поддерживается: " + contentType);
+        throw new FizzlyGlobalException("Данный тип файла не поддерживается: " + contentType);
     }
 
 }

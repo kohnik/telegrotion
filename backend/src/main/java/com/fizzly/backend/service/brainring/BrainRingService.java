@@ -7,9 +7,9 @@ import by.fizzly.common.dto.brainring.BrainRingPlayer;
 import by.fizzly.common.dto.brainring.BrainRingRoomDTO;
 import by.fizzly.common.dto.brainring.BrainRingRoomFullDTO;
 import by.fizzly.common.dto.brainring.PlayerExistsResponse;
-import com.fizzly.backend.exception.PLayerNotFoundException;
+import com.fizzly.backend.exception.PlayerNotFoundException;
 import com.fizzly.backend.exception.RoomNotFoundException;
-import com.fizzly.backend.exception.TelegrotionException;
+import com.fizzly.backend.exception.FizzlyGlobalException;
 import com.fizzly.backend.utils.JoinCodeUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class BrainRingService {
         if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(PLAYERS_PREFIX + "names:" + roomId, playerName))) {
             String exMessage = String.format("Игрок с никнеймом %s уже существует", playerName);
             LOGGER.error(exMessage);
-            throw new TelegrotionException(exMessage);
+            throw new FizzlyGlobalException(exMessage);
         }
 
         BrainRingPlayer player = new BrainRingPlayer(UUID.randomUUID(), playerName);
@@ -75,7 +75,7 @@ public class BrainRingService {
     public void deletePlayer(UUID playerId, UUID roomId) {
         BrainRingPlayer player = (BrainRingPlayer) redisTemplate.opsForHash().get(PLAYERS_PREFIX + roomId, playerId.toString());
         if (player == null) {
-            throw new PLayerNotFoundException(playerId);
+            throw new PlayerNotFoundException(playerId);
         }
 
         redisTemplate.opsForHash().delete(PLAYERS_PREFIX + roomId, playerId.toString());
@@ -127,7 +127,7 @@ public class BrainRingService {
         BrainRingPlayer player = activeRoom.getPlayers().stream()
                 .filter(p -> p.getPlayerId().equals(playerId))
                 .findFirst()
-                .orElseThrow(() -> new PLayerNotFoundException(playerId));
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
 
         LOGGER.info("Answer submitted: player={}, time={}", player.getPlayerName(), answerTime);
         return new AnswerResponseDTO(playerId, player.getPlayerName(), answerTime);

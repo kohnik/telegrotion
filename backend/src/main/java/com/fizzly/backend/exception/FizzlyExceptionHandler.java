@@ -10,19 +10,19 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.time.LocalDateTime;
 
 @ControllerAdvice
-public class TelegrotionExceptionHandler extends ResponseEntityExceptionHandler {
+public class FizzlyExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(TelegrotionException.class)
-    public ResponseEntity<ExceptionResponse> handleGlobalAppException(TelegrotionException ex, HttpServletRequest request) {
+    @ExceptionHandler({FizzlyGlobalException.class, RuntimeException.class})
+    public ResponseEntity<ExceptionResponse> handleGlobalAppException(FizzlyGlobalException ex, HttpServletRequest request) {
         return ResponseEntity.internalServerError().body(buildException(ex, request));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ExceptionResponse> handleEntityNotFoundException(TelegrotionException ex, HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleEntityNotFoundException(FizzlyGlobalException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(buildException(ex, request));
     }
 
-    private ExceptionResponse buildException(TelegrotionException ex, HttpServletRequest request) {
+    private ExceptionResponse buildException(RuntimeException ex, HttpServletRequest request) {
         ExceptionResponse response = new ExceptionResponse();
         response.setMessage(ex.getMessage());
         response.setTimestamp(LocalDateTime.now());

@@ -11,7 +11,7 @@ import com.fizzly.backend.entity.Quiz;
 import com.fizzly.backend.entity.QuizAnswer;
 import com.fizzly.backend.entity.QuizMediaType;
 import com.fizzly.backend.entity.QuizQuestion;
-import com.fizzly.backend.exception.TelegrotionException;
+import com.fizzly.backend.exception.FizzlyGlobalException;
 import com.fizzly.backend.repository.QuizAnswerRepository;
 import com.fizzly.backend.repository.QuizQuestionRepository;
 import com.fizzly.backend.repository.QuizRepository;
@@ -287,7 +287,7 @@ public class FullQuizService {
         try {
             storageService.uploadFile(file.getInputStream(), fileName, String.valueOf(quiz.getId()));
         } catch (IOException e) {
-            throw new TelegrotionException(e.getMessage(), e);
+            throw new FizzlyGlobalException(e.getMessage(), e);
         }
     }
 

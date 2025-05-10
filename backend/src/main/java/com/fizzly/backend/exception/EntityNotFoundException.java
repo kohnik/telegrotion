@@ -1,6 +1,6 @@
 package com.fizzly.backend.exception;
 
-public class EntityNotFoundException extends TelegrotionException {
+public class EntityNotFoundException extends FizzlyGlobalException {
 
     public EntityNotFoundException() {
     }
