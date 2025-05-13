@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
-COPY /target/backend-1.0.jar app.jar
+COPY /target/rest-1.0.jar app.jar
 COPY /target/classes/gcc-auth.json gcc-auth.json
 
 # Открываем порт, на котором работает Spring Boot приложение

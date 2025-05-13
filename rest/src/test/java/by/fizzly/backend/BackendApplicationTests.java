@@ -1,4 +1,4 @@
-package com.fizzly.backend;
+package by.fizzly.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
