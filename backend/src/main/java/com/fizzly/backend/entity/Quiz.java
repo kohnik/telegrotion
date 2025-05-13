@@ -1,5 +1,6 @@
 package com.fizzly.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,11 +10,13 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "QUIZES")
 @Getter
 @Setter
-public class Quiz {
+public class Quiz implements Serializable {
 
     @Id
     @GeneratedValue
@@ -23,5 +26,6 @@ public class Quiz {
     private String name;
 
     @ManyToOne
+    @JsonIgnore
     private User owner;
 }

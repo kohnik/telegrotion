@@ -1,4 +1,4 @@
-package com.fizzly.backend.controller.brainring;
+package by.fizzly.fizzlywebsocket.controller.brainring;
 
 import by.fizzly.common.dto.brainring.BrainRingEndSessionRequest;
 import by.fizzly.common.dto.brainring.BrainRingJoinRoomDTO;
@@ -11,8 +11,8 @@ import by.fizzly.common.dto.brainring.PlayerExistsResponse;
 import by.fizzly.common.dto.brainring.RoomDescriptionDTO;
 import by.fizzly.common.dto.websocket.response.BrainRingSessionEndedResponse;
 import by.fizzly.common.event.BrainRingEvent;
-import com.fizzly.backend.service.brainring.BrainRingService;
-import com.fizzly.backend.utils.WebSocketTopics;
+import by.fizzly.fizzlywebsocket.service.BrainRingService;
+import by.fizzly.fizzlywebsocket.utils.WebSocketTopics;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

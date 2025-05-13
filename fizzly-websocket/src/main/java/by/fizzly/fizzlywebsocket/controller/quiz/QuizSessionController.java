@@ -1,15 +1,14 @@
-package com.fizzly.backend.controller.quiz;
+package by.fizzly.fizzlywebsocket.controller.quiz;
 
 import by.fizzly.common.dto.quiz.PlayerJoinedResponse;
 import by.fizzly.common.dto.quiz.QuizSessionRoom;
-import com.fizzly.backend.service.quiz.QuizSessionService;
+import by.fizzly.fizzlywebsocket.service.QuizSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +26,6 @@ import java.util.UUID;
 public class QuizSessionController {
 
     private final QuizSessionService quizSessionService;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/start")
     @Operation(summary = "Создать комнату квиза")
@@ -71,24 +69,6 @@ public class QuizSessionController {
         private String joinCode;
         private String playerName;
     }
-
-//    @Getter
-//    @Setter
-//    @AllArgsConstructor
-//    private static class UserJoinResponse {
-//        private int userCount;
-//        private String username;
-//        private String joinCode;
-//    }
-
-//    @Getter
-//    @Setter
-//    @AllArgsConstructor
-//    private static class CurrentUserSessionStateResponse {
-//        private int userCount;
-//        private String joinCode;
-//        private List<String> users;
-//    }
 
     @Getter
     @Setter

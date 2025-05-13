@@ -38,7 +38,7 @@ public class QuizControlController {
     private final ObjectMapper objectMapper;
 
     @MessageMapping("/quiz/start")
-    public void startQuizSession(@Payload StartSessionRequest request) throws JsonProcessingException {
+    public void startQuizSession(@Payload StartSessionRequest request) {
         final String joinCode = request.getJoinCode();
         int questionsCount = quizSessionService.activateSessionRoom(joinCode, request.getRoomId());
 
@@ -47,7 +47,6 @@ public class QuizControlController {
                 QuizEvent.QUIZ_STARTED.getId(),
                 joinCode,
                 questionsCount);
-//        saveEventData(request.getRoomId(), QuizEvent.QUIZ_STARTED, startSessionResponse, "");
         messagingTemplate.convertAndSend(topic, startSessionResponse);
     }
 
@@ -57,7 +56,7 @@ public class QuizControlController {
     }
 
     @MessageMapping("/quiz/submit-answer")
-    public void submitAnswer(@Payload SubmitAnswerRequest request) throws JsonProcessingException {
+    public void submitAnswer(@Payload SubmitAnswerRequest request) {
         List<String> usersLeft = quizSessionService.submitAnswer(
                 request.getPlayerId(),
                 request.getAnswer(),

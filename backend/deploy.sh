@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Build backend module
+mvn clean install
+
 # Build Docker image
 docker build --platform linux/amd64 -t alexanderrybak/fizzly-app:version-1 .
 

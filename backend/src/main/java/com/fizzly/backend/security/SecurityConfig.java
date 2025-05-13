@@ -29,6 +29,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     private static final String[] WHITE_LIST = {
+            "/**",
             "/auth/**",
             "/swagger-ui/**",
             "/swagger-resources/*",
@@ -38,7 +39,7 @@ public class SecurityConfig {
             "/brain-ring/join-room"
     };
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+//    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserService userService;
 
     @Bean
@@ -51,14 +52,14 @@ public class SecurityConfig {
                     corsConfiguration.setAllowedHeaders(List.of("*"));
                     corsConfiguration.setAllowCredentials(true);
                     return corsConfiguration;
-                }))
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers(WHITE_LIST).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                }));
+//                .authorizeHttpRequests(request -> request
+//                        .requestMatchers(WHITE_LIST).permitAll()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .anyRequest().authenticated())
+//                .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
+//                .authenticationProvider(authenticationProvider())
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
