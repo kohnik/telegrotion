@@ -13,8 +13,8 @@
     <groupId>by.telegrotion</groupId>
     <artifactId>rest</artifactId>
     <version>1.0</version>
-    <name>backend</name>
-    <description>backend</description>
+    <name>rest</name>
+    <description>rest</description>
 
     <properties>
         <java.version>21</java.version>
