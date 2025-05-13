@@ -7,6 +7,7 @@ import by.fizzly.common.dto.brainring.BrainRingPlayer;
 import by.fizzly.common.dto.brainring.BrainRingRoomDTO;
 import by.fizzly.common.dto.brainring.BrainRingRoomFullDTO;
 import by.fizzly.common.dto.brainring.PlayerExistsResponse;
+import by.fizzly.fizzlywebsocket.utils.RedisKeys;
 import by.fizzly.fizzlywebsocket.exception.FizzlyAppException;
 import by.fizzly.fizzlywebsocket.utils.JoinCodeUtils;
 import lombok.RequiredArgsConstructor;
@@ -29,17 +30,13 @@ public class BrainRingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BrainRingService.class);
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private static final String ROOM_PREFIX = "room:";
-    private static final String JOIN_CODE_PREFIX = "joinCode:";
-    private static final String PLAYERS_PREFIX = "room:players:";
-    private static final String ACTIVE_ROOM_PREFIX = "activeRoom:";
 
     public BrainRingRoomDTO createRoom() {
         String joinCode = JoinCodeUtils.generateJoinCode();
         UUID roomId = UUID.randomUUID();
 
-        redisTemplate.opsForValue().set(ROOM_PREFIX + roomId, joinCode);
-        redisTemplate.opsForValue().set(JOIN_CODE_PREFIX + joinCode, roomId.toString());
+        redisTemplate.opsForValue().set(RedisKeys.buildKey(RedisKeys.BRAINRING_ROOM_KEY, roomId.toString()), joinCode);
+        redisTemplate.opsForValue().set(RedisKeys.buildKey(RedisKeys.BRAINRING_JOIN_CODE_KEY, joinCode), roomId.toString());
 
         LOGGER.info("Created room: id={}, joinCode={}", roomId, joinCode);
         return new BrainRingRoomDTO(roomId, joinCode);
@@ -50,7 +47,7 @@ public class BrainRingService {
         if (roomId == null) {
             throw new FizzlyAppException(joinCode);
         }
-        if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(PLAYERS_PREFIX + "names:" + roomId, playerName))) {
+        if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(RedisKeys.buildKey(RedisKeys.BRAINRING_PLAYER_NAMES_KEY, roomId.toString()), playerName))) {
             String exMessage = String.format("Игрок с никнеймом %s уже существует", playerName);
             LOGGER.error(exMessage);
             throw new FizzlyAppException(exMessage);
@@ -59,35 +56,35 @@ public class BrainRingService {
         BrainRingPlayer player = new BrainRingPlayer(UUID.randomUUID(), playerName);
 
         redisTemplate.opsForHash().put(
-                PLAYERS_PREFIX + roomId,
+                RedisKeys.buildKey(RedisKeys.BRAINRING_PLAYERS_KEY, roomId.toString()),
                 player.getPlayerId().toString(),
                 player
         );
 
-        redisTemplate.opsForSet().add(PLAYERS_PREFIX + "names:" + roomId, playerName);
+        redisTemplate.opsForSet().add(RedisKeys.buildKey(RedisKeys.BRAINRING_PLAYER_NAMES_KEY, roomId.toString()), playerName);
 
         LOGGER.info("Player joined: roomId={}, player={}", roomId, playerName);
         return new BrainRingJoinRoomDTO(roomId, joinCode, playerName, player.getPlayerId());
     }
 
     public void deletePlayer(UUID playerId, UUID roomId) {
-        BrainRingPlayer player = (BrainRingPlayer) redisTemplate.opsForHash().get(PLAYERS_PREFIX + roomId, playerId.toString());
+        BrainRingPlayer player = (BrainRingPlayer) redisTemplate.opsForHash().get(RedisKeys.buildKey(RedisKeys.BRAINRING_PLAYERS_KEY, roomId.toString()), playerId.toString());
         if (player == null) {
             throw new FizzlyAppException(playerId.toString());
         }
 
-        redisTemplate.opsForHash().delete(PLAYERS_PREFIX + roomId, playerId.toString());
-        redisTemplate.opsForSet().remove(PLAYERS_PREFIX + "names:" + roomId, player.getPlayerName());
+        redisTemplate.opsForHash().delete(RedisKeys.buildKey(RedisKeys.BRAINRING_PLAYERS_KEY, roomId.toString()), playerId.toString());
+        redisTemplate.opsForSet().remove(RedisKeys.buildKey(RedisKeys.BRAINRING_PLAYER_NAMES_KEY, roomId.toString()), player.getPlayerName());
     }
 
     public BrainRingRoomFullDTO getRoomFullInfo(UUID roomId) {
-        String joinCode = (String) redisTemplate.opsForValue().get(ROOM_PREFIX + roomId);
+        String joinCode = (String) redisTemplate.opsForValue().get(RedisKeys.buildKey(RedisKeys.BRAINRING_ROOM_KEY, roomId.toString()));
         if (joinCode == null) {
             throw new FizzlyAppException(roomId.toString());
         }
 
         List<BrainRingPlayer> players = redisTemplate.opsForHash()
-                .values(PLAYERS_PREFIX + roomId)
+                .values(RedisKeys.buildKey(RedisKeys.BRAINRING_PLAYERS_KEY, roomId.toString()))
                 .stream()
                 .map(BrainRingPlayer.class::cast)
                 .toList();
@@ -96,12 +93,12 @@ public class BrainRingService {
     }
 
     private UUID getRoomByJoinCode(String joinCode) {
-        String roomIdStr = (String) redisTemplate.opsForValue().get(JOIN_CODE_PREFIX + joinCode);
+        String roomIdStr = (String) redisTemplate.opsForValue().get(RedisKeys.buildKey(RedisKeys.BRAINRING_JOIN_CODE_KEY, joinCode));
         return roomIdStr != null ? UUID.fromString(roomIdStr) : null;
     }
 
     public BrainRingActiveRoom activateRoom(UUID roomId) {
-        String joinCode = (String) redisTemplate.opsForValue().get(ROOM_PREFIX + roomId);
+        String joinCode = (String) redisTemplate.opsForValue().get(RedisKeys.buildKey(RedisKeys.BRAINRING_ROOM_KEY, roomId.toString()));
         if (joinCode == null) {
             throw new FizzlyAppException(roomId.toString());
         }
@@ -109,18 +106,18 @@ public class BrainRingService {
         List<BrainRingPlayer> players = getRoomFullInfo(roomId).getPlayers();
         BrainRingActiveRoom activeRoom = new BrainRingActiveRoom(true, joinCode, players);
 
-        redisTemplate.opsForValue().set(ACTIVE_ROOM_PREFIX + roomId, activeRoom);
+        redisTemplate.opsForValue().set(RedisKeys.buildKey(RedisKeys.BRAINRING_ACTIVE_ROOM_KEY, roomId.toString()), activeRoom);
         return activeRoom;
     }
 
     public AnswerResponseDTO submitAnswer(UUID roomId, UUID playerId, double answerTime) {
-        BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) redisTemplate.opsForValue().get(ACTIVE_ROOM_PREFIX + roomId);
+        BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) redisTemplate.opsForValue().get(RedisKeys.buildKey(RedisKeys.BRAINRING_ACTIVE_ROOM_KEY, roomId.toString()));
         if (activeRoom == null || !activeRoom.isReady()) {
             return null;
         }
 
         activeRoom.setReady(false);
-        redisTemplate.opsForValue().set(ACTIVE_ROOM_PREFIX + roomId, activeRoom);
+        redisTemplate.opsForValue().set(RedisKeys.buildKey(RedisKeys.BRAINRING_ACTIVE_ROOM_KEY, roomId.toString()), activeRoom);
 
         BrainRingPlayer player = activeRoom.getPlayers().stream()
                 .filter(p -> p.getPlayerId().equals(playerId))
@@ -132,7 +129,7 @@ public class BrainRingService {
     }
 
     private BrainRingActiveRoom getActiveRoom(UUID roomId) {
-        BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) redisTemplate.opsForValue().get(ACTIVE_ROOM_PREFIX + roomId);
+        BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) redisTemplate.opsForValue().get(RedisKeys.buildKey(RedisKeys.BRAINRING_ACTIVE_ROOM_KEY, roomId.toString()));
         if (activeRoom == null) {
             LOGGER.warn("Active room not found: {}", roomId);
             throw new FizzlyAppException(roomId.toString());
@@ -144,9 +141,9 @@ public class BrainRingService {
         redisTemplate.execute(new SessionCallback<>() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
-                operations.watch(ACTIVE_ROOM_PREFIX + roomId);
+                operations.watch(RedisKeys.buildKey(RedisKeys.BRAINRING_ACTIVE_ROOM_KEY, roomId.toString()));
 
-                BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) operations.opsForValue().get(ACTIVE_ROOM_PREFIX + roomId);
+                BrainRingActiveRoom activeRoom = (BrainRingActiveRoom) operations.opsForValue().get(RedisKeys.buildKey(RedisKeys.BRAINRING_ACTIVE_ROOM_KEY, roomId.toString()));
                 if (activeRoom == null) {
                     operations.unwatch();
                     throw new FizzlyAppException(roomId.toString());
@@ -154,7 +151,7 @@ public class BrainRingService {
 
                 operations.multi();
                 activeRoom.setReady(true);
-                operations.opsForValue().set(ACTIVE_ROOM_PREFIX + roomId, activeRoom);
+                operations.opsForValue().set(RedisKeys.buildKey(RedisKeys.BRAINRING_ACTIVE_ROOM_KEY, roomId.toString()), activeRoom);
 
                 return operations.exec();
             }
@@ -165,7 +162,7 @@ public class BrainRingService {
 
     public PlayerExistsResponse playerExistsInRoom(UUID roomId, UUID playerId) {
         PlayerExistsResponse response = new PlayerExistsResponse();
-        BrainRingPlayer player = (BrainRingPlayer) redisTemplate.opsForHash().get(PLAYERS_PREFIX + roomId, playerId.toString());
+        BrainRingPlayer player = (BrainRingPlayer) redisTemplate.opsForHash().get(RedisKeys.buildKey(RedisKeys.BRAINRING_PLAYERS_KEY, roomId.toString()), playerId.toString());
 
         if (player != null) {
             response.setExists(true);
@@ -180,7 +177,6 @@ public class BrainRingService {
 
     public void finishRoom(UUID roomId) {
         deleteRoomData(roomId);
-
         LOGGER.info("Game session ended for room: {}", roomId);
     }
 
