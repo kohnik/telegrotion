@@ -10,9 +10,13 @@ const quizRoutes: Routes = [
     path: 'quiz-library',
     loadComponent: () => import('./features/quiz/quiz-library/quiz-library.component').then(m => m.QuizLibraryComponent)
   },
+  // {
+  //   path: 'quiz-lobby',
+  //   loadComponent: () => import('./features/quiz/quiz-lobby/quiz-lobby.component').then(m => m.QuizLobbyComponent)
+  // },
   {
     path: 'quiz-lobby',
-    loadComponent: () => import('./features/quiz/quiz-lobby/quiz-lobby.component').then(m => m.QuizLobbyComponent)
+    loadComponent: () => import('./features/quiz/quiz-lobby/game-window/components/game-window-answer/game-window-answer.component').then(m => m.GameWindowAnswerComponent)
   },
   {
     path: 'quiz-creator',

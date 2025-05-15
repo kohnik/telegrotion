@@ -1,8 +1,8 @@
-@mixin bounceInMixin($start: 50px, $time: 0.5s) {
+@mixin bounceInMixin($start: 50px, $time: 0.5s, $delay: 0s) {
 
   transition: transform 0.3s, box-shadow 0.3s;
   transform: translateY($start) scale(0.95);
-  animation: bounceIn $time ease-out forwards;
+  animation: bounceIn $time $delay ease-out forwards;
 
   @keyframes bounceIn {
     0% {

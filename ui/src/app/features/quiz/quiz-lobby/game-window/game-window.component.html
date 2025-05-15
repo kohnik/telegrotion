@@ -5,12 +5,15 @@
     } @else if (isFinishedQuiz) {
       <app-game-finish-page [players]="players"></app-game-finish-page>
     }
+    @else if (currentWindow === EWindowsType.ANSWER_WINDOW) {
+      <app-game-window-answer></app-game-window-answer>
+    }
     @else {
       <app-game-window-leader-board [players]="players" (nextQuestion)="nextQuestion()"></app-game-window-leader-board>
     }
 
   } @else {
-    <app-pre-game-timer (timerEnd)="nextQuestion()"></app-pre-game-timer>
+    <app-pre-game-timer [gameType]="EGameType.Quiz" (timerEnd)="nextQuestion()"></app-pre-game-timer>
   }
 </div>
 

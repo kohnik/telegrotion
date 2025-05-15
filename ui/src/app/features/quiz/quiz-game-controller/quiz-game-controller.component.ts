@@ -5,11 +5,22 @@ import {FormsModule} from '@angular/forms';
 import {Subject, takeUntil} from 'rxjs';
 import {EWSEventQuizTypes} from '../models';
 import {ICrateQuizAnswer} from '../interfaces';
-import {PreGameTimerComponent} from '../pre-game-timer/pre-game-timer.component';
+import {PreGameTimerComponent} from '../../../shared/components/pre-game-timer/pre-game-timer.component';
 import {quizRingWSTopic} from '../constants';
 import {QuizDataService} from '../quiz.service';
 import {QuizLogoComponent} from '../quiz-logo/quiz-logo.component';
 import {EWSEventBrainRingTypes} from '../../brain-ring/models';
+import {EGameType} from "../../../shared/interfaces";
+import {
+  answerFigureIcon,
+  bgAnswerCircleColor,
+  bgAnswerColor,
+  setAnswerBackground,
+  setAnswerFigureIcon
+} from '../quiz-creator/constants';
+import {NgStyle} from '@angular/common';
+import {SymbolSpritePipe} from '../../../shared/pipes/symbol-sprite.pipe';
+import {SpriteIdsType} from '../../../../sprites-ids.type';
 
 
 @Component({
@@ -17,7 +28,9 @@ import {EWSEventBrainRingTypes} from '../../brain-ring/models';
   imports: [
     FormsModule,
     PreGameTimerComponent,
-    QuizLogoComponent
+    QuizLogoComponent,
+    NgStyle,
+    SymbolSpritePipe
   ],
   templateUrl: './quiz-game-controller.component.html',
   styleUrl: './quiz-game-controller.component.scss',
@@ -30,11 +43,14 @@ export class QuizGameControllerComponent implements OnInit, OnDestroy {
   public playerId = '';
   public playerName = '';
   public roomId = '';
-  public isNeedStartedTimer = false;
+  public isOnStartedTimer = false;
   public isWaiting = true;
   public answers: ICrateQuizAnswer[] = [];
   public timeLeft = 0
   private destroy$ = new Subject<void>();
+  protected readonly EGameType = EGameType;
+  protected readonly setAnswerFigureIcon = setAnswerFigureIcon;
+  protected readonly setAnswerBackground = setAnswerBackground;
 
   constructor(
     private wsService: WebSocketService,
@@ -50,7 +66,7 @@ export class QuizGameControllerComponent implements OnInit, OnDestroy {
 
         this.handleGameEvent(parseContent.eventId, parseContent)
 
-        if (parseContent.eventId === EWSEventBrainRingTypes.CHECK_EVENT) {
+        if (parseContent.eventId === EWSEventQuizTypes.CHECK_EVENT) {
           console.log(parseContent, 'parseContent')
           parseContent.currentEventId > 1 && this.handleGameEvent(parseContent.currentEventId, parseContent)
         }
@@ -99,6 +115,7 @@ export class QuizGameControllerComponent implements OnInit, OnDestroy {
     if(eventId === EWSEventQuizTypes.NEW_QUESTION) {
 
       this.isWaiting = false
+      this.isOnStartedTimer = false;
       this.answers = parseContent.answers;
 
       this.timeLeft = parseContent.timeLeft
@@ -115,17 +132,19 @@ export class QuizGameControllerComponent implements OnInit, OnDestroy {
     }
 
     if(eventId === EWSEventQuizTypes.ANSWER_SUBMITTED) {
-      this.isWaiting = true
+
     }
 
     if(eventId === EWSEventQuizTypes.QUESTION_ENDED) {
-      this.isNeedStartedTimer = false
+      console.log(parseContent, 'parseContentparseContentparseContentparseContentparseContent')
+      this.isOnStartedTimer = false
       this.isWaiting = true
       this.answers = [];
     }
 
     if(eventId === EWSEventQuizTypes.QUIZ_STARTED) {
-      this.isNeedStartedTimer = true;
+      console.log(eventId)
+      this.isOnStartedTimer = true;
     }
 
     // if(eventId === EWSEventBrainRingTypes.END_SESSION) {
@@ -159,7 +178,7 @@ export class QuizGameControllerComponent implements OnInit, OnDestroy {
       '/app/quiz/submit-answer',
       JSON.stringify({
         roomId: this.roomId,
-        playerName: this.playerName,
+        playerId: this.playerId,
         answer: answerOrder,
         timeSpent: 7,
       })

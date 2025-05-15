@@ -7,6 +7,7 @@ import {QuizLogoComponent} from '../quiz-logo/quiz-logo.component';
 import {Subject, takeUntil} from 'rxjs';
 import {setLocalStorageUserData} from '../../brain-ring/utils';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
+import {EGameType} from '../../../shared/interfaces';
 
 @Component({
   selector: 'app-quiz-join',
@@ -99,4 +100,6 @@ export class QuizJoinComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  protected readonly EGameType = EGameType;
 }

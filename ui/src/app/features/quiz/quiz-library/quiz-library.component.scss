@@ -13,7 +13,6 @@
   justify-content: flex-start;
   padding: 0;
   position: relative;
-  max-width: 1240px;
 
   &__header {
     display: flex;
@@ -36,8 +35,8 @@
     gap: 20px;
     width: 100%;
     margin: 0 auto;
-    overflow-x: scroll;
     height: calc(100vh - 60px);
+    overflow: auto;
 
     @media (max-width: 768px) {
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

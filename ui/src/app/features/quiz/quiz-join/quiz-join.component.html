@@ -1,9 +1,12 @@
 <div class="join">
   <app-quiz-logo></app-quiz-logo>
   <div class="join__container" [formGroup]="form">
-    <span class="join__title">Введите код комнаты и ник</span>
-    <input placeholder="код комнаты" formControlName="joinCode">
-    <input placeholder="ник" formControlName="playerName">
+    <span class="join__title">Введите {{isAfterQrCodeRedirect ? 'код комнаты и' : ''}} ваше имя</span>
+
+    @if (!isAfterQrCodeRedirect) {
+      <input placeholder="код комнаты" formControlName="joinCode">
+    }
+    <input placeholder="Имя" formControlName="playerName">
 
     <button
       class="join__go"
@@ -20,5 +23,5 @@
 
 
 @if (isLoading) {
-  <app-loader></app-loader>
+  <app-loader [gameType]="EGameType.Quiz"></app-loader>
 }

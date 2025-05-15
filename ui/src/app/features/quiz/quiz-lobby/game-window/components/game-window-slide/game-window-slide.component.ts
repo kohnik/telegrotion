@@ -1,9 +1,15 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
 import {ICurrentSlide} from '../../../interfaces';
+import {NgStyle} from '@angular/common';
+import {setAnswerBackground, setAnswerFigureIcon} from '../../../../quiz-creator/constants';
+import {SymbolSpritePipe} from '../../../../../../shared/pipes/symbol-sprite.pipe';
 
 @Component({
   selector: 'app-game-window-slide',
-  imports: [],
+  imports: [
+    NgStyle,
+    SymbolSpritePipe
+  ],
   templateUrl: './game-window-slide.component.html',
   styleUrl: './game-window-slide.component.scss',
   standalone: true,
@@ -30,4 +36,7 @@ export class GameWindowSlideComponent implements OnInit {
       this.cdr.markForCheck()
     },1000)
   }
+
+  protected readonly setAnswerBackground = setAnswerBackground;
+  protected readonly setAnswerFigureIcon = setAnswerFigureIcon;
 }

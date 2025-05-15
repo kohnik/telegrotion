@@ -1,7 +1,14 @@
+@import "../../../../assets/styles/colors";
+@import "../../../../assets/styles/mixins";
+
 .timer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: block;
   width: 100vw;
   height: 100vh;
+  background: var(--timer-background);
 }
 
 .timer {
@@ -24,9 +31,7 @@
   }
 
   &__number {
-    font-size: 4.8rem;
-    font-weight: 700;
-    color: white;
+    @include text-style($font-weight: normal, $size: 72px);
     text-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
   }
 

@@ -23,7 +23,7 @@ export class WebSocketService {
 
   constructor() {
     this.stompClient = new Client({
-      brokerURL: `wss://fizzly-7dba31943cb3.herokuapp.com/quiz-websocket`,
+      brokerURL: `wss://fizzly-websocket-50575b6868ed.herokuapp.com/quiz-websocket`,
       reconnectDelay: 10000,
       debug: (str) => console.debug('[STOMP]', str),
     });

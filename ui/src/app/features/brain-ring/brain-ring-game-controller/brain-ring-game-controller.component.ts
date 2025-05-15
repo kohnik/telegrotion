@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {PreGameTimerComponent} from '../../quiz/pre-game-timer/pre-game-timer.component';
+import {PreGameTimerComponent} from '../../../shared/components/pre-game-timer/pre-game-timer.component';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ICrateQuizAnswer} from '../../quiz/interfaces';
 import {Subject, takeUntil} from 'rxjs';
@@ -11,6 +11,7 @@ import {EWSEventBrainRingTypes} from '../models';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
 import {clearLocalStorageUserData} from '../utils';
 import {BrainRingLogoComponent} from '../brain-ring-logo/brain-ring-logo.component';
+import {EGameType} from "../../../shared/interfaces";
 
 @Component({
   selector: 'app-brain-ring-game-controller',
@@ -152,4 +153,6 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  protected readonly EGameType = EGameType;
 }

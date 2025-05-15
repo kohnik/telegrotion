@@ -1,46 +1,63 @@
 <div class="lobby">
+  <app-quiz-logo></app-quiz-logo>
+
   <div class="lobby__connect-data">
     <div class="lobby__connect-link">
-      <span>ЗАЛЕТАЙ НА ФИЗЛИ</span>
+      <span>Сканируй qr-code или переходи по ссылке: <br> https://fizzly.by/brain-ring-welcome</span>
     </div>
-    <div class="lobby__connect-code">
-      <span>КОД ДЛЯ ВХОДА:</span>
-      <span>{{joinCode}}</span>
-    </div>
+
+    @if (isReadyLobby){
+      <div class="lobby__connect-code">
+        <span>КОД ДЛЯ ВХОДА:</span>
+        <span>{{joinCode}}</span>
+      </div>
+      <qrcode [qrdata]="setLinkByQrCode()" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+    } @else {
+      <span class="lobby__empty">
+        <span class="lobby__dots">
+          <span class="lobby__dot"></span>
+          <span class="lobby__dot"></span>
+          <span class="lobby__dot"></span>
+        </span>
+      </span>
+    }
   </div>
 
-  <div class="lobby__start-btn" (click)="startQuiz()">
-    <span>Начать</span>
-  </div>
+  @if (isReadyLobby) {
+    <button
+      class="lobby__start-btn" (click)="startQuiz()"
+      [class.disabled]="!joinedPlayers.length">
+      Начать
+    </button>
+  }
 
   <div class="lobby__participants">
-    @if (joinedUsers.length) {
-      @for (user of joinedUsers; track $index) {
+    @if (joinedPlayers.length) {
+      @for (team of joinedPlayers; track $index) {
         <span class="lobby__participant">
-         {{user.username}}
+         {{team.playerName}}
+          <svg (click)="deletePlayer(team.playerName)">
+            <use [attr.xlink:href]="'trash' | symbolSprite" ></use>
+          </svg>
         </span>
       }
     } @else {
-      <span class="lobby__empty">Ждём людей...</span>
+      <span class="lobby__empty">
+        Ждём людей...
+        <span class="lobby__dots">
+          <span class="lobby__dot"></span>
+          <span class="lobby__dot"></span>
+          <span class="lobby__dot"></span>
+        </span>
+      </span>
     }
   </div>
 
   <div class="lobby__settings">
     <div class="lobby__count-participants">
-      <span>{{userCount ?? 0}}</span>
+      <span>{{playersCount ?? 0}}</span>
       <svg>
         <use [attr.xlink:href]="'user' | symbolSprite" ></use>
-      </svg>
-    </div>
-    <div class="lobby__settings-config">
-      <svg>
-        <use [attr.xlink:href]="'calendar' | symbolSprite" ></use>
-      </svg>
-      <svg>
-        <use [attr.xlink:href]="'gear' | symbolSprite" ></use>
-      </svg>
-      <svg>
-        <use [attr.xlink:href]="'vk-logo' | symbolSprite" ></use>
       </svg>
     </div>
   </div>

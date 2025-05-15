@@ -1,0 +1,12 @@
+@import '../../../../styles/quiz-colors';
+@import '../../../../styles/quiz-mixins';
+@import "../../../../../../../assets/styles/animations";
+
+:host {
+  display: block;
+  background: linear-gradient(135deg, $color-purple-bg, $color-blue-bg);
+}
+
+.answer-window {
+  @include main-background();
+}

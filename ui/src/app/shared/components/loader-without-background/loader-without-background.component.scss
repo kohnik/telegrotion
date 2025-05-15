@@ -13,7 +13,7 @@
   @include text-style($size: 72px);
   font-weight: bold;
   position: relative;
-  color: var(--loader-main-text-color);
+  color: var(--loader-without-main-text-color);
   text-shadow:
     0 1px 1px rgba(0, 0, 0, 0.5),
     0 2px 2px rgba(0, 0, 0, 0.4),
@@ -27,7 +27,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  color: var(--loader-before-text-color);
+  color: var(--loader-without-before-text-color);
   width: 0%;
   overflow: hidden;
   white-space: nowrap;

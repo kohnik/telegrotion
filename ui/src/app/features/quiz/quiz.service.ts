@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {
   IAddQuizBody,
   IGoToLobbyBody,
-  IQuizConfig, IQuizCreatePlayerResponse,
+  IQuizConfig, IQuizCreatePlayerResponse, IQuizPlayer,
   IStartedQuizConfig,
   IStartedQuizParticipants,
   IStartQuizBody
@@ -14,6 +14,7 @@ import {
 export class QuizDataService {
 
   private readonly baseApi = 'https://fizzly-7dba31943cb3.herokuapp.com'
+  private readonly sessionApi = 'https://fizzly-websocket-50575b6868ed.herokuapp.com'
 
   constructor(private readonly http: HttpClient) { }
 
@@ -25,19 +26,19 @@ export class QuizDataService {
     return this.http.post<IQuizConfig>(`${this.baseApi}/full-quiz`, body)
   }
 
-  public startQuiz(body: IStartQuizBody): Observable<IStartedQuizConfig> {
-    return this.http.post<IStartedQuizConfig>(`${this.baseApi}/quiz-session/start`, body)
-  }
-
   public getAllQuizzesByUserId(userId: number): Observable<IQuizConfig[]> {
     return this.http.get<IQuizConfig[]>(`${this.baseApi}/quizzes/users/${userId}`)
   }
 
-  public getParticipantsByCurrentSession(joinCode: string): Observable<string[]> {
-    return this.http.get<string[]>(`${this.baseApi}/quiz-session/${joinCode}/players`)
+  public startQuiz(body: IStartQuizBody): Observable<IStartedQuizConfig> {
+    return this.http.post<IStartedQuizConfig>(`${this.sessionApi}/quiz-session/start`, body)
+  }
+
+  public getParticipantsByCurrentSession(joinCode: string): Observable<IQuizPlayer[]> {
+    return this.http.get<IQuizPlayer[]>(`${this.sessionApi}/quiz-session/${joinCode}/players`)
   }
 
   public gotToLobby(body: IGoToLobbyBody): Observable<IQuizCreatePlayerResponse> {
-    return this.http.post<IQuizCreatePlayerResponse>(`${this.baseApi}/quiz-session/join`, body)
+    return this.http.post<IQuizCreatePlayerResponse>(`${this.sessionApi}/quiz-session/join`, body)
   }
 }

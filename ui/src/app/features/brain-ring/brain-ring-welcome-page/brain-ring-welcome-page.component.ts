@@ -5,6 +5,7 @@ import {SymbolSpritePipe} from '../../../shared/pipes/symbol-sprite.pipe';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
 import {getLocalStorageUserData, setLocalStorageUserData} from '../utils';
 import {BrainRingLogoComponent} from '../brain-ring-logo/brain-ring-logo.component';
+import {EGameType} from "../../../shared/interfaces";
 
 @Component({
   selector: 'app-brain-ring-welcome-page',
@@ -70,4 +71,6 @@ export class BrainRingWelcomePageComponent implements OnInit{
   public goToMainPage(): void {
     this.router.navigate(['/']);
   }
+
+  protected readonly EGameType = EGameType;
 }

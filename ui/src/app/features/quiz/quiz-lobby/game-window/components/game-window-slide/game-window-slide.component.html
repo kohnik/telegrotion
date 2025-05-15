@@ -4,17 +4,21 @@
       <span class="slide__timer">{{timeLeft}}</span>
 
       <div class="slide__question">
-        <span class="slide__question">{{slide.questionName}}</span>
+        {{slide.questionName}}
       </div>
-      <div class="slide__img">
-        картинка
-      </div>
+      @if (false) {
+        <div class="slide__img">
+          картинка
+        </div>
+      }
 
       <div class="slide__answers">
 
         @for (item of slide.answers; track $index) {
-          <span class="slide__answer">
-              <span>{{item.order}}.</span>
+          <span class="slide__answer" [ngStyle]="{'background-color': setAnswerBackground($index)}">
+            <svg [ngStyle]="{'color': 'white'}">
+              <use [attr.xlink:href]="setAnswerFigureIcon($index) | symbolSprite" ></use>
+            </svg>
               <span>{{item.answer}}</span>
           </span>
         }

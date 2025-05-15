@@ -3,7 +3,7 @@
 
 :host {
   display: block;
-  background: linear-gradient(135deg, #6566e6, #4c6cee);
+  background: linear-gradient(135deg, $color-purple-bg, $color-blue-bg);
 }
 
 .join {
@@ -28,7 +28,7 @@
     align-items: center;
     justify-content: center;
     width: 100px;
-    padding: 5px;
+    padding: 10px 20px 10px 20px;
     border-radius: 10px;
     cursor: pointer;
     border: none;
@@ -36,7 +36,7 @@
     background-color: $color-button-secondary;
     box-shadow: 0 8px 16px 0 $color-box-shadow-secondary;
 
-    @include text-style($size: 14px, $font-weight: bold);
+    @include text-style($size: 20px, $font-weight: bold);
 
     &.disabled {
       opacity: 0.5;

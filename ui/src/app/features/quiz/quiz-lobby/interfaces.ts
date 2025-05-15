@@ -13,6 +13,6 @@ export interface ICurrentSlide {
 }
 
 export interface ILeaderBoardPlayers {
-  username: string,
+  playerName: string,
   points: number,
 }

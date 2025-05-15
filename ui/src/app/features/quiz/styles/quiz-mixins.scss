@@ -44,3 +44,9 @@
   //  font-size: 30px;
   //}
 }
+
+@mixin disabled-button() {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}

@@ -28,6 +28,11 @@ export interface IStartQuizBody  {
   userId: number
 }
 
+export interface IQuizPlayer  {
+  playerName: string,
+  playerId: string
+}
+
 export interface IStartedQuizConfig {
   roomId: string,
   quizId: number,

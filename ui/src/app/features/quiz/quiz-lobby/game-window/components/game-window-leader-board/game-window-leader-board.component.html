@@ -11,8 +11,13 @@
     <div class="leader-board__table">
       @for (player of players; track $index) {
         <div class="leader-board__row">
-          <span>{{player.username}}</span>
-          <span>{{player.points}}</span>
+          <div class="leader-board__row-points">{{player.points}}</div>
+          <div class="leader-board__fill"
+               [style.width]="readyToFill ? fillWidth(player) : '80px'"
+               [style.background-color]="getRandomColor()"
+          >
+            <div class="leader-board__row-name">{{player.playerName ?? 'тест'}}</div>
+          </div>
         </div>
       }
     </div>

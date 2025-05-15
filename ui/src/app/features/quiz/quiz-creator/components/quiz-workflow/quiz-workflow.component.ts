@@ -4,7 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {QuizManagementService} from '../../services/quiz-management.service';
 import {Observable, Subscription} from 'rxjs';
 import {AsyncPipe, NgStyle} from '@angular/common';
-import {bgAnswerCircleColor, bgAnswerColor} from '../../constants';
+import {bgAnswerCircleColor, bgAnswerColor, setAnswerBackground, setAnswerSecondaryBackground} from '../../constants';
 import {SymbolSpritePipe} from '../../../../../shared/pipes/symbol-sprite.pipe';
 
 @Component({
@@ -51,14 +51,6 @@ export class QuizWorkflowComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  setAnswerBackground(index: number): string {
-    return bgAnswerColor[index];
-  }
-
-  setAnswerCircleBackground(index: number): string {
-    return bgAnswerCircleColor[index];
-  }
-
   onFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files ? input.files[0] : null;
@@ -74,4 +66,7 @@ export class QuizWorkflowComponent implements OnInit, OnDestroy {
       reader.readAsDataURL(file);
     }
   }
+
+  protected readonly setAnswerBackground = setAnswerBackground;
+  protected readonly setAnswerCircleBackground = setAnswerSecondaryBackground;
 }

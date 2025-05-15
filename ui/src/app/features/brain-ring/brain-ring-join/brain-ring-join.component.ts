@@ -6,6 +6,7 @@ import {BrainRingService} from '../brain-ring.service';
 import {LoaderComponent} from '../../../shared/components/loader/loader.component';
 import {setLocalStorageUserData} from '../utils';
 import {BrainRingLogoComponent} from "../brain-ring-logo/brain-ring-logo.component";
+import {EGameType} from "../../../shared/interfaces";
 
 @Component({
   selector: 'app-brain-ring-join',
@@ -97,4 +98,6 @@ export class BrainRingJoinComponent implements OnInit, OnDestroy{
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  protected readonly EGameType = EGameType;
 }
