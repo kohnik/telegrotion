@@ -1,4 +1,4 @@
-package by.fizzly.common.dto.brainring;
+package by.fizzly.common.dto.quiz;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -13,11 +13,11 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "DTO для игрока BrainRing")
-public class BrainRingPlayer implements Serializable {
+@Schema(description = "DTO для ответа, отправленного игроком")
+public class PlayerSubmittedAnswer implements Serializable {
     @Schema(description = "Идентификатор игрока")
     private UUID playerId;
     
-    @Schema(description = "Имя игрока")
-    private String playerName;
+    @Schema(description = "Ответ игрока (индекс/номер)")
+    private int answer;
 }

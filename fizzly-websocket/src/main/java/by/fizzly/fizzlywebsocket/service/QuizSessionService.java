@@ -3,6 +3,7 @@ package by.fizzly.fizzlywebsocket.service;
 import by.fizzly.common.dto.converter.QuizConverter;
 import by.fizzly.common.dto.quiz.FullQuizGetDTO;
 import by.fizzly.common.dto.quiz.PlayerJoinedResponse;
+import by.fizzly.common.dto.quiz.PlayerSubmittedAnswer;
 import by.fizzly.common.dto.quiz.QuizSessionAnswerDTO;
 import by.fizzly.common.dto.quiz.QuizSessionDTO;
 import by.fizzly.common.dto.quiz.QuizSessionRoom;
@@ -11,12 +12,11 @@ import by.fizzly.common.dto.websocket.response.QuestionEndedResponse;
 import by.fizzly.common.dto.websocket.response.QuizEndedResponse;
 import by.fizzly.common.dto.websocket.response.UserJoinResponse;
 import by.fizzly.common.event.QuizEvent;
-import by.fizzly.fizzlywebsocket.utils.RedisKeys;
 import by.fizzly.fizzlywebsocket.exception.FizzlyAppException;
 import by.fizzly.fizzlywebsocket.feign.QuizFeignClient;
 import by.fizzly.fizzlywebsocket.utils.JoinCodeUtils;
+import by.fizzly.fizzlywebsocket.utils.RedisKeys;
 import by.fizzly.fizzlywebsocket.utils.WebSocketTopics;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -182,6 +182,9 @@ public class QuizSessionService {
         redisTemplate.opsForSet().add(RedisKeys.buildKey(RedisKeys.SUBMITTED_ANSWERS_KEY, roomId.toString() + activeQuestion.getQuestionId()), playerId);
         LOGGER.info("User with id {} in session room submit answer", playerId);
 
+        PlayerSubmittedAnswer answer = new PlayerSubmittedAnswer(playerId, answerOrder);
+        redisTemplate.opsForSet().add(RedisKeys.buildKey(RedisKeys.PLAYERS_ANSWERS_KEY, roomId.toString() + activeQuestion.getQuestionId()), answer);
+
         if (correctAnswer.getOrder() == answerOrder) {
             LOGGER.info("User with id {} made right chose", playerId);
             Set<Object> members = redisTemplate.opsForSet().members(RedisKeys.buildKey(RedisKeys.SESSION_PARTICIPANTS_WITH_RESULTS_KEY, roomId.toString()));
@@ -266,7 +269,7 @@ public class QuizSessionService {
                 .toList();
     }
 
-    public void nextQuestion(String joinCode, UUID roomId) throws JsonProcessingException {
+    public void nextQuestion(String joinCode, UUID roomId) {
         final String topic = String.format(WebSocketTopics.JOIN_QUIZ_TOPIC, roomId);
         List<QuestionEndedPlayerDTO> players = getSubmittedAnswerPlayers(roomId);
 
@@ -291,6 +294,7 @@ public class QuizSessionService {
                     }
                 }
             } catch (InterruptedException e) {
+                LOGGER.warn(e.getMessage(), e);
                 Thread.currentThread().interrupt();
             }
 
@@ -313,11 +317,22 @@ public class QuizSessionService {
                             String.format("Не найден правильный ответ на вопрос: %s", question.getQuestionId()))
                     )
                     .getOrder();
-
-            QuestionEndedResponse response = new QuestionEndedResponse(
-                    QuizEvent.QUESTION_ENDED.getId(), order, getSubmittedAnswerPlayers(roomId)
-            );
-            messagingTemplate.convertAndSend(topic, response);
+            try {
+                List<PlayerSubmittedAnswer> submittedAnswers = redisTemplate.opsForSet().members(
+                                RedisKeys.buildKey(RedisKeys.PLAYERS_ANSWERS_KEY, roomId.toString() + question.getQuestionId())
+                        ).stream()
+                        .map(PlayerSubmittedAnswer.class::cast)
+                        .toList();
+                QuestionEndedResponse response = new QuestionEndedResponse(
+                        QuizEvent.QUESTION_ENDED.getId(),
+                        order,
+                        getSubmittedAnswerPlayers(roomId),
+                        submittedAnswers
+                );
+                messagingTemplate.convertAndSend(topic, response);
+            } catch (Throwable e) {
+                LOGGER.error(e.getMessage(), e);
+            }
 //            try {
 //                saveEventData(roomId, QuizEvent.QUESTION_ENDED, response, "");
 //            } catch (JsonProcessingException e) {
