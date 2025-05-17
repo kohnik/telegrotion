@@ -4,6 +4,7 @@ import by.fizzly.common.dto.UserCreateDTO;
 import by.fizzly.backend.entity.User;
 import by.fizzly.backend.mapper.UserMapper;
 import by.fizzly.backend.service.UserService;
+import by.fizzly.common.dto.UserGetDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +37,10 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "Получить всех пользователей")
-    public List<User> findAllUsers() {
-        return userService.getAllUsers();
+    public List<UserGetDTO> findAllUsers() {
+        return userService.getAllUsers().stream()
+                .map(userMapper::toUserGetDTO)
+                .toList();
     }
 
 }

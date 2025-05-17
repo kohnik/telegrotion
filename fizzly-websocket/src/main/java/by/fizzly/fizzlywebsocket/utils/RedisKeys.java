@@ -14,6 +14,7 @@ public final class RedisKeys {
     public static final String ACTIVE_QUESTIONS_KEY = "quiz:session:questions:";
     public static final String ACTIVE_QUESTION_KEY = "quiz:session:current_question:";
     public static final String SUBMITTED_ANSWERS_KEY = "quiz:session:submitted_answers:";
+    public static final String PLAYERS_ANSWERS_KEY = "quiz:session:players:answers";
     public static final String EVENT_PREFIX = "events:quiz";
     public static final String EVENT_PAYLOAD_PREFIX = "events:quiz:payload";
 
