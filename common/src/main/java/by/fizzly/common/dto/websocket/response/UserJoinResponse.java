@@ -12,8 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Schema(description = "DTO для ответа о присоединении пользователя")
 public class UserJoinResponse {
-    @Schema(description = "Идентификатор события")
-    private Long eventId;
     private int userCount;
     private String username;
     private String joinCode;

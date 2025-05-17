@@ -18,9 +18,6 @@ public class SubmitAnswerResponse {
     @Schema(description = "Идентификатор события")
     private Long eventId;
     
-    @Schema(description = "Флаг успешности отправки")
-    private boolean success;
-    
     private UUID playerId;
     private List<String> playersLeft;
 }

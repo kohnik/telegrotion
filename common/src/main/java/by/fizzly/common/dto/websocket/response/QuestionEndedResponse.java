@@ -16,9 +16,9 @@ import java.util.List;
 @NoArgsConstructor
 @Schema(description = "DTO для ответа о завершении вопроса")
 public class QuestionEndedResponse {
-    @Schema(description = "Список игроков с их результатами")
-    private List<QuestionEndedPlayerDTO> players;
     private Long eventId;
     private int correctAnswer;
+    @Schema(description = "Список игроков с их результатами")
+    private List<QuestionEndedPlayerDTO> players;
     private List<PlayerSubmittedAnswer> answers;
 }
