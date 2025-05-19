@@ -1,30 +1,36 @@
-<div class="game-controller" [class.is-game]="isWaitingGameAfterJoin">
-  <div class="game-controller__container" [class.is-game]="isWaitingGameAfterJoin">
-    @if (isJoined) {
-      @if (isWaitingGameAfterJoin) {
-        @if (isNeedStartedTimer) {
-          <app-pre-game-timer></app-pre-game-timer>
-        } @else {
-          <span>Ожидание</span>
-        }
+<div class="game-controller">
+  <app-quiz-logo></app-quiz-logo>
+
+  <div class="game-controller__container">
+      @if (isWaiting) {
+        <span class="game-controller__waiting">Ожидание</span>
+        <div class="game-controller__loader">
+          <span class="game-controller__dot"></span>
+          <span class="game-controller__dot"></span>
+          <span class="game-controller__dot"></span>
+        </div>
       } @else {
-        <h2 class="game-controller__answers-title">ОТВЕЧАЙ НА ВОПРОС</h2>
         @if (answers.length) {
           <div class="game-controller__buttons">
             @for (data of answers; track $index) {
-              <div class="game-controller__button" (click)="submitAnswer(data.order)">{{data.order}}</div>
+              <div
+                [ngStyle]="{'background-color': setAnswerBackground($index)}"
+                class="game-controller__button"
+                (click)="submitAnswer(data.order)">
+                <div class="game-controller__button-sub-bg sub-bg-{{$index}}">
+                  <svg>
+                    <use [attr.xlink:href]="setAnswerFigureIcon($index) | symbolSprite" ></use>
+                  </svg>
+                </div>
+              </div>
             }
           </div>
         }
         <span class="game-controller__timer">{{timeLeft}}</span>
       }
-
-    } @else {
-      <span class="game-controller__title">Введите код комнаты и ник</span>
-      <input placeholder="код комнаты" [(ngModel)]="joinCode">
-      <input placeholder="ник" [(ngModel)]="username">
-      <span class="game-controller__go" (click)="goToLobby()">Вход</span>
-    }
-
   </div>
 </div>
+
+<!--@if (isOnStartedTimer) {-->
+<!--  <app-pre-game-timer [gameType]="EGameType.Quiz"></app-pre-game-timer>-->
+<!--}-->

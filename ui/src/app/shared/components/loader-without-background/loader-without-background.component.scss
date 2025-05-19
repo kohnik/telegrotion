@@ -1,0 +1,41 @@
+@import "../../../../assets/styles/colors";
+@import "../../../../assets/styles/mixins";
+
+.loader-container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+}
+
+.loader {
+  @include text-style($size: 72px);
+  font-weight: bold;
+  position: relative;
+  color: var(--loader-without-main-text-color);
+  text-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.5),
+    0 2px 2px rgba(0, 0, 0, 0.4),
+    0 6px 6px rgba(0, 0, 0, 0.3),
+    0 -1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.loader::before {
+  @include text-style($size: 72px);
+  content: "Fizzly";
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--loader-without-before-text-color);
+  width: 0%;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: fill 3s infinite;
+}
+
+@keyframes fill {
+  0% { width: 0; }
+  50% { width: 100%; }
+  100% { width: 0; }
+}

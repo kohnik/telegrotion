@@ -1,6 +1,6 @@
 export interface ICrateQuizSlide {
   questionId: number;
-  question?: string;
+  questionName?: string;
   type?: string;
   order: number;
   seconds?: number;
@@ -28,12 +28,15 @@ export interface IStartQuizBody  {
   userId: number
 }
 
+export interface IQuizPlayer  {
+  playerName: string,
+  playerId: string
+}
+
 export interface IStartedQuizConfig {
-  id: string,
+  roomId: string,
   quizId: number,
   joinCode: string,
-  ownerId: number,
-  participants: IStartedQuizParticipants
   active: boolean
 }
 
@@ -50,4 +53,25 @@ export interface IQuizConfig {
     id: number,
     username: string
   }
+}
+
+export interface IGoToLobbyBody {
+  playerName: string,
+  joinCode: string,
+}
+
+export interface IQuizCreatePlayerResponse {
+  roomId: string,
+  joinCode: string,
+  playerName: string,
+  playerId: string
+}
+
+export interface IQuizQuestionStatistic {
+  answers: IQuizQuestionStatisticAnswer[]
+}
+
+export interface IQuizQuestionStatisticAnswer {
+  playerId: string,
+  answer: number,
 }

@@ -6,21 +6,23 @@ import {
 } from '@angular/core';
 import {ICrateQuizSlide} from '../../../interfaces';
 import {SymbolSpritePipe} from '../../../../../shared/pipes/symbol-sprite.pipe';
-import {AsyncPipe, NgOptimizedImage} from '@angular/common';
+import {AsyncPipe, NgOptimizedImage, NgStyle} from '@angular/common';
 import {QuizManagementService} from '../../services/quiz-management.service';
 import {Observable, Subscription} from 'rxjs';
+import {bgAnswerColor, ESlideAnswersColor} from '../../constants';
 
 @Component({
   selector: 'app-quiz-slides',
   imports: [
     SymbolSpritePipe,
     NgOptimizedImage,
-    AsyncPipe
+    AsyncPipe,
+    NgStyle
   ],
   templateUrl: './quiz-slides.component.html',
   standalone: true,
   styleUrl: './quiz-slides.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuizSlidesComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
@@ -28,15 +30,15 @@ export class QuizSlidesComponent implements OnInit, OnDestroy {
   public selectedSlide$: Observable<ICrateQuizSlide | null>;
   public slides$: Observable<ICrateQuizSlide[]>;
 
-  constructor(private quizService: QuizManagementService) {}
+  constructor(private quizManagementService: QuizManagementService) {}
 
   ngOnInit(): void {
-    this.selectedSlide$ = this.quizService.selectedSlide$;
-    this.slides$ = this.quizService.slides$;
+    this.selectedSlide$ = this.quizManagementService.selectedSlide$;
+    this.slides$ = this.quizManagementService.slides$;
   }
 
   selectSlide(slide: ICrateQuizSlide): void {
-    this.quizService.setSelectedSlide(slide);
+    this.quizManagementService.setSelectedSlide(slide);
   }
 
   ngOnDestroy() {
@@ -44,14 +46,18 @@ export class QuizSlidesComponent implements OnInit, OnDestroy {
   }
 
   public addSlide(): void {
-    this.quizService.addSlide()
+    this.quizManagementService.addSlide()
   }
 
   duplicateSlide(slide: ICrateQuizSlide): void {
-    this.quizService.duplicateSlide(slide)
+    this.quizManagementService.duplicateSlide(slide)
   }
 
   deleteSlide(index: number): void {
-    this.quizService.deleteSlide(index)
+    this.quizManagementService.deleteSlide(index)
+  }
+
+  setAnswerBackground(index: number): string {
+    return bgAnswerColor[index];
   }
 }

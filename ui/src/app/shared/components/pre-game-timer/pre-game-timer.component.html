@@ -1,0 +1,10 @@
+<div class="timer-container">
+  <div class="timer" *ngIf="showTimer">
+    <div
+      class="timer__circle"
+      [@timerAnimation]="currentNumber"
+    >
+      <span class="timer__number">{{ currentNumber === 0 ? "Go" : currentNumber }}</span>
+    </div>
+  </div>
+</div>

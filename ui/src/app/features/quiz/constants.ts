@@ -1,1 +1,1 @@
-export const quizRingWSTopic ='/topic/session/'
+export const quizRingWSTopic ='/topic/quiz/'

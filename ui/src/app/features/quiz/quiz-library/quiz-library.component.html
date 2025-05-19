@@ -1,7 +1,8 @@
 <div class="main">
   <div class="main__header">
-    <span (click)="goToHome()">Fizzly</span>
-    <span (click)="goToQuizList()">К списку квизов</span>
+<!--    <span (click)="goToHome()">Fizzly</span>-->
+<!--    <span (click)="goToQuizList()">К списку квизов</span>-->
+    <app-quiz-logo></app-quiz-logo>
   </div>
   <div class="main__content">
     @for (quiz of quizzes$ | async; track $index) {
@@ -11,11 +12,28 @@
           <span class="main__questions-count">25 вопросов</span>
         </div>
         <div class="main__bottom-container">
-          <span>{{quiz.name}}</span>
-          <span>{{quiz.owner.username}}</span>
+          <span class="main__bottom-container-text">
+            <span>
+              Название:
+            </span>
+            <span>
+              {{quiz.name}}
+            </span>
+          </span>
+          <span class="main__bottom-container-text">
+            <span>
+              Создатель:
+            </span>
+            <span>
+              {{quiz.owner.username}}
+            </span>
+          </span>
         </div>
         <span class="main__start" (click)="$event.stopPropagation(); startQuiz(quiz)">ЗАПУСТИТЬ</span>
       </div>
     }
   </div>
+  @if (isLoading) {
+    <app-loader-without-background [gameType]="EGameType.BrainRing"></app-loader-without-background>
+  }
 </div>

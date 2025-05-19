@@ -3,7 +3,7 @@
     <span (click)="goToHome()">Fizzly</span>
     <span (click)="goToQuizList()">К списку квизов</span>
   </div>
-  <div class="create-quiz__content">
+  <div class="create-quiz__content" [class.panel-open]="isPanelOpen" >
     <div class="create-quiz__slides">
       <app-quiz-slides></app-quiz-slides>
     </div>
@@ -12,12 +12,15 @@
       <app-quiz-workflow></app-quiz-workflow>
     </div>
 
-    <div class="create-quiz__themes">
-      <app-quiz-slide-property (quizNameChange)="quizName = $event"></app-quiz-slide-property>
-    </div>
-  </div>
+    <button class="create-quiz__toggle-theme-button" [class.panel-open]="isPanelOpen" (click)="togglePanel()">
+      <svg>
+        <use [attr.xlink:href]="'arrow-bold' | symbolSprite" ></use>
+      </svg>
+    </button>
 
-  <div class="create-quiz__actions">
-    <span class="create-quiz__action" (click)="createQuiz()">{{isEditing ? 'Редактировать' : 'Создать'}}</span>
+    <div class="create-quiz__themes" [class.open]="isPanelOpen">
+      <app-quiz-slide-property></app-quiz-slide-property>
+    </div>
+
   </div>
 </div>

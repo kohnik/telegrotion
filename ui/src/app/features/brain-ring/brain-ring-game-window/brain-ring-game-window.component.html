@@ -1,9 +1,22 @@
 <div class="game-window">
-
+  <app-brain-ring-logo></app-brain-ring-logo>
+  <div class="game-window__end-game" (click)="endSession()">Закончить игру</div>
   @if(isFirstTeamAnswer) {
-    <span class="game-window__text">команда <b>{{answeredTeam.teamName}}</b> нажала кнопку спустя {{answeredTeam.answerTime}} секунд</span>
+    <span class="game-window__text">команда <b>{{answeredTeam.playerName}}</b> нажала кнопку
+      {{answeredTeam.answerTime === 0 ? 'моментально' : 'спустя  секунд'}} {{answeredTeam.answerTime === 0 ? '' : answeredTeam.answerTime}}</span>
 
-    <button class="game-window__next-btn" (click)="$event.preventDefault(); nextQuestion()">Далее</button>
+    <button
+      class="game-window__next-btn"
+      (click)="$event.preventDefault(); nextQuestion()"
+    >Далее</button>
+  } @else {
+    <span class="game-window__empty">
+        Ждём кого-то...
+        <span class="game-window__dots">
+          <span class="game-window__dot"></span>
+          <span class="game-window__dot"></span>
+          <span class="game-window__dot"></span>
+        </span>
+      </span>
   }
-
 </div>

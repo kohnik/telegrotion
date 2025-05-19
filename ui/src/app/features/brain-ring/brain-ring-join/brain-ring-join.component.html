@@ -1,0 +1,38 @@
+<div class="join-to" [formGroup]="form">
+  <app-brain-ring-logo></app-brain-ring-logo>
+  <div class="join-to__login" [formGroup]="form">
+          <span class="join-to__login-title">
+            Введите {{ isAfterQrCodeRedirect ? '' : 'код комнаты и'}} название команды!
+          </span>
+
+    @if (!isAfterQrCodeRedirect) {
+      <input
+        placeholder="КОД КОМНАТЫ"
+        class="join-to__login-input"
+        formControlName="joinCode"
+      />
+    }
+
+    <input
+      placeholder="НАЗВАНИЕ КОМАНДЫ"
+      class="join-to__login-input"
+      formControlName="playerName"
+    />
+
+    <button
+      class="join-to__login-button"
+      [disabled]="form.invalid"
+      [class.disabled]="form.invalid"
+      (click)="$event.preventDefault(); goToRoom()"
+    >
+      Вход
+    </button>
+
+    <span  class="join-to__error">{{errorMessage}}</span>
+  </div>
+</div>
+
+
+@if (isLoading) {
+  <app-loader [gameType]="EGameType.BrainRing"></app-loader>
+}

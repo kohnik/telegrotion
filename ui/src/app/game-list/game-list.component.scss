@@ -1,0 +1,96 @@
+@import "../../assets/styles/colors";
+@import "../../assets/styles/mixins";
+@import "../../assets/styles/animations";
+
+:host {
+  @include main-background();
+  padding: 20px;
+}
+
+.game-select {
+  &__header {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  &__logo {
+    @include logo-style();
+  }
+
+  &__title {
+    @include text-style($color: $color-text-dark, $size: 2.5rem);
+    margin: 10px 0;
+
+    @media (max-width: 768px) {
+      @include text-style($color: $color-text-dark, $size: 2.0rem);
+      margin: 0;
+    }
+  }
+
+  &__cards {
+    display: flex;
+    gap: 40px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__card {
+    background: rgba($color-primary-dark, 1);
+    border-radius: 20px;
+    box-shadow: 1px 20px 15px 7px rgba(0, 0, 0, 0.1);
+    width: 280px;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+
+    @include bounceInMixin();
+
+    &:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  &__icon {
+    font-size: 64px;
+    color: $color-orange;
+  }
+
+  &__name {
+    @include text-style($size: 30px);
+    letter-spacing: 2px;
+  }
+
+  &__description {
+    @include text-style($color: $color-text-dark, $size: 14px);
+  }
+
+  &__button {
+    background-color: $color-button;
+    color: $color-white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    @include text-style($size: 14px);
+    cursor: pointer;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px $color-button-shadow;
+    transition: background-color 0.3s;
+    margin-top: auto;
+
+    &:hover {
+      background-color: $color-orange-darker;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .game-select__cards {
+    flex-direction: column;
+    align-items: center;
+  }
+}

@@ -4,36 +4,37 @@ import {QuizSlidesComponent} from './components/quiz-slides/quiz-slides.componen
 import {ICrateQuizSlide} from '../interfaces';
 import {slides} from './mocks';
 import {QuizWorkflowComponent} from './components/quiz-workflow/quiz-workflow.component';
-import {DataService} from '../../../core/services/data.service';
 import {QuizManagementService} from './services/quiz-management.service';
 import {catchError, EMPTY, Observable, of, Subject, Subscription, switchMap, takeUntil, throwError} from 'rxjs';
 import {QuizSlidePropertyComponent} from './components/quiz-slide-property/quiz-slide-property.component';
+import {QuizDataService} from '../quiz.service';
+import {SymbolSpritePipe} from '../../../shared/pipes/symbol-sprite.pipe';
 
 @Component({
   selector: 'app-quiz',
   imports: [
     QuizSlidesComponent,
     QuizWorkflowComponent,
-    QuizSlidePropertyComponent
+    QuizSlidePropertyComponent,
+    SymbolSpritePipe
   ],
   templateUrl: './quiz-creator.html',
   standalone: true,
   styleUrl: './quiz-creator.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [QuizDataService, QuizManagementService]
 })
 export class QuizCreator implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   public slides$: Observable<ICrateQuizSlide[]>
   private subs = new Subscription();
   public isEditing = false;
-  public quizName = ''
-
 
   constructor(
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
-    private readonly dataService: DataService,
-    private readonly quizService: QuizManagementService,
+    private readonly quizDataService: QuizDataService,
+    private readonly quizManagementService: QuizManagementService,
     private route: ActivatedRoute
   ) {
   }
@@ -44,11 +45,11 @@ export class QuizCreator implements OnInit, OnDestroy {
       switchMap(params => {
         const quizId = params['id'];
         if (!quizId) {
-          this.quizService.setSlides(slides);
+          this.quizManagementService.setSlides(slides);
           return EMPTY
         }
 
-        return this.dataService.getQuiz(quizId).pipe(
+        return this.quizDataService.getQuiz(quizId).pipe(
           catchError(error => {
             console.error('Failed to load quiz:', error);
             throw error;
@@ -58,7 +59,7 @@ export class QuizCreator implements OnInit, OnDestroy {
     ).subscribe({
       next: quiz => {
         console.log(quiz.questions)
-        this.quizService.setSlides(quiz.questions);
+        this.quizManagementService.setSlides(quiz.questions);
         this.isEditing = true;
       },
       error: err => {
@@ -77,13 +78,14 @@ export class QuizCreator implements OnInit, OnDestroy {
   }
 
   public goToQuizList(): void {
-    this.router.navigate(['/main'])
+    this.router.navigate(['/quiz-library'])
   }
 
-  createQuiz(): void {
-    this.quizService.createNewQuiz(this.quizName).subscribe(() => {
-      this.router.navigate(['/main']);
-    })
+  isPanelOpen = false;
+
+  // Метод для переключения состояния панели
+  togglePanel() {
+    this.isPanelOpen = !this.isPanelOpen;
   }
 
 }

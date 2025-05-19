@@ -1,0 +1,233 @@
+@import '../../../../styles/quiz-colors';
+@import '../../../../styles/quiz-mixins';
+@import "../../../../../../../assets/styles/animations";
+
+:host {
+  display: block;
+  background: linear-gradient(135deg, $color-purple-bg, $color-blue-bg);
+}
+
+.answer-window {
+  @include main-background();
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 50px;
+
+  &__backdrop {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    top: 0;
+  }
+
+  &__title-container {
+    width: 100%;
+    padding: 0 100px;
+    z-index: 1;
+    max-height: 300px;
+    display: flex;
+    justify-content: center;
+  }
+
+  &__title {
+    display: inline-block;
+    text-align: center;
+    width: fit-content;
+    box-sizing: border-box;
+    border-radius: 10px;
+    padding: 20px;
+    @include text-style($color: $color-text-light, $size: 48px, $font-weight: 500);
+    background-color: $color-purple-bg;
+    box-shadow: 0 4px 8px rgba($color-box-shadow-secondary,1);
+  }
+
+  &__container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 100px;
+    //background-color: $color-purple-bg;
+    //box-shadow: 0 4px 8px rgba($color-box-shadow-secondary,1);
+    //padding: 20px;
+    border-radius: 30px;
+    box-sizing: border-box;
+    //margin: auto;
+    margin-top: auto;
+    width: 100%;
+    @include bounceInMixin();
+  }
+
+  &__answers-list {
+    box-sizing: border-box;
+    padding: 20px;
+    border-radius: 30px;
+    @include text-style($color: $color-text-light, $size: 38px, $font-weight: 600);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  &__players-count {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  &__answer-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    &.correct .answer-window__answer-label {
+      color: #4CAF50;
+    }
+  }
+
+  &__answer-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__correct-icon {
+    font-size: 28px;
+  }
+
+  &__answer-votes {
+    font-size: 32px;
+    font-weight: 400;
+    opacity: 0.8;
+  }
+
+
+  &__next-btn {
+    @include text-style($size: 16px, $font-weight: 600);
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    background-color: $color-button-primary;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 $color-box-shadow-secondary;
+    transition: transform 0.1s ease;
+    border: none;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 $color-box-shadow-secondary;
+    }
+
+    @media (max-width: 1056px) {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+
+      &:hover {
+        transform: translate(-50%, -2px);
+      }
+
+      &:active {
+        transform: translate(-50%, 2px);
+      }
+    }
+
+    &.disabled {
+      @include disabled-button()
+    }
+  }
+
+  &__answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: center;
+    gap: 10px;
+    width: 100%;
+    z-index: 1;
+    margin-top: auto;
+  }
+
+  &__answer {
+    display: flex;
+    align-items: center;
+    justify-content:flex-start;
+    padding: 5px 10px;
+    gap: 10px;
+    height: 75px;
+    border-radius: 5px;
+    width: 100%;
+    opacity: 30%;
+    @include text-style($color: $color-text-dark, $size: 24px, $font-weight: 600);
+
+    svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    &.correct {
+      opacity: 100%;
+    }
+
+    .approve-icon {
+      margin-left: auto;
+      svg {
+        width: 35px;
+        height: 35px;
+      }
+    }
+  }
+
+  &__result-bars {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 75px;
+    height: 320px;
+    margin: auto;
+    z-index: 1;
+  }
+
+  &__result-bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+  }
+
+  &__result-bar {
+    width: 75px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 5px;
+    transition: height 0.5s ease;
+    color: white;
+    opacity: 0.5;
+
+    &.correct {
+      opacity: 1;
+    }
+  }
+
+  &__result-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+    fill: white;
+    margin-bottom: 10px;
+  }
+
+  &__result-count {
+    margin-bottom: 4px;
+    @include text-style( $size: 20px, $font-weight: 600);
+  }
+}

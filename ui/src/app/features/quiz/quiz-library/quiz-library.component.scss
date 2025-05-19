@@ -1,14 +1,26 @@
-@import "../../../../assets/styles/colors";
+@import "../styles/quiz-colors";
+@import "../styles/quiz-mixins";
+
+:host {
+  display: block;
+  background: linear-gradient(135deg, #6566e6, #4c6cee);
+  height: 100vh;
+}
 
 .main {
+  @include main-background;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0;
   position: relative;
 
   &__header {
     display: flex;
     justify-content: space-between;
-    padding: 10px;
-    color: $primary-color;
-    background-color: $secondary-color;
+    height: 60px;
+    background: linear-gradient(135deg, #6566e6, #4c6cee);
+    width: 100%;
+    box-shadow: 1px 2px 9px #0000006e;
 
     span {
       cursor: pointer;
@@ -18,9 +30,13 @@
   &__content {
     padding: 20px;
     display: grid;
+    justify-content: center;
     grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), clamp(180px, 25vw, 200px)));
     gap: 20px;
     width: 100%;
+    margin: 0 auto;
+    height: calc(100vh - 60px);
+    overflow: auto;
 
     @media (max-width: 768px) {
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -37,16 +53,16 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
+    //border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
     transition: transform 0.2s;
     cursor: pointer;
+    background-color: #00000069;
+    box-shadow: 1px 1px 12px #00000082;
 
-
-    &:hover {
+  &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     @media (max-width: 768px) {
@@ -66,20 +82,33 @@
 
   &__top-container {
     position: relative;
+    @include text-style($size: 14px);
+
+    img {
+      border-radius: 5px;
+    }
   }
 
   &__questions-count {
     position: absolute;
     bottom: 10px;
     right: 10px;
-    background-color: rgba(black, 0.5);
-    color: white;
+    color: #e7e7e7;
   }
 
   &__bottom-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    justify-content: center;
+    gap: 10px;
+    padding: 5px 10px;
+    @include text-style($size: 12px);
+  }
+
+  &__bottom-container-text {
+    span:first-child {
+      opacity: 70%;
+    }
   }
 
   &__start {
@@ -93,5 +122,7 @@
     padding: 5px;
     border-radius: 5px;
     transition: 0.1s ease-in-out;
+
+    @include text-style($size: 12px, $color: $color-text-dark);
   }
 }

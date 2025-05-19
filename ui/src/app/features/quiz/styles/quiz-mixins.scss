@@ -1,0 +1,52 @@
+@import '../styles/quiz-colors';
+
+@mixin text-style($color: $color-text-light, $size: 20px, $font-family: 'Nunito', $font-weight: normal) {
+  color: $color;
+  font-size: $size;
+  font-family: $font-family, sans-serif;
+  font-weight: $font-weight;
+}
+
+
+@mixin main-background($padding: 0 20px) {
+  width: 100vw;
+  min-height: calc(var(--vh) * 100);
+  background-image: url("../../../../assets/images/quiz/background-quiz-main.png");
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+}
+
+@mixin logo-style($color: $color-text-light, $size: 30px) {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.2;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: $size;
+  color: $color;
+  cursor: pointer;
+  background: rgba($color-box-shadow-secondary,1);
+  padding: 5px 10px;
+  border-radius: 20px;
+
+  //@media (max-width: 768px) {
+  //  font-size: 40px;
+  //}
+  //
+  //@media (max-width: 456px) {
+  //  font-size: 30px;
+  //}
+}
+
+@mixin disabled-button() {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}

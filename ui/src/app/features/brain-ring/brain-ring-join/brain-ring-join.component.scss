@@ -1,0 +1,70 @@
+@import "../../../../assets/styles/colors";
+@import "../../../../assets/styles/mixins";
+
+.join-to {
+  @include main-background();
+
+  &__login {
+    background-color: $color-orange;
+    padding: 32px 32px 10px 32px;
+    border-radius: 1.5rem;
+    width: 320px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+
+    &-title {
+      @include text-style($size: 1.25rem, $font-family: 'Russo One', $font-weight: 'normal');
+      display: block;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 1px $color-black;
+    }
+
+    &-input {
+      @include text-style($size: 18px, $color: $color-text-dark, $font-family: 'Russo One', $font-weight: 'normal');
+      display: block;
+      width: 100%;
+      margin: 0 auto 1rem;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 2rem;
+      text-align: center;
+      background-color: $color-input-bg;
+      outline: none;
+
+      &::placeholder {
+        @include text-style($size: 18px, $color: $color-text-dark, $font-family: 'Russo One', $font-weight: 'normal');
+        text-transform: uppercase;
+        opacity: 0.5;
+      }
+    }
+
+    &-button {
+      @include text-style($size: 18px, $color: $color-white, $font-family: 'Russo One', $font-weight: 'normal');
+      padding: 0.75rem 1rem;
+      width: 100%;
+      background-color: $color-orange-dark;
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      &:not(.disabled):hover {
+        background-color: $color-orange-darker;
+      }
+    }
+  }
+
+  &__error {
+    display: block;
+    height: 25px;
+    width: 100%;
+
+    @include text-style($size: 16px, $color: $color-text-dark, $font-family: 'Russo One', $font-weight: 'normal');
+  }
+}

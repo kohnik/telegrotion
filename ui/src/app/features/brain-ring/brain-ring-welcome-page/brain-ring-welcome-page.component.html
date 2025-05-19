@@ -1,19 +1,21 @@
-<div class="welcome-page">
-  <div class="welcome-page__container">
-    <img src="assets/images/logo.png">
-    <div class="welcome-page__buttons">
-      <span class="welcome-page__join" (click)="joinToRoom()">
-        <svg>
-          <use [attr.xlink:href]="'blue-play' | symbolSprite" ></use>
-        </svg>
-        <span>Присоедениться к комнате</span>
-      </span>
-      <span class="welcome-page__new" (click)="createRoom()">
-        <svg>
-          <use [attr.xlink:href]="'green-plus' | symbolSprite" ></use>
-        </svg>
-        <span>Создать комнату</span>
-      </span>
+@if (isLoading) {
+  <app-loader [gameType]="EGameType.BrainRing"></app-loader>
+} @else {
+  <div class="welcome-screen">
+    <app-brain-ring-logo></app-brain-ring-logo>
+
+    <div class="welcome-screen__box">
+      <div class="welcome-screen__title">Присоединиться к викторине или создать её!</div>
+      <div class="welcome-screen__buttons">
+        <button class="welcome-screen__button welcome-screen__button--join" (click)="joinToRoom()">
+          Присоединиться
+        </button>
+        <button class="welcome-screen__button welcome-screen__button--create" (click)="createRoom()">
+          Создать
+        </button>
+      </div>
     </div>
   </div>
-</div>
+}
+
+

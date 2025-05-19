@@ -1,6 +1,15 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import {NgIf} from '@angular/common';
+import {EGameType} from '../../interfaces';
 
 @Component({
   selector: 'app-pre-game-timer',
@@ -28,18 +37,22 @@ import {NgIf} from '@angular/common';
         opacity: 0
       })),
       transition('void => 3', [
-        animate('500ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
+        animate('300ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
       ]),
       transition('3 => 2', [
-        animate('500ms ease-out', style({ transform: 'scale(0.5)', opacity: 0 })),
-        animate('500ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
+        animate('300ms ease-out', style({ transform: 'scale(0.9)', opacity: 0.2 })),
+        animate('300ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
       ]),
       transition('2 => 1', [
-        animate('500ms ease-out', style({ transform: 'scale(0.5)', opacity: 0 })),
-        animate('500ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
+        animate('300ms ease-out', style({ transform: 'scale(0.9)', opacity: 0.2 })),
+        animate('300ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
+      ]),
+      transition('1 => 0', [
+        animate('300ms ease-out', style({ transform: 'scale(0.9)', opacity: 0.2 })),
+        animate('300ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
       ]),
       transition('1 => void', [
-        animate('500ms ease-out', style({ transform: 'scale(0.5)', opacity: 0 }))
+        animate('300ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
       ])
     ])
   ],
@@ -48,8 +61,20 @@ import {NgIf} from '@angular/common';
 })
 export class PreGameTimerComponent implements OnInit {
   showTimer = false;
-  currentNumber: number | null = null;
-  private colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F5'];
+  currentNumber:number | null = null;
+
+  @Input() set gameType(gameType: EGameType) {
+    switch (gameType) {
+      case EGameType.Quiz: {
+        document.documentElement.style.setProperty('--timer-background', `linear-gradient(135deg, #30316b, #4c6cee)`);
+        break;
+      }
+      case EGameType.BrainRing: {
+        document.documentElement.style.setProperty('--timer-background', `linear-gradient(to bottom, #f9a825, #ef6c00)`);
+        break;
+      }
+    }
+  }
 
   @Output() timerEnd = new EventEmitter();
 
@@ -70,7 +95,7 @@ export class PreGameTimerComponent implements OnInit {
     console.log(this.showTimer)
 
     const countdown = setInterval(() => {
-      if (this.currentNumber && this.currentNumber > 1) {
+      if (this.currentNumber && this.currentNumber >= 0) {
         this.currentNumber--;
       } else {
         clearInterval(countdown);
@@ -84,9 +109,5 @@ export class PreGameTimerComponent implements OnInit {
       }
       this.cdr.markForCheck();
     }, 1000);
-  }
-
-  getRandomColor() {
-    return this.colors[Math.floor(Math.random() * this.colors.length)];
   }
 }

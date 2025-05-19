@@ -3,20 +3,20 @@ import {SymbolSpritePipe} from "../../../shared/pipes/symbol-sprite.pipe";
 import {Subject, takeUntil} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {WebSocketService} from '../../../core/services/web-socket.service';
-import {DataService} from '../../../core/services/data.service';
-import {EWSEventQuizTypes} from '../../quiz/models';
 import {brainRingWSTopic} from '../constants';
 import {BrainRingService} from '../brain-ring.service';
 import {IBrainRingTeam} from '../interfaces';
 import {EWSEventBrainRingTypes} from '../models';
 import {QRCodeComponent} from 'angularx-qrcode';
+import {BrainRingLogoComponent} from "../brain-ring-logo/brain-ring-logo.component";
 
 @Component({
   selector: 'app-brain-ring-lobby',
-  imports: [
-    SymbolSpritePipe,
-    QRCodeComponent
-  ],
+    imports: [
+        SymbolSpritePipe,
+        QRCodeComponent,
+        BrainRingLogoComponent
+    ],
   templateUrl: './brain-ring-lobby.component.html',
   styleUrl: './brain-ring-lobby.component.scss',
   standalone: true,
@@ -26,8 +26,9 @@ import {QRCodeComponent} from 'angularx-qrcode';
 export class BrainRingLobbyComponent implements OnInit, OnDestroy {
   public joinCode = '';
   public roomId = '';
-  public teamsCount: number;
-  public joinedTeams: IBrainRingTeam[] = [];
+  public playersCount: number;
+  public isReadyLobby = false;
+  public joinedPlayers: IBrainRingTeam[] = [];
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -44,10 +45,11 @@ export class BrainRingLobbyComponent implements OnInit, OnDestroy {
         console.log(parseContent, 'QUIZ_LOBBY')
 
         if(parseContent.eventId === EWSEventBrainRingTypes.USER_ADDED) {
-            this.joinedTeams.push({
-              teamName: `${parseContent.teamName}`,
-              teamId: parseContent.teamId ?? '',
+            this.joinedPlayers.push({
+              playerName: `${parseContent.playerName}`,
+              playerId: parseContent.playerId ?? '',
             });
+          this.playersCount = this.joinedPlayers.length;
           this.cdr.markForCheck()
         }
 
@@ -85,8 +87,8 @@ export class BrainRingLobbyComponent implements OnInit, OnDestroy {
     this.roomId = this.route.snapshot.queryParams['roomId'];
 
     this.brainRingService.roomInfo(this.roomId).subscribe(el => {
-      this.joinedTeams = el.teams ?? []
-      this.teamsCount = this.joinedTeams.length;
+      this.joinedPlayers = el.players ?? []
+      this.playersCount = this.joinedPlayers.length;
       this.cdr.markForCheck()
     })
 
@@ -97,11 +99,14 @@ export class BrainRingLobbyComponent implements OnInit, OnDestroy {
     this.wsService.connect();
     setTimeout(()=> {
       this.wsService.subscribe(brainRingWSTopic + `${this.roomId}`)
+      this.isReadyLobby = true;
       this.cdr.markForCheck();
-    },3000)
+    },2000)
   }
 
-  public startBrainRing(): void {
+  public startBrainRing(event: MouseEvent): void {
+    event.stopPropagation();
+
     this.wsService.send(
       '/app/brain-ring/start',
       JSON.stringify({
@@ -117,6 +122,13 @@ export class BrainRingLobbyComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    // this.wsService.disconnect();
+  }
+
+  public setLinkByQrCode(): string {
+    return `https://fizzly.by/brain-ring-join?roomId=${this.roomId}&joinCode=${this.joinCode}`;
+  }
+
+  public goToMainPage(): void {
+    this.router.navigate(['/']);
   }
 }

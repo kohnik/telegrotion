@@ -1,0 +1,67 @@
+<div class="answer-window">
+  <div class="answer-window__backdrop"></div>
+  <div class="answer-window__title-container">
+      <span class="answer-window__title">{{slide.questionName}}</span>
+  </div>
+  <button
+    class="answer-window__next-btn" (click)="next()">
+    Далее
+  </button>
+  <div class="answer-window__result-bars">
+    @for (item of answersData; track $index) {
+      <div class="answer-window__result-bar-container">
+        <div
+          class="answer-window__result-bar"
+          [class.correct]="item.isCorrect"
+          [ngStyle]="{
+          'height.px': readyToFill ? getBarHeight(item.votes) : '40',
+          'background-color': setAnswerBackground($index)
+        }">
+          <svg class="answer-window__result-icon">
+            <use [attr.xlink:href]="setIcon(item) | symbolSprite" ></use>
+          </svg>
+          <div class="answer-window__result-count">
+            {{ item.votes}}
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="answer-window__answers">
+    @for (item of answersData; track $index) {
+      <span
+        class="answer-window__answer"
+        [class.correct]="item.isCorrect"
+        [ngStyle]="{'background-color': setAnswerBackground($index)}">
+            <svg [ngStyle]="{'color': 'white'}">
+              <use [attr.xlink:href]="setAnswerFigureIcon($index) | symbolSprite" ></use>
+            </svg>
+             <span>{{item.answer}}</span>
+            <svg class="approve-icon">
+              <use [attr.xlink:href]="setIcon(item) | symbolSprite" ></use>
+            </svg>
+          </span>
+    }
+  </div>
+</div>
+
+<!--    <div class="answer-window__answers-list">-->
+<!--      <div class="answer-window__players-count">-->
+<!--        Игроков: {{ statistics.answers.length }}-->
+<!--      </div>-->
+
+<!--      <div-->
+<!--        *ngFor="let answer of answersData"-->
+<!--        class="answer-window__answer-item"-->
+<!--        [class.correct]="answer.isCorrect"-->
+<!--      >-->
+<!--        <div class="answer-window__answer-label">-->
+<!--          {{ answer.answer }}-->
+<!--          <span *ngIf="answer.isCorrect" class="answer-window__correct-icon">✅</span>-->
+<!--        </div>-->
+<!--        <div class="answer-window__answer-votes">-->
+<!--          — {{ answer.votes }} {{ answer.votes === 1 ? 'человек' : 'человек' }}-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->

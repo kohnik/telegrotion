@@ -1,22 +1,26 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {PreGameTimerComponent} from '../../quiz/pre-game-timer/pre-game-timer.component';
+import {PreGameTimerComponent} from '../../../shared/components/pre-game-timer/pre-game-timer.component';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ICrateQuizAnswer} from '../../quiz/interfaces';
 import {Subject, takeUntil} from 'rxjs';
 import {WebSocketService} from '../../../core/services/web-socket.service';
-import {Router} from '@angular/router';
-import {DataService} from '../../../core/services/data.service';
-import {EWSEventQuizTypes} from '../../quiz/models';
-import {brainRingWSTopic} from '../constants';
+import {ActivatedRoute, Router} from '@angular/router';
+import {brainRingWSTopic, privateUserBrainRingWSTopic} from '../constants';
 import {BrainRingService} from '../brain-ring.service';
 import {EWSEventBrainRingTypes} from '../models';
+import {LoaderComponent} from '../../../shared/components/loader/loader.component';
+import {clearLocalStorageUserData} from '../utils';
+import {BrainRingLogoComponent} from '../brain-ring-logo/brain-ring-logo.component';
+import {EGameType} from "../../../shared/interfaces";
 
 @Component({
   selector: 'app-brain-ring-game-controller',
   imports: [
     PreGameTimerComponent,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    LoaderComponent,
+    BrainRingLogoComponent
   ],
   templateUrl: './brain-ring-game-controller.component.html',
   styleUrl: './brain-ring-game-controller.component.scss',
@@ -25,31 +29,21 @@ import {EWSEventBrainRingTypes} from '../models';
   providers: [BrainRingService]
 })
 export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
-  public isJoined = false;
-  public isWaiting = false;
-  public form: FormGroup
+  public isWaiting = true;
   public roomId: string;
-  public teamId: string;
+  public playerId: string;
   public answerTime = 0 ;
   public timer: number;
+  public isLoading = false;
 
   private destroy$ = new Subject<void>();
-
-  get joinCode(): string {
-    return this.form.get('joinCode')!.value;
-  }
-
-  get teamName(): string {
-    return this.form.get('teamName')!.value;
-  }
-
   constructor(
+    private readonly route: ActivatedRoute,
     private wsService: WebSocketService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private brainRingService: BrainRingService,) {
-    this.form = this.setForm();
+    private fb: FormBuilder
+  ) {
 
     this.wsService.messages
       .pipe(takeUntil(this.destroy$))
@@ -57,25 +51,11 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
         let parseContent = JSON.parse(content);
         console.log(parseContent,'CONTROLLER');
 
-        if(parseContent.eventId === EWSEventBrainRingTypes.ROOM_ACTIVATED) {
-          this.isWaiting = false;
+        this.handleGameEvent(parseContent.eventId)
 
-          this.timer = setInterval(()=> {
-            this.answerTime++;
-          }, 1000) as unknown as number;
-        }
-
-        if(parseContent.eventId === EWSEventBrainRingTypes.ANSWER_SUBMITTED) {
-          this.isWaiting = true;
-          this.clearTimer()
-        }
-
-        if(parseContent.eventId === EWSEventBrainRingTypes.NEXT_ROUND) {
-          this.isWaiting = false;
-
-          this.timer = setInterval(()=> {
-            this.answerTime++;
-          }, 1000) as unknown as number;
+        if (parseContent.eventId === EWSEventBrainRingTypes.CHECK_EVENT) {
+          console.log(parseContent, 'parseContent')
+          parseContent.currentEventId > 1 && this.handleGameEvent(parseContent.currentEventId)
         }
 
         this.cdr.markForCheck()
@@ -83,31 +63,66 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.roomId = this.route.snapshot.queryParams['roomId'];
+    this.playerId = this.route.snapshot.queryParams['playerId'];
+    this.startSession();
+  }
 
+  private handleGameEvent(eventId: number): void {
+    if (eventId=== EWSEventBrainRingTypes.ROOM_ACTIVATED) {
+      this.isWaiting = false;
+
+      this.timer = setInterval(()=> {
+        this.answerTime++;
+      }, 1000) as unknown as number;
+    }
+
+    if (eventId === EWSEventBrainRingTypes.ANSWER_SUBMITTED) {
+      this.isWaiting = true;
+      this.clearTimer()
+    }
+
+    if(eventId === EWSEventBrainRingTypes.END_SESSION) {
+      clearLocalStorageUserData()
+      this.wsService.disconnect();
+      this.router.navigate(['/brain-ring-room-not-found']);
+    }
+
+    if (eventId === EWSEventBrainRingTypes.NEXT_ROUND) {
+      this.isWaiting = false;
+
+      this.timer = setInterval(()=> {
+        this.answerTime++;
+      }, 1000) as unknown as number;
+    }
+
+    this.cdr.markForCheck()
   }
 
   private startSession() {
     this.wsService.connect();
     setTimeout(()=> {
       this.wsService.subscribe(brainRingWSTopic + `${this.roomId}`)
+
       this.cdr.markForCheck();
-    },1000)
+    },2000)
+
+    setTimeout(()=> {
+      this.wsService.subscribe(privateUserBrainRingWSTopic(this.playerId) + `${this.roomId}`)
+
+      //TODO запускается в самом начале, а это не надо ( тоесть когда чел просто идёт по плане без перезагрузки )
+      this.setCurrentEvent()
+      this.cdr.markForCheck();
+    },2000)
   }
 
-  public goRoRoom(): void {
-    this.brainRingService.goToRoom({
-      teamName: this.teamName,
-      joinCode: this.joinCode,
-    }).subscribe(el =>
-      {
-        this.roomId = el.roomId;
-        this.teamId = el.teamId;
-
-        this.isJoined = true;
-        this.isWaiting = true;
-        this.cdr.markForCheck();
-        this.startSession()
-      }
+  private setCurrentEvent(): void {
+    this.wsService.send(
+      `/app/brain-ring/current-state`,
+      JSON.stringify({
+        roomId: this.roomId,
+        playerId: this.playerId,
+      }),
     )
   }
 
@@ -116,7 +131,7 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
       '/app/brain-ring/submit-answer',
       JSON.stringify({
         roomId: this.roomId,
-        teamId: this.teamId,
+        playerId: this.playerId,
         answerTime: this.answerTime,
       })
     )
@@ -130,16 +145,14 @@ export class BrainRingGameControllerComponent implements OnInit, OnDestroy {
     clearInterval(this.timer)
   }
 
-  public setForm(): FormGroup {
-    return this.fb.group({
-      joinCode: ['', [Validators.required]],
-      teamName: ['', [Validators.required]],
-    })
+  public goToMainPage(): void {
+    this.router.navigate(['/']);
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    // this.wsService.disconnect();
   }
+
+  protected readonly EGameType = EGameType;
 }
