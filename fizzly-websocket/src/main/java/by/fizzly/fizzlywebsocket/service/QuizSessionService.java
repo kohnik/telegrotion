@@ -17,6 +17,8 @@ import by.fizzly.fizzlywebsocket.feign.QuizFeignClient;
 import by.fizzly.fizzlywebsocket.utils.JoinCodeUtils;
 import by.fizzly.fizzlywebsocket.utils.RedisKeys;
 import by.fizzly.fizzlywebsocket.utils.WebSocketTopics;
+import by.fizzly.fizzlywebsocket.websocket.QuizControlController;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -275,83 +278,95 @@ public class QuizSessionService {
 
         QuizSessionDTO question = getNextQuestion(roomId);
         if (question == null) {
-            messagingTemplate.convertAndSend(topic, new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), players));
             endQuiz(roomId);
+            QuizEndedResponse response = new QuizEndedResponse(QuizEvent.QUIZ_FINISHED.getId(), players);
+            saveEventData(roomId, QuizEvent.QUIZ_FINISHED, response, QuizControlController.ADMIN_PLAYER_ID);
+            messagingTemplate.convertAndSend(topic, response);
             return;
         }
 
-//        saveEventData(roomId, QuizEvent.NEW_QUESTION, question, "");
+        saveEventData(roomId, QuizEvent.NEW_QUESTION, question, QuizControlController.ADMIN_PLAYER_ID);
+
+        //remove all submitted user event answers payload
+        String playersKey = RedisKeys.buildKey(RedisKeys.SESSION_PARTICIPANTS_UUID_KEY, roomId.toString());
+        Boolean hasPlayers = redisTemplate.hasKey(playersKey);
+        if (hasPlayers == Boolean.TRUE) {
+            Set<Object> playerIds = redisTemplate.opsForSet().members(playersKey);
+            if (playerIds != null && !playerIds.isEmpty()) {
+                playerIds.stream()
+                        .filter(Objects::nonNull)
+                        .map(String.class::cast)
+                        .map(UUID::fromString).forEach(playerId -> {
+                            redisTemplate.delete(RedisKeys.buildKey(RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX, roomId.toString() + playerId));
+                        });
+                LOGGER.info("Deleted key {}", RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX);
+            }
+        }
+
         messagingTemplate.convertAndSend(topic, question);
 
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(() -> {
-            final int seconds = question.getTimeLeft();
-            try {
-                for (int i = 0; i < seconds; i++) {
-                    TimeUnit.SECONDS.sleep(1);
-                    if (getLeftUsers(roomId, question.getQuestionId()).isEmpty()) {
-                        break;
+        try (ExecutorService executorService = Executors.newSingleThreadExecutor()) {
+            executorService.submit(() -> {
+                final int seconds = question.getTimeLeft();
+                try {
+                    for (int i = 0; i < seconds; i++) {
+                        TimeUnit.SECONDS.sleep(1);
+                        if (getLeftUsers(roomId, question.getQuestionId()).isEmpty()) {
+                            break;
+                        }
                     }
+                } catch (InterruptedException e) {
+                    LOGGER.warn(e.getMessage(), e);
+                    Thread.currentThread().interrupt();
                 }
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getMessage(), e);
-                Thread.currentThread().interrupt();
-            }
 
-            if (question.isLast()) {
-                QuizEndedResponse response = new QuizEndedResponse(
-                        QuizEvent.QUIZ_FINISHED.getId(), getSubmittedAnswerPlayers(roomId)
-                );
-//                try {
-//                    saveEventData(roomId, QuizEvent.QUIZ_FINISHED, response, "");
-//                } catch (JsonProcessingException e) {
-//                    throw new RuntimeException(e);
-//                }
-                messagingTemplate.convertAndSend(topic, response);
-                endQuiz(roomId);
-                return;
-            }
-            int order = question.getAnswers().stream()
-                    .filter(QuizSessionAnswerDTO::isCorrect)
-                    .findFirst().orElseThrow(() -> new FizzlyAppException(
-                            String.format("Не найден правильный ответ на вопрос: %s", question.getQuestionId()))
-                    )
-                    .getOrder();
-            try {
-                List<PlayerSubmittedAnswer> submittedAnswers = redisTemplate.opsForSet().members(
-                                RedisKeys.buildKey(RedisKeys.PLAYERS_ANSWERS_KEY, roomId.toString() + question.getQuestionId())
-                        ).stream()
-                        .map(PlayerSubmittedAnswer.class::cast)
-                        .toList();
-                QuestionEndedResponse response = new QuestionEndedResponse(
-                        QuizEvent.QUESTION_ENDED.getId(),
-                        order,
-                        getSubmittedAnswerPlayers(roomId),
-                        submittedAnswers
-                );
-                messagingTemplate.convertAndSend(topic, response);
-            } catch (Throwable e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-//            try {
-//                saveEventData(roomId, QuizEvent.QUESTION_ENDED, response, "");
-//            } catch (JsonProcessingException e) {
-//                throw new RuntimeException(e);
-//            }
-            LOGGER.info("Question in session room {} was ended", joinCode);
-        });
-        executorService.shutdown();
+                if (question.isLast()) {
+                    QuizEndedResponse response = new QuizEndedResponse(
+                            QuizEvent.QUIZ_FINISHED.getId(), getSubmittedAnswerPlayers(roomId)
+                    );
+                    endQuiz(roomId);
+                    saveEventData(roomId, QuizEvent.QUIZ_FINISHED, response, QuizControlController.ADMIN_PLAYER_ID);
+                    messagingTemplate.convertAndSend(topic, response);
+                    return;
+                }
+                int order = question.getAnswers().stream()
+                        .filter(QuizSessionAnswerDTO::isCorrect)
+                        .findFirst().orElseThrow(() -> new FizzlyAppException(
+                                String.format("Не найден правильный ответ на вопрос: %s", question.getQuestionId()))
+                        )
+                        .getOrder();
+                try {
+                    List<PlayerSubmittedAnswer> submittedAnswers = redisTemplate.opsForSet().members(
+                                    RedisKeys.buildKey(RedisKeys.PLAYERS_ANSWERS_KEY, roomId.toString() + question.getQuestionId())
+                            ).stream()
+                            .map(PlayerSubmittedAnswer.class::cast)
+                            .toList();
+                    QuestionEndedResponse response = new QuestionEndedResponse(
+                            QuizEvent.QUESTION_ENDED.getId(),
+                            order,
+                            getSubmittedAnswerPlayers(roomId),
+                            submittedAnswers
+                    );
+                    saveEventData(roomId, QuizEvent.QUESTION_ENDED, response, QuizControlController.ADMIN_PLAYER_ID);
+                    messagingTemplate.convertAndSend(topic, response);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+                LOGGER.info("Question in session room {} was ended", joinCode);
+            });
+            executorService.shutdown();
+        }
     }
 
-    private static final String CURRENT_EVENT_PREFIX = "events:quiz";
-    private static final String CURRENT_EVENT_PAYLOAD_PREFIX = "events:quiz:payload";
-
-//    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId)
-//            throws JsonProcessingException {
-//        redisTemplate.opsForValue().set(CURRENT_EVENT_PREFIX + roomId.toString(), event);
-//        redisTemplate.opsForValue().set(
-//                CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId,
-//                objectMapper.writeValueAsString(payload)
-//        );
-//    }
+    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId) {
+        try {
+            redisTemplate.opsForValue().set(RedisKeys.buildKey(RedisKeys.CURRENT_EVENT_STATUS_PREFIX, roomId.toString()), event);
+            redisTemplate.opsForValue().set(
+                    RedisKeys.buildKey(RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX, roomId + playerId),
+                    objectMapper.writeValueAsString(payload)
+            );
+        } catch (JsonProcessingException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
 }

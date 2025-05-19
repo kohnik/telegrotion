@@ -15,8 +15,8 @@ public final class RedisKeys {
     public static final String ACTIVE_QUESTION_KEY = "quiz:session:current_question:";
     public static final String SUBMITTED_ANSWERS_KEY = "quiz:session:submitted_answers:";
     public static final String PLAYERS_ANSWERS_KEY = "quiz:session:players:answers";
-    public static final String EVENT_PREFIX = "events:quiz";
-    public static final String EVENT_PAYLOAD_PREFIX = "events:quiz:payload";
+    public static final String CURRENT_EVENT_STATUS_PREFIX = "quiz:events:status:";
+    public static final String CURRENT_EVENT_PAYLOAD_PREFIX = "quiz:events:payload:";
 
     // BrainRing related keys
     public static final String BRAINRING_ROOM_KEY = "brainring:room:";
