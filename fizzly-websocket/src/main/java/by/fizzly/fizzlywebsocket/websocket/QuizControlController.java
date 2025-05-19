@@ -1,21 +1,23 @@
 package by.fizzly.fizzlywebsocket.websocket;
 
-import by.fizzly.common.dto.quiz.QuizSessionDTO;
 import by.fizzly.common.dto.websocket.request.NextQuestionRequest;
 import by.fizzly.common.dto.websocket.request.StartSessionRequest;
 import by.fizzly.common.dto.websocket.request.SubmitAnswerRequest;
-import by.fizzly.common.dto.websocket.response.QuestionEndedResponse;
-import by.fizzly.common.dto.websocket.response.QuizEndedResponse;
 import by.fizzly.common.dto.websocket.response.StartSessionResponse;
 import by.fizzly.common.dto.websocket.response.SubmitAnswerResponse;
 import by.fizzly.common.event.QuizEvent;
+import by.fizzly.fizzlywebsocket.exception.FizzlyAppException;
 import by.fizzly.fizzlywebsocket.service.QuizSessionService;
+import by.fizzly.fizzlywebsocket.utils.RedisKeys;
+import by.fizzly.fizzlywebsocket.utils.WebSocketEndpoints;
 import by.fizzly.fizzlywebsocket.utils.WebSocketTopics;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -23,14 +25,16 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
 public class QuizControlController {
 
-    private static final String CURRENT_EVENT_PREFIX = "events:quiz";
-    private static final String CURRENT_EVENT_PAYLOAD_PREFIX = "events:quiz:payload";
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuizControlController.class);
+
+    public static final String ADMIN_PLAYER_ID = "admin";
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final QuizSessionService quizSessionService;
@@ -43,15 +47,16 @@ public class QuizControlController {
         int questionsCount = quizSessionService.activateSessionRoom(joinCode, request.getRoomId());
 
         final String topic = String.format(WebSocketTopics.JOIN_QUIZ_TOPIC, request.getRoomId());
-        StartSessionResponse startSessionResponse = new StartSessionResponse(
+        StartSessionResponse response = new StartSessionResponse(
                 QuizEvent.QUIZ_STARTED.getId(),
                 joinCode,
                 questionsCount);
-        messagingTemplate.convertAndSend(topic, startSessionResponse);
+        saveEventData(request.getRoomId(), QuizEvent.QUIZ_STARTED, response, ADMIN_PLAYER_ID);
+        messagingTemplate.convertAndSend(topic, response);
     }
 
     @MessageMapping("/quiz/next-question")
-    public void nextQuestion(@Payload NextQuestionRequest request) throws JsonProcessingException {
+    public void nextQuestion(@Payload NextQuestionRequest request) {
         quizSessionService.nextQuestion(request.getJoinCode(), request.getRoomId());
     }
 
@@ -68,57 +73,95 @@ public class QuizControlController {
         SubmitAnswerResponse submitAnswerResponse = new SubmitAnswerResponse(
                 QuizEvent.ANSWER_SUBMITTED.getId(), request.getPlayerId(), usersLeft
         );
-//        saveEventData(request.getRoomId(), QuizEvent.ANSWER_SUBMITTED, submitAnswerResponse, request.getPlayerId().toString());
+        saveEventData(request.getRoomId(), QuizEvent.ANSWER_SUBMITTED, submitAnswerResponse, request.getPlayerId().toString());
         messagingTemplate.convertAndSend(topic, submitAnswerResponse);
     }
 
-    @MessageMapping("/quiz/current-state")
+    @MessageMapping(WebSocketEndpoints.QUIZ_CURRENT_STATE)
     public void getCurrentState(@Payload PlayerCurrentStateRequest request) {
         UUID playerId = request.getPlayerId();
         UUID roomId = request.getRoomId();
         Object eventObj = redisTemplate.opsForValue()
-                .get(CURRENT_EVENT_PREFIX + roomId);
+                .get(RedisKeys.buildKey(RedisKeys.CURRENT_EVENT_STATUS_PREFIX, roomId.toString()));
         QuizEvent event = QuizEvent.valueOf((String) eventObj);
         final String topic = String.format(WebSocketTopics.JOIN_QUIZ_TOPIC, request.getRoomId());
+//        final String payload = (String) redisTemplate.opsForValue()
+//                .get(RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX + roomId);
         switch (event) {
-            case QUIZ_STARTED -> {
-                StartSessionResponse response = (StartSessionResponse) redisTemplate.opsForValue()
-                        .get(CURRENT_EVENT_PAYLOAD_PREFIX + roomId);
-                messagingTemplate.convertAndSendToUser(playerId.toString(), topic, response);
+            case QUIZ_STARTED, QUIZ_FINISHED, QUESTION_ENDED -> {
+                Optional.ofNullable(
+                                redisTemplate.opsForValue()
+                                        .get(RedisKeys.buildKey(
+                                                RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX, roomId + ADMIN_PLAYER_ID)
+                                        )
+                        ).map(String.class::cast)
+                        .ifPresent(payload -> {
+                            LOGGER.info("Payload for topic {} was sent", topic);
+                            messagingTemplate.convertAndSendToUser(playerId.toString(), topic, payload);
+                        });
             }
-            case QUIZ_FINISHED -> {
-                QuizEndedResponse response = (QuizEndedResponse) redisTemplate.opsForValue()
-                        .get(CURRENT_EVENT_PAYLOAD_PREFIX + roomId);
-                messagingTemplate.convertAndSendToUser(playerId.toString(), topic, response);
-            }
-            case QUESTION_ENDED -> {
-                QuestionEndedResponse response = (QuestionEndedResponse) redisTemplate.opsForValue()
-                        .get(CURRENT_EVENT_PAYLOAD_PREFIX + roomId);
-                messagingTemplate.convertAndSendToUser(playerId.toString(), topic, response);
-            }
-            case NEW_QUESTION -> {
-                Object val = redisTemplate.opsForValue().get(CURRENT_EVENT_PREFIX + roomId + playerId);
-                if (val == null) {
-                    QuizSessionDTO response = (QuizSessionDTO) redisTemplate.opsForValue()
-                            .get(CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId);
-                    messagingTemplate.convertAndSendToUser(playerId.toString(), topic, response);
+            case NEW_QUESTION, ANSWER_SUBMITTED -> {
+                if (isRoomAdmin(playerId, roomId)) {
+                    Optional.ofNullable(
+                                    redisTemplate.opsForValue()
+                                            .get(RedisKeys.buildKey(
+                                                    RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX, roomId + ADMIN_PLAYER_ID)
+                                            )
+                            ).map(String.class::cast)
+                            .ifPresent(payload -> {
+                                LOGGER.info("Payload for topic {} was sent", topic);
+                                messagingTemplate.convertAndSendToUser(playerId.toString(), topic, payload);
+                            });
                     return;
                 }
-                SubmitAnswerResponse response = (SubmitAnswerResponse) redisTemplate.opsForValue()
-                        .get(CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId);
-                messagingTemplate.convertAndSendToUser(playerId.toString(), topic, response);
+
+                Object eventPlayerObj = redisTemplate.opsForValue()
+                        .get(RedisKeys.buildKey(
+                                RedisKeys.CURRENT_EVENT_STATUS_PREFIX, roomId.toString() + playerId)
+                        );
+                if (eventPlayerObj == null) { // return default state of next-question event
+                    Optional.ofNullable(
+                                    redisTemplate.opsForValue()
+                                            .get(RedisKeys.buildKey(
+                                                    RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX, roomId + ADMIN_PLAYER_ID)
+                                            )
+                            ).map(String.class::cast)
+                            .ifPresent(payload -> {
+                                LOGGER.info("Payload for topic {} was sent", topic);
+                                messagingTemplate.convertAndSendToUser(playerId.toString(), topic, payload);
+                            });
+                } else { // if player submit his answer as an example
+                    Optional.ofNullable(
+                                    redisTemplate.opsForValue()
+                                            .get(RedisKeys.buildKey(
+                                                    RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX, roomId.toString() + playerId)
+                                            )
+                            ).map(String.class::cast)
+                            .ifPresent(payload -> {
+                                LOGGER.info("Payload for topic {} was sent", topic);
+                                messagingTemplate.convertAndSendToUser(playerId.toString(), topic, payload);
+                            });
+                }
             }
+            default -> throw new FizzlyAppException("Unknown quiz event type: " + event);
         }
     }
 
-//    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId)
-//            throws JsonProcessingException {
-//        redisTemplate.opsForValue().set(CURRENT_EVENT_PREFIX + roomId + playerId, event);
-//        redisTemplate.opsForValue().set(
-//                CURRENT_EVENT_PAYLOAD_PREFIX + roomId + playerId,
-//                objectMapper.writeValueAsString(payload)
-//        );
-//    }
+    private void saveEventData(UUID roomId, QuizEvent event, Object payload, String playerId) {
+        try {
+            redisTemplate.opsForValue().set(RedisKeys.buildKey(RedisKeys.CURRENT_EVENT_STATUS_PREFIX, roomId.toString()), event);
+            redisTemplate.opsForValue().set(
+                    RedisKeys.buildKey(RedisKeys.CURRENT_EVENT_PAYLOAD_PREFIX, roomId + playerId),
+                    objectMapper.writeValueAsString(payload)
+            );
+        } catch (JsonProcessingException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    private boolean isRoomAdmin(UUID playerId, UUID roomId) {
+        return playerId.equals(roomId);
+    }
 
     @Getter
     @Setter

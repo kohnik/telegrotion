@@ -10,4 +10,7 @@ public class WebSocketEndpoints {
     public static final String BR_NEXT_QUESTION = WebSocketTopics.BRAIN_RING + "/nextQuestion";
     public static final String BR_SUBMIT_ANSWER = WebSocketTopics.BRAIN_RING + "/submit-answer";
     public static final String BR_START = WebSocketTopics.BRAIN_RING + "/start";
+
+    public static final String QUIZ_TOPIC = "/quiz";
+    public static final String QUIZ_CURRENT_STATE = QUIZ_TOPIC + "/current-state";
 }
