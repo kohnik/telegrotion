@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: fizzly-websocket
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  web:
+    multipart:
+      enabled: true
+
+fizzly:
+  url: ${FIZZLY_URL:https://fizzly-7dba31943cb3.herokuapp.com/}
+
+heroku:
+  redis:
+    host: ${REDIS_HOST:ec2-34-247-132-90.eu-west-1.compute.amazonaws.com}
+    port: ${REDIS_PORT:21220}
+    password: ${REDIS_PASSWORD:p6341f559bf45b1c649fb323f0594776490553898c49dfdcf6fe0afa0b53d443a}
+
+server:
+  port: 8081
