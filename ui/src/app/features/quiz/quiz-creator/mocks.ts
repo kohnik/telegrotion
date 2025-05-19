@@ -3,7 +3,7 @@ import {ICrateQuizAnswer, ICrateQuizSlide} from '../interfaces';
 export const slides: ICrateQuizSlide[] = [
   {
     questionId: 0,
-    question: 'Введите ваш вопрос',
+    questionName: 'Введите ваш вопрос',
     type: "Quiz",
     order: 0,
     seconds: 10,

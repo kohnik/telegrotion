@@ -10,6 +10,7 @@ import {GameWindowLeaderBoardComponent} from './components/game-window-leader-bo
 import {GameFinishPageComponent} from './components/game-finish-page/game-finish-page.component';
 import {EGameType} from '../../../../shared/interfaces';
 import {GameWindowAnswerComponent} from './components/game-window-answer/game-window-answer.component';
+import {ICrateQuizAnswer, ICrateQuizSlide, IQuizQuestionStatistic} from '../../interfaces';
 
 export enum EWindowsType {
   LEADER_BORDER_WINDOW = 0,
@@ -35,11 +36,15 @@ export class GameWindowComponent implements OnInit, OnDestroy {
   public quizStarted = false;
   public currentSlide: ICurrentSlide | null;
   public players = []
+  public statistics: IQuizQuestionStatistic;
   public isFinishedQuiz = false;
 
   public joinCode: string;
   public roomId: string;
   private destroy$ = new Subject<void>();
+  public slide: ICrateQuizSlide;
+  protected readonly EGameType = EGameType;
+  protected readonly EWindowsType = EWindowsType;
 
   public currentWindow = EWindowsType.QUESTION_WINDOW;
 
@@ -56,21 +61,24 @@ export class GameWindowComponent implements OnInit, OnDestroy {
 
         if (parseContent.eventId === EWSEventQuizTypes.NEW_QUESTION) {
           this.currentSlide = parseContent;
+          this.currentWindow = EWindowsType.QUESTION_WINDOW
+          this.quizStarted = true;
           this.cdr.markForCheck()
         }
 
         if(parseContent.eventId === EWSEventQuizTypes.QUESTION_ENDED) {
-            this.currentSlide = null;
-            this.players = parseContent.players;
-            this.cdr.markForCheck()
-          console.log(parseContent)
-            this.currentWindow = EWindowsType.ANSWER_WINDOW
+          this.currentSlide = null;
+          this.players = parseContent.players;
+          this.statistics = parseContent;
+          this.currentWindow = EWindowsType.ANSWER_WINDOW
+          this.cdr.markForCheck()
         }
 
         if(parseContent.eventId === EWSEventQuizTypes.QUIZ_FINISHED) {
           this.currentSlide = null;
           this.players = parseContent.players;
           this.isFinishedQuiz = true;
+          this.currentWindow = EWindowsType.FINISH_WINDOW
           this.cdr.markForCheck()
         }
       });
@@ -94,7 +102,10 @@ export class GameWindowComponent implements OnInit, OnDestroy {
         }
       )
     )
-    this.quizStarted = true;
+  }
+
+  setSlideAnswersForAnswerWindow(answers: ICrateQuizSlide): void {
+    this.slide = answers;
   }
 
   ngOnDestroy() {
@@ -102,7 +113,4 @@ export class GameWindowComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
     // this.wsService.disconnect();
   }
-
-  protected readonly EGameType = EGameType;
-  protected readonly EWindowsType = EWindowsType;
 }

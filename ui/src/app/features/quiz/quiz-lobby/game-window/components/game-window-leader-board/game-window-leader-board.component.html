@@ -14,7 +14,7 @@
           <div class="leader-board__row-points">{{player.points}}</div>
           <div class="leader-board__fill"
                [style.width]="readyToFill ? fillWidth(player) : '80px'"
-               [style.background-color]="getRandomColor()"
+               [style.background-color]="getRandomPalletColor()"
           >
             <div class="leader-board__row-name">{{player.playerName ?? 'тест'}}</div>
           </div>

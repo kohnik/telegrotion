@@ -9,7 +9,7 @@
             class="slides__content"
             [class.active]="slide.questionId === (selectedSlide$ | async)?.questionId"
           >
-            <span class="slides__question">{{slide.question}}</span>
+            <span class="slides__question">{{slide.questionName}}</span>
             <div class="slides__info">
               <span class="slides__time-limit">{{slide.seconds}}</span>
               @if (slide.img) {

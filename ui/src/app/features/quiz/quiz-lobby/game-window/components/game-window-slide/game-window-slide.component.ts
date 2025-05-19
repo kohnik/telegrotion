@@ -1,8 +1,17 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import {ICurrentSlide} from '../../../interfaces';
 import {NgStyle} from '@angular/common';
 import {setAnswerBackground, setAnswerFigureIcon} from '../../../../quiz-creator/constants';
 import {SymbolSpritePipe} from '../../../../../../shared/pipes/symbol-sprite.pipe';
+import {ICrateQuizAnswer, ICrateQuizSlide} from '../../../../interfaces';
 
 @Component({
   selector: 'app-game-window-slide',
@@ -19,7 +28,11 @@ export class GameWindowSlideComponent implements OnInit {
 
   public timeLeft = 0
 
-  @Input() slide: ICurrentSlide
+  @Input() slide: ICurrentSlide;
+  @Output() slideAnswers = new EventEmitter<ICrateQuizSlide>();
+
+  protected readonly setAnswerBackground = setAnswerBackground;
+  protected readonly setAnswerFigureIcon = setAnswerFigureIcon;
 
   constructor(private cdr: ChangeDetectorRef) {
   }
@@ -35,8 +48,7 @@ export class GameWindowSlideComponent implements OnInit {
       this.timeLeft -= 1;
       this.cdr.markForCheck()
     },1000)
-  }
 
-  protected readonly setAnswerBackground = setAnswerBackground;
-  protected readonly setAnswerFigureIcon = setAnswerFigureIcon;
+    this.slideAnswers.emit(JSON.parse(JSON.stringify(this.slide)))
+  }
 }

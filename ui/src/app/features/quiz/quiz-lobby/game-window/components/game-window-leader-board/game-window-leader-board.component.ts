@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import {ILeaderBoardPlayers} from '../../../interfaces';
 import {GameWindowSlideComponent} from '../game-window-slide/game-window-slide.component';
+import {getRandomPalletColor, palletColors} from '../../../../quiz-creator/constants';
 
 @Component({
   selector: 'app-game-window-leader-board',
@@ -26,17 +27,6 @@ export class GameWindowLeaderBoardComponent implements AfterViewInit, OnInit {
   @Output() nextQuestion = new EventEmitter<ILeaderBoardPlayers[]>()
 
   public readyToFill = false;
-  public colors: string[] = [
-    '#30316b',
-    '#5A4FCF',
-    '#6A5ACD',
-    '#483D8B',
-    '#7B68EE',
-    '#4B0082',
-    '#9370DB',
-    '#8A2BE2',
-    '#B0C4DE',
-  ];
 
   constructor(public cdr: ChangeDetectorRef) {
   }
@@ -69,8 +59,5 @@ export class GameWindowLeaderBoardComponent implements AfterViewInit, OnInit {
     return `${percentage}%`;
   }
 
-  getRandomColor(): string {
-    const index = Math.floor(Math.random() * this.colors.length);
-    return this.colors[index];
-  }
+  protected readonly getRandomPalletColor = getRandomPalletColor;
 }

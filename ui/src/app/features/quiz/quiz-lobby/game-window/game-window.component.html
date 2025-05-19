@@ -1,18 +1,28 @@
 <div class="game-window">
-  @if (quizStarted) {
-    @if (currentSlide) {
-      <app-game-window-slide [slide]="currentSlide"></app-game-window-slide>
-    } @else if (isFinishedQuiz) {
-      <app-game-finish-page [players]="players"></app-game-finish-page>
+    @switch (currentWindow) {
+      @case (EWindowsType.QUESTION_WINDOW) {
+        @if(currentSlide) {
+          <app-game-window-slide
+            [slide]="currentSlide"
+            (slideAnswers)="setSlideAnswersForAnswerWindow($event)">
+          </app-game-window-slide>
+        }
+      }
+      @case (EWindowsType.FINISH_WINDOW) {
+        <app-game-finish-page [players]="players"></app-game-finish-page>
+      }
+      @case (EWindowsType.ANSWER_WINDOW) {
+        <app-game-window-answer
+          [statistics]="statistics"
+          [slide]="slide"
+          (nextWindowHandler)="currentWindow = EWindowsType.LEADER_BORDER_WINDOW">
+        </app-game-window-answer>
+      }
+      @case (EWindowsType.LEADER_BORDER_WINDOW) {
+        <app-game-window-leader-board [players]="players" (nextQuestion)="nextQuestion()"></app-game-window-leader-board>
+      }
     }
-    @else if (currentWindow === EWindowsType.ANSWER_WINDOW) {
-      <app-game-window-answer></app-game-window-answer>
-    }
-    @else {
-      <app-game-window-leader-board [players]="players" (nextQuestion)="nextQuestion()"></app-game-window-leader-board>
-    }
-
-  } @else {
+  @if (!quizStarted) {
     <app-pre-game-timer [gameType]="EGameType.Quiz" (timerEnd)="nextQuestion()"></app-pre-game-timer>
   }
 </div>

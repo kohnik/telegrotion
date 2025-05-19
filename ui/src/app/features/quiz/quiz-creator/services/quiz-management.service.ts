@@ -46,7 +46,7 @@ export class QuizManagementService {
   updateSlideQuestion(newQuestion: string): void {
     this.updateSlide(slide => ({
       ...slide,
-      question: newQuestion,
+      questionName: newQuestion,
     }));
   }
 
@@ -93,7 +93,7 @@ export class QuizManagementService {
   addSlide(): void {
     let newSlide: ICrateQuizSlide =     {
       questionId: new Date().getTime(),
-      question: 'Введите ваш вопрос',
+      questionName: 'Введите ваш вопрос',
       type: "Quiz",
       order: this._slides.getValue().length,
       seconds: 20,

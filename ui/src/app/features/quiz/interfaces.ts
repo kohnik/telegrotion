@@ -1,6 +1,6 @@
 export interface ICrateQuizSlide {
   questionId: number;
-  question?: string;
+  questionName?: string;
   type?: string;
   order: number;
   seconds?: number;
@@ -65,4 +65,13 @@ export interface IQuizCreatePlayerResponse {
   joinCode: string,
   playerName: string,
   playerId: string
+}
+
+export interface IQuizQuestionStatistic {
+  answers: IQuizQuestionStatisticAnswer[]
+}
+
+export interface IQuizQuestionStatisticAnswer {
+  playerId: string,
+  answer: number,
 }
